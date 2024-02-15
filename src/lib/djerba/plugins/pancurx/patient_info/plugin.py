@@ -48,8 +48,18 @@ class main(plugin_base):
         return renderer.render_name(self.TEMPLATE_NAME, data)
 
     def specify_params(self):
+        discovered = [
+            self.REPORT_VERSION,
+            self.TUMOUR_ID,
+            self.DONOR_ID,
+            self.NORMAL_ID,
+            self.REPORT_DATE,
+            self.EXTERNAL_IDS,
+            self.TUMOUR_TISSUE,
+            self.NORMAL_TISSUE
+        ]
+        for key in discovered:
+            self.add_ini_discovered(key)
         self.set_ini_default(core_constants.ATTRIBUTES, 'clinical')
-        for key, value in self.PATIENT_DEFAULTS.items():
-            self.set_ini_default(key, value)
         self.set_priority_defaults(self.PRIORITY)
         self.set_ini_default('render_priority', 30)
