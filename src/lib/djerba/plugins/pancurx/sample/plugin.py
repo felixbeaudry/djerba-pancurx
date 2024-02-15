@@ -80,5 +80,5 @@ class main(plugin_base):
     def convert_plot(self, plot_path, plot_name):
         """Read VAF plot from file and return as a base64 string"""
         image_converter = converter(self.log_level, self.log_path)
-        converted_plot = image_converter.convert_svg(plot_path, plot_name)
+        converted_plot = image_converter.convert_png(plot_path, plot_name)
         return converted_plot
