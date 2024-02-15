@@ -41,6 +41,7 @@ class main(plugin_base):
             self.PLOIDY,
             self.ALEXANDROV_CLASS,
             self.COLLISSON_CLASS,
+            self.WADDELL_CLASS,
             self.MOFFITT_CLASS,
             self.INFERRED_SEX,
             self.HLA_TYPES
@@ -60,6 +61,7 @@ class main(plugin_base):
             self.PLOIDY,
             self.ALEXANDROV_CLASS,
             self.COLLISSON_CLASS,
+            self.WADDELL_CLASS,
             self.MOFFITT_CLASS,
             self.INFERRED_SEX,
             self.HLA_TYPES
