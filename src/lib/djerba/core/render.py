@@ -56,6 +56,7 @@ class html_renderer(logger):
         try:
             template_name = self.config[cc.DOCUMENT_SETTINGS][doc_type][cc.DOCUMENT_HEADER]
             stylesheet_name = self.config[cc.DOCUMENT_SETTINGS][doc_type][cc.STYLESHEET]
+            javascript_name = self.config[cc.DOCUMENT_SETTINGS][doc_type][cc.JAVASCRIPT]
         except KeyError as err:
             msg = "Document config entry for '{0}' not found: {1}".format(doc_type, err)
             self.logger.error(msg)
@@ -63,7 +64,12 @@ class html_renderer(logger):
         # do template substititon to insert the stylesheet
         with open(os.path.join(self.html_dir, stylesheet_name)) as in_file:
             stylesheet = in_file.read()
-        args = {cc.STYLESHEET: stylesheet}
+        with open(os.path.join(self.html_dir, javascript_name)) as in_file:
+            javascript = in_file.read()
+        args = {
+                cc.STYLESHEET: stylesheet,
+                cc.JAVASCRIPT: javascript
+            }
         header = self.mako.render_name(template_name, args)
         return header
 

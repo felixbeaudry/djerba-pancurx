@@ -55,6 +55,7 @@ AUTHOR = 'author'
 EXTRACT_TIME = 'extract_time'
 SAMPLE_INFO = 'sample_info'
 STYLESHEET = 'stylesheet'
+JAVASCRIPT = 'javascript'
 DOCUMENT_CONFIG = 'document_config'
 PLUGINS = 'plugins'
 MERGERS = 'mergers'
@@ -73,6 +74,7 @@ NORMAL_ID = 'normal_id'
 DEFAULT_PATH_INFO = "path_info.json"
 DEFAULT_SAMPLE_INFO = "sample_info.json"
 DEFAULT_CSS = "stylesheet.css"
+DEFAULT_JS = "sorttable.js"
 DEFAULT_AUTHOR = "CGI Author"
 DEFAULT_DOCUMENT_CONFIG = "document_config.json"
 
