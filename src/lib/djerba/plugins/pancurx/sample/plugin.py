@@ -6,6 +6,7 @@ from time import strptime
 import djerba.core.constants as core_constants
 from djerba.plugins.base import plugin_base
 from djerba.util.render_mako import mako_renderer
+from djerba.util.image_to_base64 import converter
 
 class main(plugin_base):
 
@@ -23,6 +24,7 @@ class main(plugin_base):
     MOFFITT_CLASS = "moffitt_class"
     INFERRED_SEX = "inferred_sex"
     HLA_TYPES = "hla_types"
+    ONCOSLIDE_PLOT = "oncoslide_plot"
 
     def configure(self, config):
         config = self.apply_defaults(config)
@@ -47,6 +49,9 @@ class main(plugin_base):
             self.HLA_TYPES
         ]
         data[core_constants.RESULTS] = {k: wrapper.get_my_string(k) for k in results_keys}
+        data[core_constants.RESULTS][self.ONCOSLIDE_PLOT] = self.convert_plot(wrapper.get_my_string(self.ONCOSLIDE_PLOT), 
+                                                                                  self.ONCOSLIDE_PLOT)
+
         return data
 
     def render(self, data):
@@ -64,9 +69,16 @@ class main(plugin_base):
             self.WADDELL_CLASS,
             self.MOFFITT_CLASS,
             self.INFERRED_SEX,
-            self.HLA_TYPES
+            self.HLA_TYPES,
+            self.ONCOSLIDE_PLOT
         ]
         for key in discovered:
             self.add_ini_discovered(key)
         self.set_ini_default(core_constants.ATTRIBUTES, 'clinical')
         self.set_priority_defaults(self.PRIORITY)
+
+    def convert_plot(self, plot_path, plot_name):
+        """Read VAF plot from file and return as a base64 string"""
+        image_converter = converter(self.log_level, self.log_path)
+        converted_plot = image_converter.convert_svg(plot_path, plot_name)
+        return converted_plot
