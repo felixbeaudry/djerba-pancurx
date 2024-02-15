@@ -4,17 +4,20 @@
 	"clinical": {
 	    "document_header": "clinical_header.html",
 	    "document_footer": "clinical_footer.html",
-	    "stylesheet": "stylesheet.css"
+	    "stylesheet": "stylesheet.css",
+	    "javascript": "sorttable.js"
 	},
 	"research": {
 	    "document_header": "research_header.html",
 	    "document_footer": "footer.html",
-	    "stylesheet": "stylesheet.css"
+	    "stylesheet": "stylesheet.css",
+	    "javascript": "sorttable.js"
 	},
 	"simple": {
 	    "document_header": "simple_header.html",
 	    "document_footer": "footer.html",
-	    "stylesheet": "stylesheet.css"
+	    "stylesheet": "stylesheet.css",
+	    "javascript": "sorttable.js"
 	}	
     }
 }

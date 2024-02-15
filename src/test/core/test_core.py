@@ -33,7 +33,7 @@ class TestCore(TestBase):
     LOREM_FILENAME = 'lorem.txt'
     SIMPLE_REPORT_JSON = 'simple_report_expected.json'
     SIMPLE_REPORT_UPDATE_JSON = 'simple_report_for_update.json'
-    SIMPLE_REPORT_MD5 = 'c3ee01a00e24a8fc6c2cc8232fcf9636'
+    SIMPLE_REPORT_MD5 = 'a688f939b6dce3e0297118c24b8d7af9'
     SIMPLE_CONFIG_MD5 = 'fc6265eeb6a9f8f2a5c864a97e07250c'
 
     class mock_args:
@@ -439,6 +439,7 @@ class TestMainScript(TestCore):
             '--work-dir', work_dir,
             '--ini', ini_path,
             '--json', json_path,
+            '--no-archive'
         ]
         result = subprocess_runner().run(cmd)
         self.assertEqual(result.returncode, 0)
@@ -451,7 +452,8 @@ class TestMainScript(TestCore):
         cmd = [
             'djerba.py', mode,
             '--json', json_path,
-            '--out-dir', self.tmp_dir
+            '--out-dir', self.tmp_dir,
+            '--no-archive'
         ]
         result = subprocess_runner().run(cmd)
         self.assertEqual(result.returncode, 0)
@@ -469,7 +471,8 @@ class TestMainScript(TestCore):
             'djerba.py', mode,
             '--work-dir', work_dir,
             '--ini', ini_path,
-            '--out-dir', self.tmp_dir
+            '--out-dir', self.tmp_dir,
+            '--no-archive'
         ]
         result = subprocess_runner().run(cmd)
         pattern = os.path.join(self.tmp_dir, '*'+core_constants.REPORT_JSON_SUFFIX)
@@ -497,14 +500,15 @@ class TestMainScript(TestCore):
             '--ini', ini_path,
             '--json', json_path,
             '--out-dir', self.tmp_dir,
-            '--pdf'
+            '--pdf',
+            '--no-archive'
         ]
         result = subprocess_runner().run(cmd)
         self.assertEqual(result.returncode, 0)
         html_path = os.path.join(self.tmp_dir, 'placeholder_report.clinical.html')
         with open(html_path) as html_file:
             html_string = html_file.read()
-        self.assert_report_MD5(html_string, 'b11a1d1623af8ae77385994f2f0ab9fa')
+        self.assert_report_MD5(html_string, '8858d22be21fb28ff8cab1aed72017ca')
         pdf_path = os.path.join(self.tmp_dir, 'placeholder_report.clinical.pdf')
         self.assertTrue(os.path.isfile(pdf_path))
         # again, with the --write-json option
@@ -528,14 +532,15 @@ class TestMainScript(TestCore):
             '--summary', summary_path,
             '--json', json_path,
             '--out-dir', self.tmp_dir,
-            '--pdf'
+            '--pdf',
+            '--no-archive'
         ]
         result = subprocess_runner().run(cmd)
         self.assertEqual(result.returncode, 0)
         html_path = os.path.join(self.tmp_dir, 'placeholder_report.clinical.html')
         with open(html_path) as html_file:
             html_string = html_file.read()
-        self.assert_report_MD5(html_string, 'b11a1d1623af8ae77385994f2f0ab9fa')
+        self.assert_report_MD5(html_string, 'fb60742371ff83d5240cd964d6266902')
         pdf_path = os.path.join(self.tmp_dir, 'placeholder_report.clinical.pdf')
         self.assertTrue(os.path.isfile(pdf_path))
         # again, with the --write-json option
