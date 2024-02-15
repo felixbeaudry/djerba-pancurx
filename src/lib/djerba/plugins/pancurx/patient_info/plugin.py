@@ -11,6 +11,8 @@ class main(plugin_base):
 
     PRIORITY = 100
     PLUGIN_VERSION = '1.0.0'
+    TEMPLATE_NAME = 'patient_info_template.html'
+
     REPORT_VERSION = "report_version"
     TUMOUR_ID = "tumour_id"
     DONOR_ID = "donor_id"
