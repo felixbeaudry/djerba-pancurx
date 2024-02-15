@@ -1,0 +1,35 @@
+<%
+  from djerba.plugins.pancurx.sample.plugin import main as plugin
+%>
+
+<div id="main">
+
+      <p>ONCOSLIDE PLOT PLACEHOLDER</p>
+      <p><b>This report is for research purposes only.</b></p>
+
+      <h3>DNA Sequencing Quality Metrics</h3>
+      <table style="width:100%">
+      <tr>
+            <td><b>Tumour Coverage:</b> ${results.get(plugin.TUMOUR_COVERAGE)}x (>30x)</td>
+            <td><b>Normal Coverage:</b> ${results.get(plugin.NORMAL_COVERAGE)}x (>30x)</td>
+            <td><b>Cellularity:</b> ${results.get(plugin.CELLULARITY)}%</td>
+      </tr>
+      </table>
+
+      <h2>Classifications</h2>
+      <table style="width:100%">
+      <tr>
+            <td><b>Alexandrov Class:</b> ${results.get(plugin.ALEXANDROV_CLASS)}</td>
+            <td><b>Collisson Class:</b> ${results.get(plugin.COLLISSON_CLASS)}</td>
+            <td><b>Ploidy:</b> ${results.get(plugin.PLOIDY)}</td>
+      <tr>
+      <tr>
+            <td><b>Waddell Class:</b> ${results.get(plugin.WADDELL_CLASS)}</td>
+            <td><b>Moffitt Class:</b> ${results.get(plugin.MOFFITT_CLASS)}</td>
+            <td><b>Inferred Sex:</b> ${results.get(plugin.INFERRED_SEX)}</td>
+      </tr>
+      <tr>
+            <td colspan="3"><b>HLA Types:</b> ${results.get(plugin.hla_types)}</td>
+      </tr>
+      </table>
+</div>
