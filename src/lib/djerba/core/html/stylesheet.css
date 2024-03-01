@@ -121,3 +121,19 @@ table.sortable thead {
 	color: #000000;
 	background-color: #FFFFFF;
 }
+
+.circle {
+    border-radius: 50%;
+    width: 15px;
+    height: 15px;
+    padding: 4px;
+    text-align: center;
+    line-height: 17px;
+    margin: auto;
+  }
+  
+.DSBR_results-True {border:2px solid #322288;  background-color: #322288; color: white;}
+.DSBR_results-False {border:2px solid #322288; background-color: white; color: black;}
+
+.MMR_results-True {border:2px solid #107733;  background-color: #107733; color: white;}
+.MMR_results-False {border:2px solid #107733; background-color: white; color: black;}
