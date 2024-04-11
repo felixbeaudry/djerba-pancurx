@@ -55,12 +55,12 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.INFERRED_SEX] = self.parse_sex(wrapper.get_my_string(phe.SEX_PATH))
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), phe.PLOIDY)
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
-        data[core_constants.RESULTS]['tandem_duplicator_phenotype_score'] = self.parse_TDP(wrapper.get_my_string(phe.TDP_PATH))
+        data[core_constants.RESULTS]['tandem_duplicator_phenotype_score'] = tools.parse_TDP(self, wrapper.get_my_string(phe.TDP_PATH))
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
-        dsbr_results, dsbr_tally = self.parse_multifactor_marker(summary_results, phe.DSBR_HTML_HEADERS, phe.DSBR_DEFAULT_HALLMARK_CUTOFFS)
+        dsbr_results, dsbr_tally = tools.parse_multifactor_marker(self, summary_results, phe.DSBR_HTML_HEADERS, phe.DSBR_DEFAULT_HALLMARK_CUTOFFS)
         data[core_constants.RESULTS][phe.DSBR_RESULTS] = dsbr_results
         data[core_constants.RESULTS]['dsbr_tally'] = dsbr_tally
-        mmr_results, mmr_tally = self.parse_multifactor_marker(summary_results, phe.MMR_HTML_HEADERS, phe.MMR_DEFAULT_HALLMARK_CUTOFFS)
+        mmr_results, mmr_tally = tools.parse_multifactor_marker(self, summary_results, phe.MMR_HTML_HEADERS, phe.MMR_DEFAULT_HALLMARK_CUTOFFS)
         data[core_constants.RESULTS][phe.MMR_RESULTS] = mmr_results
         data[core_constants.RESULTS]['mmr_tally'] = mmr_tally
         data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
@@ -107,56 +107,3 @@ class main(plugin_base):
         return(inferredSex)
             
 	
-    def parse_TDP(self, TDP_file_path):
-        row = {}
-        TDP_file_path = tools.check_path_exists(self, TDP_file_path)
-        with open(TDP_file_path, 'r') as TDP_file:
-            line = TDP_file.readline().strip()
-            header = line.split(',')
-            line = TDP_file.readline().strip()
-            row = dict(zip(header, line.split(',')))
-        return(row["score"])
-
-    def parse_multifactor_marker(self, summary_results, html_headers, marker_cutoffs):
-        result = []
-        hallmark_tally = 0
-        for this_key in summary_results:
-            this_reporting_name = html_headers.get(this_key)
-            this_value = summary_results.get(this_key)
-            if this_key in marker_cutoffs:
-                this_value = float(this_value)
-                this_cutoff = marker_cutoffs.get(this_key)
-                if this_reporting_name == 'SNV C>T Ratio <':
-                    if this_value < float(this_cutoff):
-                        above_cutoff = True
-                        hallmark_tally = hallmark_tally + 1
-                    else:
-                        above_cutoff = False
-                elif this_value > float(this_cutoff):
-                    above_cutoff = True
-                    hallmark_tally = hallmark_tally + 1
-                else:
-                    above_cutoff = False
-                this_value = round(this_value, 2)
-                this_reporting_name = " ".join((this_reporting_name, str(this_cutoff), ":"))
-                result_tmp = {
-                    phe.REPORTING_NAME: this_reporting_name,
-                    phe.VALUE : this_value,
-                    phe.ABOVE_CUTOFF: above_cutoff
-                }
-                result.append(result_tmp)
-            elif this_key in html_headers:
-                if this_value == "":
-                    above_cutoff = False
-                else:
-                    above_cutoff = True
-                    hallmark_tally = hallmark_tally + 1
-                    this_value = re.sub(r'\|', ', ', this_value)
-                result_tmp = {
-                    phe.REPORTING_NAME: this_reporting_name,
-                    phe.VALUE : this_value,
-                    phe.ABOVE_CUTOFF: above_cutoff
-                }
-                result.append(result_tmp)
-        return(result, hallmark_tally)
-

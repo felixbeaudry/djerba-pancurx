@@ -55,7 +55,7 @@ class main(plugin_base):
         somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), genes_of_interest)
         data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest)
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
-        data[core_constants.RESULTS]['loads'] = self.get_loads_from_summary(summary_results)
+        data[core_constants.RESULTS]['loads'] = tools.get_loads_from_summary(summary_results)
         data[core_constants.RESULTS]['sigs'] = self.get_sigs_from_summary(summary_results)
         data[core_constants.RESULTS][phe.CELLULOID_DIR] =  wrapper.get_my_string(phe.CELLULOID_DIR)
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
@@ -108,40 +108,6 @@ class main(plugin_base):
             self.add_ini_discovered(key)
         self.set_ini_default(core_constants.ATTRIBUTES, 'research')
         self.set_priority_defaults(self.PRIORITY)
-
-    def get_loads_from_summary(self, summary_file):
-        loads = {
-            'snv_count' : summary_file.get("snv_count"),
-            'indel_count' : summary_file.get("indel_count"),
-            'sv_count' : summary_file.get("sv_count"),
-            'TMB' : (int(summary_file.get("snv_count")) + int(summary_file.get("indel_count"))) / 1000,
-            'nonsyn_count' : summary_file.get('nonsyn_count'),
-            'del_frameshift_count' : summary_file.get('del_frameshift_count'),
-            'sv_del_bp_gene_count': summary_file.get('sv_del_bp_gene_count'),
-            'stopgain_count': summary_file.get('stopgain_count'),
-            'del_nonframeshift_count': summary_file.get('del_nonframeshift_count'),
-            'sv_dup_bp_gene_count': summary_file.get('sv_dup_bp_gene_count'),
-            'stoploss_count': summary_file.get('stoploss_count'),
-            'ins_frameshift_count': summary_file.get('ins_frameshift_count'),
-            'sv_inv_bp_gene_count': summary_file.get('sv_inv_bp_gene_count'),
-            'splice_count': summary_file.get('splice_count'),
-            'ins_nonframeshift_count': summary_file.get('ins_nonframeshift_count'),
-            'sv_tra_bp_gene_count': summary_file.get('sv_tra_bp_gene_count'),
-            'total_del_snv' :int(summary_file.get('splice_count')) + 
-                                int(summary_file.get('stoploss_count')) +
-                                  int(summary_file.get('stopgain_count')) + 
-                                  int(summary_file.get('nonsyn_count')),
-            'total_del_indel' : int(summary_file.get('ins_nonframeshift_count') )+ 
-                                int(summary_file.get('ins_frameshift_count') )+ 
-                               int( summary_file.get('del_nonframeshift_count')) + 
-                               int(summary_file.get('del_frameshift_count')),
-            'total_del_sv': int(summary_file.get('sv_dup_bp_gene_count') )+ 
-                            int(summary_file.get('sv_del_bp_gene_count')) + 
-                            int(summary_file.get('sv_inv_bp_gene_count')) + 
-                            int(summary_file.get('sv_tra_bp_gene_count'))
-
-        }
-        return(loads)
 
 
     def get_sigs_from_summary(self, summary_file):

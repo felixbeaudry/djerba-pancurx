@@ -4,6 +4,8 @@ from decimal import Decimal
 import logging
 import re
 import os
+import requests
+import json
 from djerba.util.image_to_base64 import converter
 import djerba.plugins.pancurx.constants as phe
 
@@ -209,4 +211,116 @@ def parse_summary_file(self, summary_file_path):
 
     
 
+def get_loads_from_summary(summary_file):
+    loads = {
+        'snv_count' : summary_file.get("snv_count"),
+        'indel_count' : summary_file.get("indel_count"),
+        'sv_count' : summary_file.get("sv_count"),
+        'TMB' : (int(summary_file.get("snv_count")) + int(summary_file.get("indel_count"))) / 1000,
+        'nonsyn_count' : summary_file.get('nonsyn_count'),
+        'del_frameshift_count' : summary_file.get('del_frameshift_count'),
+        'sv_del_bp_gene_count': summary_file.get('sv_del_bp_gene_count'),
+        'stopgain_count': summary_file.get('stopgain_count'),
+        'del_nonframeshift_count': summary_file.get('del_nonframeshift_count'),
+        'sv_dup_bp_gene_count': summary_file.get('sv_dup_bp_gene_count'),
+        'stoploss_count': summary_file.get('stoploss_count'),
+        'ins_frameshift_count': summary_file.get('ins_frameshift_count'),
+        'sv_inv_bp_gene_count': summary_file.get('sv_inv_bp_gene_count'),
+        'splice_count': summary_file.get('splice_count'),
+        'ins_nonframeshift_count': summary_file.get('ins_nonframeshift_count'),
+        'sv_tra_bp_gene_count': summary_file.get('sv_tra_bp_gene_count'),
+        'total_del_snv' :int(summary_file.get('splice_count')) + 
+                            int(summary_file.get('stoploss_count')) +
+                                int(summary_file.get('stopgain_count')) + 
+                                int(summary_file.get('nonsyn_count')),
+        'total_del_indel' : int(summary_file.get('ins_nonframeshift_count') )+ 
+                            int(summary_file.get('ins_frameshift_count') )+ 
+                            int( summary_file.get('del_nonframeshift_count')) + 
+                            int(summary_file.get('del_frameshift_count')),
+        'total_del_sv': int(summary_file.get('sv_dup_bp_gene_count') )+ 
+                        int(summary_file.get('sv_del_bp_gene_count')) + 
+                        int(summary_file.get('sv_inv_bp_gene_count')) + 
+                        int(summary_file.get('sv_tra_bp_gene_count'))
+
+    }
+    return(loads)
+
     
+def find_external_id_in_json_dict(lims_dict, this_donor):
+    external_id = "NA"
+    for donor in range(len(lims_dict)):
+        if lims_dict[donor]['name'] == this_donor:
+            for attribute in range(len(lims_dict[donor]['attributes'])):
+                if lims_dict[donor]['attributes'][attribute]['name'] == "External Name":
+                    external_id = lims_dict[donor]['attributes'][attribute]['value']
+                    external_id = external_id.replace(',', ' ')
+    return(external_id)
+
+def parse_lims(self, donor):
+    donor = add_underscore_to_donor(donor)
+    r = requests.get(phe.DEFAULT_CORE_LIMS_URL, allow_redirects=True)
+    if r.status_code == 404:
+        msg = "Trouble pulling LIMS"
+        raise MissingLIMSError(msg)
+    else:
+        lims_json_dict = json.loads(r.text)
+        external_ids = find_external_id_in_json_dict(lims_json_dict , donor)
+    return(external_ids)
+
+class MissingLIMSError(Exception):
+    pass
+
+
+def parse_TDP(self, TDP_file_path):
+    row = {}
+    TDP_file_path = check_path_exists(self, TDP_file_path)
+    with open(TDP_file_path, 'r') as TDP_file:
+        line = TDP_file.readline().strip()
+        header = line.split(',')
+        line = TDP_file.readline().strip()
+        row = dict(zip(header, line.split(',')))
+    return(round(float(row["score"]),2))
+
+def parse_multifactor_marker(self, summary_results, html_headers, marker_cutoffs):
+    result = []
+    hallmark_tally = 0
+    for this_key in summary_results:
+        this_reporting_name = html_headers.get(this_key)
+        this_value = summary_results.get(this_key)
+        if this_key in marker_cutoffs:
+            this_value = float(this_value)
+            this_cutoff = marker_cutoffs.get(this_key)
+            if this_reporting_name == 'SNV C>T Ratio <':
+                if this_value < float(this_cutoff):
+                    above_cutoff = True
+                    hallmark_tally = hallmark_tally + 1
+                else:
+                    above_cutoff = False
+            elif this_value > float(this_cutoff):
+                above_cutoff = True
+                hallmark_tally = hallmark_tally + 1
+            else:
+                above_cutoff = False
+            this_value = round(this_value, 2)
+            this_reporting_name = " ".join((this_reporting_name, str(this_cutoff), ":"))
+            result_tmp = {
+                phe.REPORTING_NAME: this_reporting_name,
+                phe.VALUE : this_value,
+                phe.ABOVE_CUTOFF: above_cutoff
+            }
+            result.append(result_tmp)
+        elif this_key in html_headers:
+            if this_value == "":
+                above_cutoff = False
+            else:
+                above_cutoff = True
+                hallmark_tally = hallmark_tally + 1
+                this_value = re.sub(r'\|', ', ', this_value)
+            result_tmp = {
+                phe.REPORTING_NAME: this_reporting_name,
+                phe.VALUE : this_value,
+                phe.ABOVE_CUTOFF: above_cutoff
+            }
+            result.append(result_tmp)
+    return(result, hallmark_tally)
+

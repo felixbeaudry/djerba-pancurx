@@ -33,7 +33,7 @@ class main(plugin_base):
         if wrapper.my_param_is_null(phe.REPORT_DATE):
             wrapper.set_my_param(phe.REPORT_DATE, phe.NONE_SPECIFIED)
         if wrapper.my_param_is_null(phe.EXTERNAL_IDS):
-            external_ids = self.parse_lims(wrapper.get_my_string(phe.DONOR_ID))
+            external_ids = tools.parse_lims(self, wrapper.get_my_string(phe.DONOR_ID))
             wrapper.set_my_param(phe.EXTERNAL_IDS, external_ids)
         
         if wrapper.my_param_is_null(phe.TUMOUR_TISSUE):
@@ -122,27 +122,3 @@ class main(plugin_base):
         self.set_ini_default(phe.REPORT_VERSION, phe.CURRENT_REPORT_VERSION)
         self.set_priority_defaults(self.PRIORITY)
         self.set_ini_default('render_priority', 30)
-
-    def find_external_id_in_json_dict(self, lims_dict, this_donor):
-        external_id = "NA"
-        for donor in range(len(lims_dict)):
-            if lims_dict[donor]['name'] == this_donor:
-                for attribute in range(len(lims_dict[donor]['attributes'])):
-                    if lims_dict[donor]['attributes'][attribute]['name'] == "External Name":
-                        external_id = lims_dict[donor]['attributes'][attribute]['value']
-                        external_id = external_id.replace(',', ' ')
-        return(external_id)
-
-    def parse_lims(self, donor):
-        donor = tools.add_underscore_to_donor(donor)
-        r = requests.get(phe.DEFAULT_CORE_LIMS_URL, allow_redirects=True)
-        if r.status_code == 404:
-            msg = "Trouble pulling LIMS"
-            raise MissingLIMSError(msg)
-        else:
-            lims_json_dict = json.loads(r.text)
-            external_ids = self.find_external_id_in_json_dict(lims_json_dict , donor)
-        return(external_ids)
-
-class MissingLIMSError(Exception):
-    pass

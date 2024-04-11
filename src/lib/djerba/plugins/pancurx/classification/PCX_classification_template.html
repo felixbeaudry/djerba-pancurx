@@ -12,6 +12,7 @@
             <td><b>Waddell Class:</b> ${results.get(plugin.WADDELL_CLASS)}</td>
             <td><b>Ploidy:</b> ${results.get(plugin.PLOIDY)}</td>
             <td><b>Inferred Sex:</b> ${results.get(plugin.INFERRED_SEX)}</td>
+            <td><b>TDP:</b> ${results.get('tandem_duplicator_phenotype_score')}</td>
       </tr>
       % if results.get(plugin.MOFFITT_CLASS) != "NA" :
       <tr>

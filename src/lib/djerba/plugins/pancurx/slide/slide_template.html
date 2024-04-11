@@ -2,6 +2,8 @@
 <%
 	from djerba.util.html import html_builder
 	import djerba.plugins.pancurx.constants as plugin
+	from djerba.plugins.pancurx.html import td_class
+	loads = results.get('loads')
 %>
 
 <div class="slide">
@@ -18,23 +20,38 @@
 
 	<h3>Sample Metadata</h3>
 		<table class="regular">
-			<tr><td><b>IDs:</b>${results.get(plugin.EXTERNAL_IDS)} </td></tr>
+			<tr><td><b>IDs: </b>${results.get(plugin.DONOR_ID)}, ${results.get(plugin.EXTERNAL_IDS)}</td></tr>
 		</table>
 		<hr>
 		<table class="regular">
 			<tr>
 				<td><b>Tumour:</b> ${results.get(plugin.TUMOUR_ID)} (${results.get(plugin.TUMOUR_TISSUE)})</td>
-				<td align="right">${results.get(plugin.TUMOUR_COVERAGE)} X </td><td><div class="circle MMR_results-True">&check;</div></td>
+				<td align="right">${results.get(plugin.TUMOUR_COVERAGE)}X </td>
+				% if results.get(plugin.NORMAL_COVERAGE) > 80 :
+				<td>${td_class(True, 'QC')}</td>
+				% else:
+				<td>${td_class(False, 'QC')}</td>
+				% endif
+
 			</tr>
 			<tr>
 				<td><b>Normal:</b> ${results.get(plugin.NORMAL_ID)} (${results.get(plugin.NORMAL_TISSUE)})</td>
-				<td align="right">${results.get(plugin.NORMAL_COVERAGE)} X </td><td><div class="circle MMR_results-True">&check;</div></td>
+				<td align="right">${results.get(plugin.NORMAL_COVERAGE)}X </td>
+				% if results.get(plugin.NORMAL_COVERAGE) > 30 :
+				<td>${td_class(True, 'QC')}</td>
+				% else:
+				<td>${td_class(False, 'QC')}</td>
+				% endif
+
 			</tr>
-		</table>
-		
-		<table class="regular">
 			<tr>
-			<td align="left"><b>Cellularity:</b> ${results.get(plugin.CELLULARITY)}% </td><td><div class="circle MMR_results-True">&check;</div></td>
+			<td align="left"><b>Cellularity:</b>  </td>
+			<td align="right">${results.get(plugin.CELLULARITY)}% </td>
+			% if results.get(plugin.CELLULARITY) > 30 :
+				<td>${td_class(True, 'QC')}</td>
+			% else:
+				<td>${td_class(False, 'QC')}</td>
+			% endif
 			</tr>
 		</table>
 
@@ -61,10 +78,10 @@
 
 	<h3>Mutational Burden</h3>
 		<table class="regular"><tr>
-			<td><b>TMB:</b> ${results.get(plugin.TMB)}</td>
-			<td><b>SNV Load:</b> ${results.get(plugin.SNV_LOAD)}</td>
-			<td><b>Indel Load:</b> ${results.get(plugin.INDEL_LOAD)} </td>
-			<td><b>SV Load:</b> ${results.get(plugin.SV_LOAD)}  </td>
+			<td><b>TMB:</b> ${loads.get('TMB')}</td>
+			<td><b>SNV Load:</b> ${loads.get('snv_count')}</td>
+			<td><b>Indel Load:</b> ${loads.get('indel_count')} </td>
+			<td><b>SV Load:</b> ${loads.get('sv_count')} </td>
 		</tr></table>
 
 		<table><tr>
@@ -89,10 +106,27 @@
 	<table style="width:49.33%;float:right"><tr><td>
 		<h3>Classifications</h3>
 		<table class="regular">
-			<tr><td><b>Moffitt.mod Class:</b> <mark class="mofNA">${results.get(plugin.MOFFIT)}</mark></td></tr>
-			<tr><td><b>HRD Status:</b> ${results.get(plugin.HRD)}</td></tr>
-			<tr><td><b>TDP Score:</b> ${results.get(plugin.MENGHI)}</td></tr>
-			<tr><td><b>MMR Status:</b> ${results.get(plugin.MMRD)}</td></tr>
+			% if results.get(plugin.MOFFIT) != "NA" :
+				<tr><td><b>Moffitt Class:</b> <mark class="mofNA">${results.get(plugin.MOFFIT)}</mark></td></tr>
+			% else:
+				<br>
+			% endif
+			<tr><td><b>HRD Status:</b> 
+				% if results.get('dsbr_tally') > 4 :
+					Deficient
+				%else:
+					Proficient
+				%endif
+				 (HRD-HS: ${results.get('dsbr_tally')})</td></tr>
+			<tr><td><b>MMR Status:</b> 
+				% if results.get('mmr_tally') > 2 :
+					Deficient
+				%else:
+					Proficient
+				%endif				
+				(MMRD-HS: ${results.get('mmr_tally')})</td></tr>
+			<tr><td><b>TDP Score:</b> 
+				(Menghi score: ${results.get('tandem_duplicator_phenotype_score')})</td></tr>
 			<tr><td><b>COSMIC v2 Sigs:</b> 
 				<mark class="sig1">1</mark> (62%)
 			</td></tr>

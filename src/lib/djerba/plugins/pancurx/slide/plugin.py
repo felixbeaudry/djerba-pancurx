@@ -22,23 +22,33 @@ class main(plugin_base):
     def configure(self, config):
         config = self.apply_defaults(config)
         wrapper = self.get_config_wrapper(config)
-        wrapper = tools.fill_file_if_null(self, wrapper, phe.CELLULOID_PLOT, phe.CELLULOID_PLOT, core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.TUMOUR_ID, phe.TUMOUR_ID, core_constants.DEFAULT_SAMPLE_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.DONOR_ID, phe.DONOR_ID, core_constants.DEFAULT_SAMPLE_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.NORMAL_ID, phe.NORMAL_ID, core_constants.DEFAULT_SAMPLE_INFO)
+
+        
         wrapper = tools.fill_file_if_null(self, wrapper, phe.PARAM_PATH, phe.PARAM_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.TDP_PATH, phe.TDP_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.COSMIC_SIGNNLS_PATH, phe.COSMIC_SIGNNLS_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SUMMARY_FILE_PATH, phe.SUMMARY_FILE_PATH, core_constants.DEFAULT_PATH_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, phe.INDEL_BIN_PLOT, phe.INDEL_BIN_PLOT, core_constants.DEFAULT_PATH_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, phe.SV_BIN_PLOT, phe.SV_BIN_PLOT, core_constants.DEFAULT_PATH_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, phe.SNV_CONTEXT_PLOT, phe.SNV_CONTEXT_PLOT, core_constants.DEFAULT_PATH_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, phe.COSMIC_STACK_PLOT, phe.COSMIC_STACK_PLOT, core_constants.DEFAULT_PATH_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper,phe.SV_STACK_PLOT, phe.SV_STACK_PLOT, core_constants.DEFAULT_PATH_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper,phe.TMB_STACK_PLOT, phe.TMB_STACK_PLOT, core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.CELLULOID_PLOT, phe.CELLULOID_PLOT, core_constants.DEFAULT_PATH_INFO)
+
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'indel.stack_count', phe.INDEL_BIN_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'sv.bins', phe.SV_BIN_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'SBS_context_bar', phe.SNV_CONTEXT_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'COSMIC_stack', phe.COSMIC_STACK_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'sv.stack_count', phe.SV_STACK_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'stack-tmb', phe.TMB_STACK_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
 
         if wrapper.my_param_is_null(phe.SLIDE_DATE):
             wrapper.set_my_param(phe.SLIDE_DATE, phe.NONE_SPECIFIED)
+        if wrapper.my_param_is_null(phe.MOFFIT):
+            wrapper.set_my_param(phe.MOFFIT, 'NA')
 
         if wrapper.my_param_is_null(phe.EXTERNAL_IDS):
-            wrapper.set_my_param(phe.EXTERNAL_IDS, "external_ids")
+            external_ids = tools.parse_lims(self, wrapper.get_my_string(phe.DONOR_ID))
+            wrapper.set_my_param(phe.EXTERNAL_IDS, external_ids)
+
         if wrapper.my_param_is_null(phe.TUMOUR_TISSUE):
             tissue = tools.get_tissue_from_sample_id(wrapper.get_my_string(phe.TUMOUR_ID))
             wrapper.set_my_param(phe.TUMOUR_TISSUE, tissue)
@@ -46,27 +56,8 @@ class main(plugin_base):
             tissue = tools.get_tissue_from_sample_id(wrapper.get_my_string(phe.NORMAL_ID))
             wrapper.set_my_param(phe.NORMAL_TISSUE, tissue)
 
-        if wrapper.my_param_is_null(phe.TUMOUR_COVERAGE_PATH):
-          if self.workspace.has_file(core_constants.DEFAULT_PATH_INFO):
-              path_info = self.workspace.read_json(core_constants.DEFAULT_PATH_INFO)
-              workflow_paths = path_info.get('coveragePaths')
-              workflow_path = workflow_paths['tumour']
-              if workflow_path == None:
-                  msg = 'Cannot find {0}'.format(phe.TUMOUR_COVERAGE_PATH)
-                  self.logger.error(msg)
-                  raise RuntimeError(msg)
-              wrapper.set_my_param(phe.TUMOUR_COVERAGE_PATH, workflow_path)
-        if wrapper.my_param_is_null(phe.NORMAL_COVERAGE_PATH):
-          if self.workspace.has_file(core_constants.DEFAULT_PATH_INFO):
-              path_info = self.workspace.read_json(core_constants.DEFAULT_PATH_INFO)
-              workflow_paths = path_info.get('coveragePaths')
-              workflow_path = workflow_paths['normal']
-              if workflow_path == None:
-                  msg = 'Cannot find {0}'.format(phe.NORMAL_COVERAGE_PATH)
-                  self.logger.error(msg)
-                  raise RuntimeError(msg)
-              wrapper.set_my_param(phe.NORMAL_COVERAGE_PATH, workflow_path)
-
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'tumour', phe.TUMOUR_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'normal', phe.NORMAL_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
         return wrapper.get_config()
 
     def extract(self, config):
@@ -75,19 +66,13 @@ class main(plugin_base):
         self.check_attributes_known(attributes)
         data = self.get_starting_plugin_data(wrapper, self.PLUGIN_VERSION)
         results_keys = [
+            phe.DONOR_ID,
             phe.TUMOUR_ID ,
             phe.EXTERNAL_IDS,
             phe.TUMOUR_TISSUE ,
             phe.NORMAL_ID ,
             phe.NORMAL_TISSUE ,
-            phe.TMB,
-            phe.SNV_LOAD ,
-            phe.INDEL_LOAD ,
-            phe.SV_LOAD ,
             phe.MOFFIT ,
-            phe.HRD ,
-            phe.MENGHI ,
-            phe.MMRD 
         ]
         data[core_constants.RESULTS] = {k: wrapper.get_my_string(k) for k in results_keys}
         data[core_constants.RESULTS][phe.CELLULOID_PLOT] = tools.convert_plot(self, wrapper.get_my_string(phe.CELLULOID_PLOT), phe.CELLULOID_PLOT)
@@ -99,7 +84,8 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.SNV_CONTEXT_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.SNV_CONTEXT_PLOT), phe.SNV_CONTEXT_PLOT)
         data[core_constants.RESULTS][phe.SV_STACK_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.SV_STACK_PLOT), phe.SV_STACK_PLOT)
         data[core_constants.RESULTS][phe.TMB_STACK_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.TMB_STACK_PLOT), phe.TMB_STACK_PLOT)
-
+        summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
+        data[core_constants.RESULTS]['loads'] = tools.get_loads_from_summary(summary_results)
 
         if wrapper.get_my_string(phe.SLIDE_DATE) == phe.NONE_SPECIFIED:
             data[core_constants.RESULTS][phe.SLIDE_DATE] = strftime("%a %b %d %H:%M:%S %Y")
@@ -108,7 +94,16 @@ class main(plugin_base):
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), phe.PLOIDY)
         cellularity = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), phe.CELLULARITY)
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
-        data[core_constants.RESULTS][phe.CELLULARITY] = cellularity
+        data[core_constants.RESULTS][phe.CELLULARITY] = float(cellularity)
+
+        data[core_constants.RESULTS]['tandem_duplicator_phenotype_score'] = tools.parse_TDP(self, wrapper.get_my_string(phe.TDP_PATH))
+        summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
+        dsbr_results, dsbr_tally = tools.parse_multifactor_marker(self, summary_results, phe.DSBR_HTML_HEADERS, phe.DSBR_DEFAULT_HALLMARK_CUTOFFS)
+        data[core_constants.RESULTS][phe.DSBR_RESULTS] = dsbr_results
+        data[core_constants.RESULTS]['dsbr_tally'] = dsbr_tally
+        mmr_results, mmr_tally = tools.parse_multifactor_marker(self, summary_results, phe.MMR_HTML_HEADERS, phe.MMR_DEFAULT_HALLMARK_CUTOFFS)
+        data[core_constants.RESULTS][phe.MMR_RESULTS] = mmr_results
+        data[core_constants.RESULTS]['mmr_tally'] = mmr_tally
         return(data)
 
     def render(self, data):
@@ -117,6 +112,7 @@ class main(plugin_base):
 
     def specify_params(self):
         discovered = [
+            phe.DONOR_ID,
             phe.PARAM_PATH,
             phe.COSMIC_SIGNNLS_PATH,
             phe.TDP_PATH,
@@ -130,14 +126,7 @@ class main(plugin_base):
             phe.TUMOUR_TISSUE ,
             phe.NORMAL_ID ,
             phe.NORMAL_TISSUE ,
-            phe.TMB,
-            phe.SNV_LOAD ,
-            phe.INDEL_LOAD ,
-            phe.SV_LOAD ,
             phe.MOFFIT ,
-            phe.HRD ,
-            phe.MENGHI ,
-            phe.MMRD ,
             phe.INDEL_BIN_PLOT,
             phe.SV_BIN_PLOT,
             phe.SNV_CONTEXT_PLOT,
