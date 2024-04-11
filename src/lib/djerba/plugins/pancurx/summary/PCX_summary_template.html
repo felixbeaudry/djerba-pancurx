@@ -1,0 +1,52 @@
+<%
+      import djerba.plugins.pancurx.constants as plugin
+%>
+
+<div id="header">
+<table border="0" style="width:100%">
+      <tr style="vertical-align:top;">
+            <td style="width:33.33%"><h4>Genome Summary v${results.get(plugin.REPORT_VERSION)}</h4></td>
+            <td style="width:33.33%"><h4 style="text-align:center;">${results.get(plugin.TUMOUR_ID)}</h4></td>
+            <td style="width:33.33%"><h4 style="text-align:right;">${results.get(plugin.REPORT_DATE)}</h4></td>
+      </tr>
+</table>
+</div>
+
+<div id="main">
+      <h1 class="pcx">PanCuRx Genomics Summary</h1>
+      <table style="width:100%">
+            <tr>
+                  <td><b>Donor ID:</b> ${results.get(plugin.DONOR_ID)}</td>
+                  <td><b>Tumour Sample:</b> ${results.get(plugin.TUMOUR_ID)}</td>
+                  <td><b>Normal Sample:</b> ${results.get(plugin.NORMAL_ID)}</td>
+            </tr>
+            <tr>
+                  <td><b>External IDs:</b> ${results.get(plugin.EXTERNAL_IDS)}</td>
+                  <td><b>Tumour Tissue:</b> ${results.get(plugin.TUMOUR_TISSUE)}</td>
+                  <td><b>Normal Tissue:</b> ${results.get(plugin.NORMAL_TISSUE)}</td>
+            </tr>
+      </table>
+
+      <table><tr>
+            <td style='width: 10%; vertical-align: bottom;'><img id='ONCOSLIDE_DRIVER_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_DRIVER_PLOT)}"/></td>
+            <td style='width: 10%; vertical-align: bottom;'><img id='ONCOSLIDE_SNV_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_SNV_PLOT)}"/></td>
+            <td style='width: 10%; vertical-align: bottom;'><img id='ONCOSLIDE_INDEL_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_INDEL_PLOT)}"/></td>
+            <td style='width: 10%; vertical-align: bottom;'><img id='ONCOSLIDE_SV_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_SV_PLOT)}"/></td>
+            <td style='width: 60%; vertical-align: bottom;'><img id='ONCOSLIDE_CNV_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_CNV_PLOT)}"/></td>
+     
+      </tr></table>
+
+
+      <p><b>This report is for research purposes only.</b></p>
+
+      <h3>DNA Sequencing Quality Metrics</h3>
+      <table style="width:100%">
+      <tr>
+            <td><b>Tumour Coverage:</b> ${results.get(plugin.TUMOUR_COVERAGE)}x (>30x)</td>
+            <td><b>Normal Coverage:</b> ${results.get(plugin.NORMAL_COVERAGE)}x (>30x)</td>
+            <td><b>Cellularity:</b> ${results.get(plugin.CELLULARITY)}%</td>
+      </tr>
+      </table>
+
+</div>
+

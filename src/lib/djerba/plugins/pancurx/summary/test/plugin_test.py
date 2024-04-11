@@ -9,7 +9,6 @@ import string
 
 from djerba.util.validator import path_validator
 from djerba.plugins.plugin_tester import PluginTester
-import djerba.plugins.pancurx.summary.plugin
 from djerba.core.workspace import workspace
 from djerba.util.environment import directory_finder
 
@@ -37,13 +36,13 @@ class TestSummary(PluginTester):
         params = {
             self.INI: os.path.join(input_dir, self.INI_NAME),
             self.JSON: 'summary.json',
-            self.MD5: '3eda42da91cdee105a8cff6c443ca88d'
+            self.MD5: '115f2c184a1543f7c5cb755d4be6cf9d'
         }
         self.run_basic_test(test_source_dir, params)
 
     def redact_json_data(self, data):
         """replaces empty method from testing.tools"""
-        for key in ['oncoslide_plot']:
+        for key in ['oncoslide_driver_plot','oncoslide_snv_plot','oncoslide_indel_plot','oncoslide_sv_plot','oncoslide_cnv_plot']:
             del data['results'][key]
         return data        
     

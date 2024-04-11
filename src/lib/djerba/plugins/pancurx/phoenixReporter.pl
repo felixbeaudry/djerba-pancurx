@@ -89,36 +89,36 @@ close FILE;
 
 # my $currentTime = localtime;
 
-my @germlineGeneOrder = qw/POLE POLD1 EPCAM MLH1 MSH2 MSH6 PMS1 PMS2 BRCA1 BRCA2 PALB2 ATM APC MUTYH CDKN2A STK11 TP53 SMAD4 RAD51C CHEK2 BRIP1 RNF43/;
-my @driverGeneOrder = qw/KRAS TP53 CDKN2A SMAD4 MAP2K4 ARID1A RNF43 TGFBR2 KDM6A/;
+# my @germlineGeneOrder = qw/POLE POLD1 EPCAM MLH1 MSH2 MSH6 PMS1 PMS2 BRCA1 BRCA2 PALB2 ATM APC MUTYH CDKN2A STK11 TP53 SMAD4 RAD51C CHEK2 BRIP1 RNF43/;
+# my @driverGeneOrder = qw/KRAS TP53 CDKN2A SMAD4 MAP2K4 ARID1A RNF43 TGFBR2 KDM6A/;
 
-my %germlineGenes;
-for my $g (@germlineGeneOrder)
-{
-	$germlineGenes{$g} = 1;
-}
+# my %germlineGenes;
+# for my $g (@germlineGeneOrder)
+# {
+# 	$germlineGenes{$g} = 1;
+# }
 
-my %driverGenes;
-for my $g (@driverGeneOrder)
-{
-	$driverGenes{$g} = 1;
-}
+# my %driverGenes;
+# for my $g (@driverGeneOrder)
+# {
+# 	$driverGenes{$g} = 1;
+# }
 
-my %nonsilent =  (
-	"frameshift" => 1,
-	"nonframeshift" => 1,
-	"nonsynonymous" => 1,
-	"stoploss" => 1,
-	"stopgain" => 1,
-	"splicing" => 1,
-	"strong amplification" => 1,
-	"homozygous deletion" => 1,
-	"deletion breakpoint" => 1,
-	"duplication breakpoint" => 1,
-	"inversion breakpoint" => 1,
-	"translocation breakpoint" => 1,
-	# leaving altered promoters and potential fusions for now
-);
+# my %nonsilent =  (
+# 	"frameshift" => 1,
+# 	"nonframeshift" => 1,
+# 	"nonsynonymous" => 1,
+# 	"stoploss" => 1,
+# 	"stopgain" => 1,
+# 	"splicing" => 1,
+# 	"strong amplification" => 1,
+# 	"homozygous deletion" => 1,
+# 	"deletion breakpoint" => 1,
+# 	"duplication breakpoint" => 1,
+# 	"inversion breakpoint" => 1,
+# 	"translocation breakpoint" => 1,
+# 	# leaving altered promoters and potential fusions for now
+# );
 
 
 # my %limsTissue = (
@@ -195,19 +195,19 @@ my %nonsilent =  (
 # printMmrScore($html, \%data, \%genes);
 # print $html "<p style=\"page-break-after:always;\"></p>\n";
 
-# printGermlineVariants($html, \%data, \%genes, \@germlineGeneOrder, \%nonsilent);
-print $html "<h2>Somatic Mutations</h2>\n";
-printWholeGenome($html, \%data);
-print $html "<p style=\"page-break-after:always;\"></p>\n";
+# # printGermlineVariants($html, \%data, \%genes, \@germlineGeneOrder, \%nonsilent);
+# print $html "<h2>Somatic Mutations</h2>\n";
+# printWholeGenome($html, \%data);
+# print $html "<p style=\"page-break-after:always;\"></p>\n";
 
-printMutationLoad($html, \%data);
+# printMutationLoad($html, \%data);
 
 printDriverGenes($html, \%genes, \@driverGeneOrder, \%nonsilent);
 
-print $html "<p style=\"page-break-after:always;\"></p>\n";
+# print $html "<p style=\"page-break-after:always;\"></p>\n";
 
 
-printPloidyAndChromo($html, \%data);
+# printPloidyAndChromo($html, \%data);
 
 printFullSomaticList($html, \%data, \%genes, \%nonsilent);
 
@@ -220,18 +220,18 @@ printFullSomaticList($html, \%data, \%genes, \%nonsilent);
 
 
 
-print $html "<p style=\"page-break-after:always;\"></p>\n";
+# print $html "<p style=\"page-break-after:always;\"></p>\n";
 
-print $html "<h1>Appendix</h1>\n";
+# print $html "<h1>Appendix</h1>\n";
 
 #printLaneQC($html, \%data);
 
 printWholeChroms($html, \%data);
 
-print $html "</div>\n";
+# print $html "</div>\n";
 
-printFooter($html, \%data);
-print $html "</body>\n</html>\n";
+# printFooter($html, \%data);
+# print $html "</body>\n</html>\n";
 
 
 
@@ -647,8 +647,8 @@ print $html "</body>\n</html>\n";
 
 sub printMutationLoad
 {
-	my $html = shift;
-	my $data = shift;
+	# my $html = shift;
+	# my $data = shift;
 
 	# terribly hacky!
 	my $snvText = `grep main $data->{out_path}/$data->{plot_dir}/$data->{tumour}-histogram.Rcode | grep SNVs | grep bp | sed 's/.*main="//' | sed 's/",.*//'`;
@@ -657,70 +657,70 @@ sub printMutationLoad
 #	my $neoText = `grep main $data->{out_path}/$data->{plot_dir}/$data->{tumour}-histogram.Rcode | grep Neo | grep bp | sed 's/.*main="//' | sed 's/",.*//'`;
 
 
-	print $html "<h3>\tMutational Load</h3>\n";
+	# print $html "<h3>\tMutational Load</h3>\n";
 	
-	print $html "<table style=\"width:100%\">\n";
-	print $html "<tr>\n";
-	print $html "<td style=\"text-align:center\"><b>$snvText</b></td>";
-	print $html "<td style=\"text-align:center\"><b>$indelText</b></td>";
-	print $html "<td style=\"text-align:center\"><b>$svText</b></td>";
-#	print $html "<td style=\"text-align:center\"><b>$neoText</b></td>";
-#	print $html "<td style=\"text-align:center\"><b>$data->{snv_count} SNVs (%PR)</b></td>";
-#	print $html "<td style=\"text-align:center\"><b>$data->{indel_count} Indels (%PR)</b></td>";
-#	print $html "<td style=\"text-align:center\"><b>$data->{sv_count} SVs (%PR)</b></td>";
-#	print $html "<td style=\"text-align:center\"><b>$data->{neo_antigens} Neo-antigens (%PR)</b></td>";
-	print $html "</tr>\n";
-	print $html "<tr>\n";
-	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-histbox-snv_count-240.png\" style=\"width:100%\"></td>";
-	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-histbox-indel_count-240.png\" style=\"width:100%\"></td>";
-	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-histbox-sv_count-240.png\" style=\"width:100%\"></td>";
-#	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-histbox-neo_antigens-240.png\" style=\"width:100%\"></td>";
-	print $html "</tr>\n";
-	print $html "</table>\n";
+# 	print $html "<table style=\"width:100%\">\n";
+# 	print $html "<tr>\n";
+# 	print $html "<td style=\"text-align:center\"><b>$snvText</b></td>";
+# 	print $html "<td style=\"text-align:center\"><b>$indelText</b></td>";
+# 	print $html "<td style=\"text-align:center\"><b>$svText</b></td>";
+# #	print $html "<td style=\"text-align:center\"><b>$neoText</b></td>";
+# #	print $html "<td style=\"text-align:center\"><b>$data->{snv_count} SNVs (%PR)</b></td>";
+# #	print $html "<td style=\"text-align:center\"><b>$data->{indel_count} Indels (%PR)</b></td>";
+# #	print $html "<td style=\"text-align:center\"><b>$data->{sv_count} SVs (%PR)</b></td>";
+# #	print $html "<td style=\"text-align:center\"><b>$data->{neo_antigens} Neo-antigens (%PR)</b></td>";
+# 	print $html "</tr>\n";
+# 	print $html "<tr>\n";
+# 	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-histbox-snv_count-240.png\" style=\"width:100%\"></td>";
+# 	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-histbox-indel_count-240.png\" style=\"width:100%\"></td>";
+# 	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-histbox-sv_count-240.png\" style=\"width:100%\"></td>";
+# #	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-histbox-neo_antigens-240.png\" style=\"width:100%\"></td>";
+# 	print $html "</tr>\n";
+# 	print $html "</table>\n";
 	
-	print $html "<table style=\"width:100%\">\n";
-	print $html "<tr>\n";
-	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-snv_context-400x300.png\"></td>";
-	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-indel_sv_bins-400x300.png\"></td>";
-	print $html "</tr>\n";
-	print $html "</table>\n";
+# 	print $html "<table style=\"width:100%\">\n";
+# 	print $html "<tr>\n";
+# 	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-snv_context-400x300.png\"></td>";
+# 	print $html "<td style=\"text-align:center\"><img src=\"$data->{plot_dir}/$data->{tumour}-indel_sv_bins-400x300.png\"></td>";
+# 	print $html "</tr>\n";
+# 	print $html "</table>\n";
 
-	print $html "<img src=\"$data->{plot_dir}/$data->{tumour}-snv_vaf-no_sample.png\">\n";
-	print $html "<img src=\"$data->{plot_dir}/$data->{tumour}-indel_vaf-no_sample.png\">\n";
+# 	print $html "<img src=\"$data->{plot_dir}/$data->{tumour}-snv_vaf-no_sample.png\">\n";
+# 	print $html "<img src=\"$data->{plot_dir}/$data->{tumour}-indel_vaf-no_sample.png\">\n";
 
 }
 
 
 sub printDriverGenes
 {
-	my $html = shift;
-	my $genes = shift;
-	my $driverGeneOrder = shift;
-	my $nonsilent = shift;
+	# my $html = shift;
+	# my $genes = shift;
+	# my $driverGeneOrder = shift;
+	# my $nonsilent = shift;
 
-	print $html "<h3>Driver Gene Status</h3>\n";
+	# print $html "<h3>Driver Gene Status</h3>\n";
 	
-	print $html "<table style=\"width:100%\" class=\"sortable\">\n";
-	print $html "<tr>\n";
-	print $html "<th>Gene</th><th>Variant</th><th>Copy Number</th><th>AB Count</th><th>Additional Information</th>";
-	print $html "</tr>\n";
+	# print $html "<table style=\"width:100%\" class=\"sortable\">\n";
+	# print $html "<tr>\n";
+	# print $html "<th>Gene</th><th>Variant</th><th>Copy Number</th><th>AB Count</th><th>Additional Information</th>";
+	# print $html "</tr>\n";
 	
 	my $printed;
 	
 	for my $gene (@{ $driverGeneOrder })
 	{
-		$printed = 0;
-		for my $v (sort keys %{ $genes->{$gene}{variants} })
-		{
-			unless ($genes->{$gene}{variants}{$v}{mutation_class} =~ /germline/)
-			{
-				unless ($genes->{$gene}{variants}{$v}{mutation_class} =~ /NA/)
-				{
-					printSimpleGeneRow($gene, $v, $genes, $html, "");
-					$printed = 1;
-				}
-			}
-		}
+		# $printed = 0;
+		# for my $v (sort keys %{ $genes->{$gene}{variants} })
+		# {
+		# 	unless ($genes->{$gene}{variants}{$v}{mutation_class} =~ /germline/)
+		# 	{
+		# 		unless ($genes->{$gene}{variants}{$v}{mutation_class} =~ /NA/)
+		# 		{
+		# 			printSimpleGeneRow($gene, $v, $genes, $html, "");
+		# 			$printed = 1;
+		# 		}
+		# 	}
+		# }
 	
 		for my $v (sort keys %{ $genes->{$gene}{variants} })
 		{
@@ -735,23 +735,23 @@ sub printDriverGenes
 	print $html "</table>\n";
 }
 
-sub printWholeGenome
-{
-	my $html = shift;
-	my $data = shift;
+# sub printWholeGenome
+# {
+# 	my $html = shift;
+# 	my $data = shift;
 
-	print $html "<h3>Whole Genome Summary</h3>\n";
-	print $html "<img src=\"$data->{plot_dir}/$data->{tumour}.whole_genome.png\" style=\"width:100%\">\n";
-}
+# 	print $html "<h3>Whole Genome Summary</h3>\n";
+# 	print $html "<img src=\"$data->{plot_dir}/$data->{tumour}.whole_genome.png\" style=\"width:100%\">\n";
+# }
 
-sub printPloidyAndChromo
-{
-	my $html = shift;
-	my $data = shift;
+# sub printPloidyAndChromo
+# {
+# 	my $html = shift;
+# 	my $data = shift;
 
-	print $html "<h3>Ploidy and Chromothripsis</h3>\n";
-	print $html "<img src=\"$data->{plot_dir}/$data{tumour}-celluloid_contour.png\" style=\"width:100%\">\n";
-}
+# 	print $html "<h3>Ploidy and Chromothripsis</h3>\n";
+# 	print $html "<img src=\"$data->{plot_dir}/$data{tumour}-celluloid_contour.png\" style=\"width:100%\">\n";
+# }
 
 sub printFullSomaticList
 {
@@ -760,10 +760,10 @@ sub printFullSomaticList
 	my $genes = shift;
 	my $nonsilent = shift;
 
-	print $html "<h3>Full Deleterious Somatic Variant List</h3>\n";
+	# print $html "<h3>Full Deleterious Somatic Variant List</h3>\n";
 	
-	print $html "<table style=\"width:100%\">\n";
-	print $html "<tr>\n";
+	# print $html "<table style=\"width:100%\">\n";
+	# print $html "<tr>\n";
 	print $html "<td><b>Nonsynonymous-SNVs:</b> $data->{nonsyn_count}</td>\n";
 	print $html "<td><b>Frameshift-deletions:</b> $data->{del_frameshift_count}</td>\n";
 	print $html "<td><b>Deletion-Gene-BPs:</b> $data->{sv_del_bp_gene_count}</td>\n";
@@ -787,15 +787,15 @@ sub printFullSomaticList
 	print $html "<td><b>Total Deleterious SNVs:</b> " . ($data->{nonsyn_count} + $data->{stopgain_count} + $data->{stoploss_count} + $data->{splice_count}) . "</td>\n";
 	print $html "<td><b>Total Deleterious Indels:</b> " . ($data->{del_frameshift_count} + $data->{del_nonframeshift_count} + $data->{ins_frameshift_count} + $data->{ins_nonframeshift_count}) . "</td>\n";
 	print $html "<td><b>Total Deleterious SV Breakpoints:</b> " . ($data->{sv_del_bp_gene_count} + $data->{sv_dup_bp_gene_count} + $data->{sv_inv_bp_gene_count} + $data->{sv_tra_bp_gene_count}) . "</td>\n";
-	print $html "</tr>\n";
-	print $html "</table>\n";
+	# print $html "</tr>\n";
+	# print $html "</table>\n";
 	
-	print $html "<br>\n";
+	# print $html "<br>\n";
 	
-	print $html "<table style=\"width:100%\" class=\"sortable\">\n";
-	print $html "<tr>\n";
-	print $html "<th>Gene</th><th>Variant</th><th>Copy Number</th><th>AB Count</th><th>Additional Information</th>";
-	print $html "</tr>\n";
+	# print $html "<table style=\"width:100%\" class=\"sortable\">\n";
+	# print $html "<tr>\n";
+	# print $html "<th>Gene</th><th>Variant</th><th>Copy Number</th><th>AB Count</th><th>Additional Information</th>";
+	# print $html "</tr>\n";
 	
 	for my $gene (sort keys %{ $genes })
 	{
@@ -835,48 +835,48 @@ sub printWholeChroms
 
 
 
-sub printFooter
-{
-	my $html = shift;
-	my $data = shift;
+# sub printFooter
+# {
+# 	my $html = shift;
+# 	my $data = shift;
 
-	print $html "<div id=\"footer\">\n";
-	print $html "<td style=\"width=33%;text-align:center;vertical-align:middle\"><img src=\"$data->{common_dir}/OICR_logo.jpg\"style=\"height:125px;\"></td>";
-	print $html "<td style=\"width=33%;text-align:center;vertical-align:middle\"><img src=\"$data->{common_dir}/UHN_logo.png\" style=\"height:50px;\"></td>";
-	print $html "<td style=\"width=33%;text-align:center;vertical-align:middle\"><img src=\"$data->{common_dir}/COMPASS_logo.png\" style=\"height:150px;\"></td>";
-	print $html "</tr></table>\n";
-	print $html "</div>\n";
+# 	print $html "<div id=\"footer\">\n";
+# 	print $html "<td style=\"width=33%;text-align:center;vertical-align:middle\"><img src=\"$data->{common_dir}/OICR_logo.jpg\"style=\"height:125px;\"></td>";
+# 	print $html "<td style=\"width=33%;text-align:center;vertical-align:middle\"><img src=\"$data->{common_dir}/UHN_logo.png\" style=\"height:50px;\"></td>";
+# 	print $html "<td style=\"width=33%;text-align:center;vertical-align:middle\"><img src=\"$data->{common_dir}/COMPASS_logo.png\" style=\"height:150px;\"></td>";
+# 	print $html "</tr></table>\n";
+# 	print $html "</div>\n";
 
-}
+# }
 
 
 
-sub getPercentRank
-{
-	my $value = shift;
-	my $arrayRef = shift;
+# sub getPercentRank
+# {
+# 	my $value = shift;
+# 	my $arrayRef = shift;
 
-	my $rank = "";
-	my $lowerCount = 0;
-	my $equalCount = 0;
+# 	my $rank = "";
+# 	my $lowerCount = 0;
+# 	my $equalCount = 0;
 
-	for (my $i = 0; $i < scalar(@$arrayRef); $i++)
-	{
-		if ($value > $arrayRef->[$i])
-		{
-			$lowerCount++;
-		}
-		elsif ($value == $arrayRef->[$i])
-		{
-			$equalCount++;
-		}
-	}
+# 	for (my $i = 0; $i < scalar(@$arrayRef); $i++)
+# 	{
+# 		if ($value > $arrayRef->[$i])
+# 		{
+# 			$lowerCount++;
+# 		}
+# 		elsif ($value == $arrayRef->[$i])
+# 		{
+# 			$equalCount++;
+# 		}
+# 	}
 
-	$rank = ($lowerCount + (0.5 * $equalCount)) / (scalar(@$arrayRef) + 1);
+# 	$rank = ($lowerCount + (0.5 * $equalCount)) / (scalar(@$arrayRef) + 1);
 
-	print $rank . "\n";
-	return sprintf("%.0f", ($rank * 100));
-}
+# 	print $rank . "\n";
+# 	return sprintf("%.0f", ($rank * 100));
+# }
 
 
 #printSimpleGeneRow($gene, $variant, \%vars, $html);

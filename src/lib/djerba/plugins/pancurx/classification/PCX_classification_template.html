@@ -1,0 +1,70 @@
+<%
+      import djerba.plugins.pancurx.constants as plugin
+      from djerba.plugins.pancurx.html import make_class_table_rows, make_hallmark_tally_table
+
+%>
+
+<div id="main">
+
+      <h2 class="pcx">Classifications</h2>
+      <table style="width:100%">
+      <tr>
+            <td><b>Waddell Class:</b> ${results.get(plugin.WADDELL_CLASS)}</td>
+            <td><b>Ploidy:</b> ${results.get(plugin.PLOIDY)}</td>
+            <td><b>Inferred Sex:</b> ${results.get(plugin.INFERRED_SEX)}</td>
+      </tr>
+      % if results.get(plugin.MOFFITT_CLASS) != "NA" :
+      <tr>
+            <td><b>Alexandrov Class:</b> ${results.get(plugin.ALEXANDROV_CLASS)}</td>
+            <td><b>Collisson Class:</b> ${results.get(plugin.COLLISSON_CLASS)}</td>
+            <td><b>Moffitt Class:</b> ${results.get(plugin.MOFFITT_CLASS)}</td>
+      <tr>
+      % endif
+
+      % if results.get(plugin.HLA_TYPES) != "NA" :
+      <tr>
+            <td colspan="3"><b>HLA Types:</b> ${results.get(plugin.HLA_TYPES)}</td>
+      </tr>
+      % endif
+      </table>
+
+	<h3>HR Deficiency Hallmark Score</h3>
+
+      <table style="width:100%">
+            <tr>
+            % for row in make_hallmark_tally_table(results.get('dsbr_tally'), 10, '#322288'):
+                  ${row}
+            % endfor
+            </tr>
+      </table>
+      <br>
+
+      <table width="100%">
+            <tbody>
+            % for row in make_class_table_rows(results.get(plugin.DSBR_RESULTS), plugin.DSBR_RESULTS):
+                  ${row}
+            % endfor
+            </tbody>
+      </table>
+
+      <h3>MMR Deficiency Hallmark Score</h3>
+
+      <table style="width:100%">
+            <tr>
+            % for row in make_hallmark_tally_table(results.get('mmr_tally'), 4, '#107733'):
+                  ${row}
+            % endfor
+            </tr>
+      </table>
+      <br>
+
+      <table width="100%">
+            <tbody>
+            % for row in make_class_table_rows(results.get(plugin.MMR_RESULTS), plugin.MMR_RESULTS):
+                  ${row}
+            % endfor
+            </tbody>
+      </table>
+
+</div>
+<p style="page-break-after:always;"></p>

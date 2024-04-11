@@ -9,7 +9,6 @@ import string
 
 from djerba.util.validator import path_validator
 from djerba.plugins.plugin_tester import PluginTester
-from djerba.plugins.pancurx.sample.plugin import main as sample
 from djerba.core.workspace import workspace
 from djerba.util.environment import directory_finder
 
@@ -36,8 +35,8 @@ class TestSampleInfo(PluginTester):
             ini_file.write(ini_str)
         params = {
             self.INI: os.path.join(input_dir, self.INI_NAME),
-            self.JSON: 'sample_info.json',
-            self.MD5: '7b9ea69f007f4431087ce1d55c3e07a8'
+            self.JSON: 'germline.json',
+            self.MD5: 'ca3e875bce46b40ec5d3d888c893822b'
         }
         self.run_basic_test(test_source_dir, params)
 

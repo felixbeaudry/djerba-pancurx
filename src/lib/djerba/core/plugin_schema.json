@@ -16,7 +16,7 @@
 	    "type": "array",
 	    "items": {
 		"type": "string",
-		"enum": ["clinical", "supplementary", "failed", "research"]
+		"enum": ["clinical", "supplementary", "failed", "research", "slide"]
 	    }
 	},
 	"merge_inputs": {"type": "object"},

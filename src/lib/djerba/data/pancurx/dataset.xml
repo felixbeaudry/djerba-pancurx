@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pancurx_dataset>
+    <pancurx_data category="comparator_cohort">
+        <file_name>PCX.summary.csv</file_name>
+        <edits>
+            <edit category="24.03.14"><notes_on_edits>from univa pipeline</notes_on_edits></edit>
+            <edit category="11.04.14"><notes_on_edits>renamed from pdac_20170926_matrix.csv </notes_on_edits></edit>
+        </edits>
+    </pancurx_data>
+    <pancurx_data category="comparator_cohort">
+        <file_name>LBR.summary.csv</file_name>
+        <edits>
+            <edit category="24.03.15"><notes_on_edits>concatenation of all BTC cases to date</notes_on_edits></edit>
+        </edits>
+    </pancurx_data>
+    <pancurx_data category="gene_list">
+        <file_name>PCX.genes.txt</file_name>
+        <edits>
+            <edit category="24.04.08"><notes_on_edits>hardcoded in univa pipeline</notes_on_edits></edit>
+        </edits>
+    </pancurx_data>
+   <pancurx_data category="gene_list">
+        <file_name>LBR.genes.txt</file_name>
+        <edits>
+            <edit category="24.04.08"><notes_on_edits>based on general discussion</notes_on_edits></edit>
+        </edits>
+    </pancurx_data>
+    <pancurx_data category="germline_gene_list">
+        <file_name>PCX.germline.genes.txt</file_name>
+        <edits>
+            <edit category="24.04.08"><notes_on_edits>hardcoded in univa pipeline</notes_on_edits></edit>
+        </edits>
+    </pancurx_data>
+    <pancurx_data category="germline_gene_list">
+        <file_name>LBR.germline.genes.txt</file_name>
+        <edits>
+            <edit category="24.04.09"><notes_on_edits>email from Spring Holter</notes_on_edits></edit>
+        </edits>
+    </pancurx_data>
+</pancurx_dataset>

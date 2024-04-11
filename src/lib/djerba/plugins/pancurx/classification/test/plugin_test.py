@@ -37,15 +37,9 @@ class TestclassificationInfo(PluginTester):
         params = {
             self.INI: os.path.join(input_dir, self.INI_NAME),
             self.JSON: 'classification.json',
-            self.MD5: '76756f46b7c4d3c37aeccc2141f9c769'
+            self.MD5: '30f89c8e28f97035510b536cea98d89c'
         }
         self.run_basic_test(test_source_dir, params)
-
-    def redact_json_data(self, data):
-        """replaces empty method from testing.tools"""
-        for key in ['mmr_score_image_path', 'dsbr_score_image_path' ]:
-            del data['results'][key]
-        return data   
 
 if __name__ == '__main__':
     unittest.main()

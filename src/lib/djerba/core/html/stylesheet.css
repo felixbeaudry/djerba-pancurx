@@ -28,19 +28,26 @@ h1 {
 	page-break-after: avoid;
 }
 
-h2 {
+h2.pcx {
 	color: #FFFFFF;
 	background-color: #444444;
-/*	color: #FFFFFF;
-	background-color: #38793B;
-	color: #DFDEEB;
-	background-color: #323379; */
 	font-family: Verdana, sans-serif;
 	text-align: center;
 	line-height: 1.5;
 	border-radius: 10px;
 	page-break-after: avoid;
 }
+
+
+h2.lbr {
+	color: #FFFFFF;
+	background-color: #908b8b;
+	font-family: Verdana, sans-serif;
+	line-height: 1.2;
+	page-break-after: avoid;
+   padding:0px 8px
+}
+
 
 h3 {
 	color: #000000;
