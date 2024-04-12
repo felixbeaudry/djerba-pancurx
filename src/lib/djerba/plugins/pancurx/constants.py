@@ -164,14 +164,14 @@ NONSILENT_CHANGES =  [
 ]
 
 COSMIC_MUTATION_TYPES = {
-			"A" : "strong amplification",
-			"D" : "homozygous deletion",
-			"F" : "frameshift",
-			"Mis" : "nonsynonymous,nonframeshift",
-			"N" : "stopgain",
-			"S" : "splicing",
-			"T" : "translocation",
-        }
+	"A" : "strong amplification",
+	"D" : "homozygous deletion",
+	"F" : "frameshift",
+	"Mis" : "nonsynonymous,nonframeshift",
+	"N" : "stopgain",
+	"S" : "splicing",
+	"T" : "translocation",
+}
 
 COSMIC_SIGNATURE_SET = {
 	"Signature.1": "csnnls_sig1",
@@ -241,6 +241,33 @@ MMR_HTML_HEADERS = {
 	MMR_SECOND_GENES : "Second Gene Hit(s)"
 }
 
+TMB_RANGE_CUTOFF = {
+	'high': 10,
+	'elevated': 5,
+	'typical': 1,
+	'low': 0
+}
+
+SNV_RANGE_CUTOFF = {
+	'high': 20000,
+	'elevated': 10000,
+	'typical': 2500,
+	'low': 0
+}
+
+INDEL_RANGE_CUTOFF = {
+	'high': 2000,
+	'elevated': 1000,
+	'typical': 250,
+	'low': 0
+}
+
+SV_RANGE_CUTOFF = {
+	'high': 280,
+	'elevated': 140,
+	'typical': 35,
+	'low': 0
+}
 
 #updated 2024.04.03
 LIMS_TISSUE_CODES = {

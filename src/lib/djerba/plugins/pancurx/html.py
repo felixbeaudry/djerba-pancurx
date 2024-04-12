@@ -17,6 +17,20 @@ def make_hallmark_tally_table(hallmark_tally, hallmark_length, color):
         hallmark_index = hallmark_index + 1
     return(rows)
 
+def make_signatures_string(signature_dict):
+    signature_strings = []
+    signature_dict = dict(sorted(signature_dict.items(), key=lambda item: item[1], reverse=True))
+    for this_signature in signature_dict:
+        this_signature_value = signature_dict[this_signature] * 100
+        if this_signature_value > 10 :
+            if  this_signature == 'SBS2026':
+                this_signature = 'SBS26'
+            this_signature_split = this_signature.split("SBS")
+            this_signature = this_signature_split[1]
+            this_signature_string = '<mark class="sig{0}">{0}</mark> ({1}%)'.format(this_signature, this_signature_value)
+            signature_strings.append(this_signature_string)
+    return(', '.join(signature_strings))
+    
 
 def make_class_table_rows(multifactor_marker_results, type):
     row_fields = multifactor_marker_results 
@@ -62,6 +76,21 @@ def make_somatic_table_rows(row_fields, ploidy):
             '<td {0}>{1}</td>'.format(cn_class, cn),
             '<td {0}>{1}</td>'.format(ab_class, ab),
             hb.td(additional_string)
+        ]
+        rows.append(hb.tr(cells))
+    return rows
+
+def make_somatic_slide_rows(row_fields, ploidy):
+    rows = []
+    for row in row_fields:
+        mutation = process_gene_context(row)
+
+        cn_class, cn = process_cn(row['copy_number'], ploidy)
+
+        cells = [
+            hb.td(row['gene'], italic=True),
+            hb.td(mutation),
+            '<td {0}>{1}</td>'.format(cn_class, cn)
         ]
         rows.append(hb.tr(cells))
     return rows

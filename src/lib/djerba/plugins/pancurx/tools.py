@@ -124,6 +124,26 @@ def parse_cosmic_signatures(self, cosmic_signatures_file_path):
             signature_results[phe.COSMIC_SIGNATURE_SET[signature_name]] = row[signature_name]
     return(signature_results)
 
+
+def get_sigs_from_summary(summary_file):
+    #TODO: use tools.parse_cosmic_signatures()
+    sigs = {
+        'SBS1' : float(summary_file.get("csnnls_sig1")),
+        'SBS2' : float(summary_file.get("csnnls_sig2")),
+        'SBS3' : float(summary_file.get("csnnls_sig3")),
+        'SBS5' : float(summary_file.get("csnnls_sig5")),
+        'SBS6' : float(summary_file.get('csnnls_sig6')),
+        'SBS8' : float(summary_file.get('csnnls_sig8')),
+        'SBS13': float(summary_file.get('csnnls_sig13')),
+        'SBS17': float(summary_file.get('csnnls_sig17')),
+        'SBS18': float(summary_file.get('csnnls_sig18')),
+        'SBS2026': float(summary_file.get('csnnls_sig20')) + float(summary_file.get('csnnls_sig26'))
+    }
+    sigs_total = sum(sigs.values(), )
+    sigs = {key: round( value / sigs_total , 2) for key, value in sigs.items()}
+    return(sigs)
+
+
 def parse_coverage(self, coverage_file_path):
     coverage_file_path = check_path_exists(self, coverage_file_path)
     with open(coverage_file_path, 'r') as file:
@@ -216,7 +236,7 @@ def get_loads_from_summary(summary_file):
         'snv_count' : summary_file.get("snv_count"),
         'indel_count' : summary_file.get("indel_count"),
         'sv_count' : summary_file.get("sv_count"),
-        'TMB' : (int(summary_file.get("snv_count")) + int(summary_file.get("indel_count"))) / 1000,
+        'TMB' : round((int(summary_file.get("snv_count")) + int(summary_file.get("indel_count"))) / 3000, 2),
         'nonsyn_count' : summary_file.get('nonsyn_count'),
         'del_frameshift_count' : summary_file.get('del_frameshift_count'),
         'sv_del_bp_gene_count': summary_file.get('sv_del_bp_gene_count'),
@@ -323,4 +343,60 @@ def parse_multifactor_marker(self, summary_results, html_headers, marker_cutoffs
             }
             result.append(result_tmp)
     return(result, hallmark_tally)
+
+
+def parse_germline_variants(self, sample_variants_file_path):
+    sample_variants = {}
+    sample_variants_file_path = check_path_exists(self, sample_variants_file_path)
+    with open(sample_variants_file_path, 'r') as sample_variants_file:
+        for row in csv.DictReader(sample_variants_file, delimiter=","):
+            ## only saving non-silent germline variants to save on memory
+            if 'germline' in row['mutation_class'] and row['mutation_type'] in phe.NONSILENT_CHANGES:
+                gene = row['gene']
+                variant_key = f"{row['mutation_type']},{row['position']},{row['base_change']}"
+
+                variant_characteristics = {
+                    'gene': gene,
+                    'mutation_type': row['mutation_type'],
+                    'mutation_class': row['mutation_class'],
+                    'rarity': row['rarity'],
+                    'clinvar': row['clinvar'],
+                    'dbsnp': row['dbsnp'],
+                    'copy_number': row['copy_number'],
+                    'ab_counts': row['ab_counts'],
+                    'cosmic_census_flag': row['cosmic_census_flag'],
+                    'nuc_context': row['nuc_context'],
+                    'aa_context': row['aa_context'],
+                }
+                if gene in sample_variants:
+                    sample_variants[gene][variant_key] = variant_characteristics
+                else:
+                    sample_variants[gene] = {}
+                    sample_variants[gene][variant_key] = variant_characteristics
+    return(sample_variants) 
+
+def get_subset_of_germline_variants(sample_variants, gene_order):
+    germline_nonsilent_gene_count = 0
+    germ_nonsil_genes_rare = 0
+    germ_pathogenic = 0
+    reportable_germline_variants = []
+    for gene in gene_order:
+        if gene in sample_variants:
+            for variant in sample_variants[gene]:
+                germline_nonsilent_gene_count = germline_nonsilent_gene_count + 1
+                if sample_variants[gene][variant]['rarity'] != "common":
+                    reportable_germline_variants.append(sample_variants[gene][variant])
+                    germ_nonsil_genes_rare += 1
+                    mutation_type = sample_variants[gene][variant]['mutation_type']
+                    clinvar = sample_variants[gene][variant]['clinvar'] 
+                    if (mutation_type in ["frameshift", "stopgain"] or clinvar.startswith('CLINSIG=pathogenic')) and \
+                        sample_variants[gene][variant]['dbsnp'] != "NA" and \
+                        sample_variants[gene][variant]['dbsnp'] not in phe.EXCLUDED_GERMLINE_PATHOGENIC_VARIANTS :
+                        germ_pathogenic += 1
+    return(germline_nonsilent_gene_count, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants)
+
+def get_germline_variant_counts( summary_results):
+    germ_variant_count = int(summary_results.get("germline_snv_count")) + int(summary_results.get("germline_indel_count"))
+    germ_nonsilent_count = int(summary_results.get("germline_missense_count")) + int(summary_results.get("germline_nonsense_count"))
+    return(germ_variant_count, germ_nonsilent_count)
 

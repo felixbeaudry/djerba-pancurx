@@ -2,8 +2,12 @@
 <%
 	from djerba.util.html import html_builder
 	import djerba.plugins.pancurx.constants as plugin
-	from djerba.plugins.pancurx.html import td_class
+	from djerba.plugins.pancurx.html import td_class, make_signatures_string, make_somatic_slide_rows
 	loads = results.get('loads')
+	sigs = results.get('sigs')
+	reportable_variants = results.get('reportable_variants')
+	reportable_germline_variants = results.get('reportable_germline_variants')
+	ploidy = results.get('ploidy_numeric')
 %>
 
 <div class="slide">
@@ -56,21 +60,35 @@
 		</table>
 
 	<h3>Germline Variants</h3>
-		<table class="regular">
-			<tr><th align="left" style="width:22%">Gene</th><th align="left">Variant(s)</th><th style="width:10%">CN</th><th style="width:10%">RNA</th></tr>
-			<tr><td class="biallelic"><a href="#RNF43" style="text-decoration: none"><mark class="biallelic"><b><i>RNF43</i></b></mark></a></td><td>p.A73fs, LOH</td><td class="cn_loh" align="center">1</td><td class="rna0" align="center">NA</td></tr>
-		</table>
+
+		% if results.get(plugin.GERM_NONSIL_SUBSET_RARE_COUNT) > 0:
+			<table style="width:100%" class="sortable">
+				<tr><th align="left" style="width:22%">Gene</th><th align="left">Variant(s)</th><th style="width:10%">CN</th></tr>
+
+				
+						% for row in make_somatic_slide_rows(reportable_germline_variants, ploidy):
+							${row}
+						% endfor
+
+			</table>
+		% else:
+			<p>No pathogenic germline mutations identified.</p>
+  		% endif
 
 	<h3>Somatic Mutations</h3>
-		<table class="regular">
-			<tr><th align="left" style="width:22%">Gene</th><th align="left">Variant(s)</th><th style="width:10%">CN</th><th style="width:10%">RNA</th></tr>
-			<tr><td class="biallelic"><a href="#TP53" style="text-decoration: none"><mark class="biallelic"><b><i>TP53</i></b></mark></a></td><td>p.N239fs, LOH</td><td class="cn_typical" align="center">2</td><td class="rna0" align="center">NA</td></tr>
-		</table>
 
-		<p style="text-align:center; font-size:0.75em; margin-top:15px">
-			<span class="gof"></span> Gain of Function
-			<span class="inact"></span> Biallelic Inactivation
-		</p>
+	<table style="width:100%" class="sortable">
+		<tr><th align="left" style="width:22%">Gene</th><th align="left">Variant(s)</th><th style="width:10%">CN</th></tr>
+
+			  % for row in make_somatic_slide_rows(reportable_variants, ploidy):
+					${row}
+			  % endfor
+  
+		</table>
+  
+
+
+
 
 </td></tr></table>
 
@@ -126,9 +144,16 @@
 				%endif				
 				(MMRD-HS: ${results.get('mmr_tally')})</td></tr>
 			<tr><td><b>TDP Score:</b> 
-				(Menghi score: ${results.get('tandem_duplicator_phenotype_score')})</td></tr>
-			<tr><td><b>COSMIC v2 Sigs:</b> 
-				<mark class="sig1">1</mark> (62%)
+				% if results.get('tandem_duplicator_phenotype_score') > 0 :
+					Positive
+				%else:
+					Negative
+				%endif		
+				 (Menghi score: ${results.get('tandem_duplicator_phenotype_score')})</td></tr>
+			<tr><td><b>COSMIC SBS:</b> 
+				${make_signatures_string(sigs)}
+
+
 			</td></tr>
 		</table>
 		<br>

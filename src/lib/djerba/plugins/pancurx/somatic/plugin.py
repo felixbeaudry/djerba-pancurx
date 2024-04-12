@@ -56,7 +56,7 @@ class main(plugin_base):
         data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest)
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
         data[core_constants.RESULTS]['loads'] = tools.get_loads_from_summary(summary_results)
-        data[core_constants.RESULTS]['sigs'] = self.get_sigs_from_summary(summary_results)
+        data[core_constants.RESULTS]['sigs'] = tools.get_sigs_from_summary(summary_results)
         data[core_constants.RESULTS][phe.CELLULOID_DIR] =  wrapper.get_my_string(phe.CELLULOID_DIR)
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
@@ -109,25 +109,6 @@ class main(plugin_base):
         self.set_ini_default(core_constants.ATTRIBUTES, 'research')
         self.set_priority_defaults(self.PRIORITY)
 
-
-    def get_sigs_from_summary(self, summary_file):
-        #TODO: use tools.parse_cosmic_signatures()
-        sigs = {
-            'SBS1' : float(summary_file.get("csnnls_sig1")),
-            'SBS2' : float(summary_file.get("csnnls_sig2")),
-            'SBS3' : float(summary_file.get("csnnls_sig3")),
-            'SBS5' : float(summary_file.get("csnnls_sig5")),
-            'SBS6' : float(summary_file.get('csnnls_sig6')),
-            'SBS8' : float(summary_file.get('csnnls_sig8')),
-            'SBS13': float(summary_file.get('csnnls_sig13')),
-            'SBS17': float(summary_file.get('csnnls_sig17')),
-            'SBS18': float(summary_file.get('csnnls_sig18')),
-            'SBS2026': float(summary_file.get('csnnls_sig20')) + float(summary_file.get('csnnls_sig26'))
-
-        }
-        sigs_total = sum(sigs.values(), )
-        sigs = {key: round( value / sigs_total , 2) for key, value in sigs.items()}
-        return(sigs)
 
 
     def get_percentile(self, sample_variant_count, cohort_path, variant_column_name):

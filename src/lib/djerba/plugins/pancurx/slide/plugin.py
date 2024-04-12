@@ -26,7 +26,7 @@ class main(plugin_base):
         wrapper = tools.fill_file_if_null(self, wrapper, phe.DONOR_ID, phe.DONOR_ID, core_constants.DEFAULT_SAMPLE_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.NORMAL_ID, phe.NORMAL_ID, core_constants.DEFAULT_SAMPLE_INFO)
 
-        
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.SAMPLE_VARIANTS_FILE, phe.SAMPLE_VARIANTS_FILE, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.PARAM_PATH, phe.PARAM_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.TDP_PATH, phe.TDP_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.COSMIC_SIGNNLS_PATH, phe.COSMIC_SIGNNLS_PATH, core_constants.DEFAULT_PATH_INFO)
@@ -39,6 +39,8 @@ class main(plugin_base):
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'COSMIC_stack', phe.COSMIC_STACK_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'sv.stack_count', phe.SV_STACK_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'stack-tmb', phe.TMB_STACK_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
+        wrapper = tools.fill_file_if_null(self, wrapper, 'genes_of_interest_file', 'genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
 
         if wrapper.my_param_is_null(phe.SLIDE_DATE):
             wrapper.set_my_param(phe.SLIDE_DATE, phe.NONE_SPECIFIED)
@@ -86,6 +88,7 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.TMB_STACK_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.TMB_STACK_PLOT), phe.TMB_STACK_PLOT)
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
         data[core_constants.RESULTS]['loads'] = tools.get_loads_from_summary(summary_results)
+        data[core_constants.RESULTS]['sigs'] = tools.get_sigs_from_summary(summary_results)
 
         if wrapper.get_my_string(phe.SLIDE_DATE) == phe.NONE_SPECIFIED:
             data[core_constants.RESULTS][phe.SLIDE_DATE] = strftime("%a %b %d %H:%M:%S %Y")
@@ -95,6 +98,8 @@ class main(plugin_base):
         cellularity = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), phe.CELLULARITY)
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
         data[core_constants.RESULTS][phe.CELLULARITY] = float(cellularity)
+        ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
+        data[core_constants.RESULTS]['ploidy_numeric'] = ploidy
 
         data[core_constants.RESULTS]['tandem_duplicator_phenotype_score'] = tools.parse_TDP(self, wrapper.get_my_string(phe.TDP_PATH))
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
@@ -104,6 +109,19 @@ class main(plugin_base):
         mmr_results, mmr_tally = tools.parse_multifactor_marker(self, summary_results, phe.MMR_HTML_HEADERS, phe.MMR_DEFAULT_HALLMARK_CUTOFFS)
         data[core_constants.RESULTS][phe.MMR_RESULTS] = mmr_results
         data[core_constants.RESULTS]['mmr_tally'] = mmr_tally
+
+        genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('genes_of_interest_file'))
+        somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), genes_of_interest)
+        data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest)
+
+        genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('germline_genes_of_interest_file'))
+        germline_variants = tools.parse_germline_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE))
+        germ_nonsil_genes, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants = tools.get_subset_of_germline_variants(germline_variants, genes_of_interest)
+
+        data[core_constants.RESULTS]['reportable_germline_variants'] = reportable_germline_variants
+        data[core_constants.RESULTS][phe.GERM_NONSIL_SUBSET_RARE_COUNT] = germ_nonsil_genes_rare
+
+
         return(data)
 
     def render(self, data):
@@ -132,7 +150,10 @@ class main(plugin_base):
             phe.SNV_CONTEXT_PLOT,
             phe.COSMIC_STACK_PLOT,
             phe.SV_STACK_PLOT,
-            phe.TMB_STACK_PLOT
+            phe.TMB_STACK_PLOT,
+            phe.SAMPLE_VARIANTS_FILE,
+            'genes_of_interest_file',
+            'germline_genes_of_interest_file'
         ]
         for key in discovered:
             self.add_ini_discovered(key)

@@ -36,11 +36,11 @@ class main(plugin_base):
         self.check_attributes_known(attributes)
         data = self.get_starting_plugin_data(wrapper, self.PLUGIN_VERSION)
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
-        germ_variant_count, germ_nonsilent_count = self.get_germline_variant_counts(summary_results)
+        germ_variant_count, germ_nonsilent_count = tools.get_germline_variant_counts(summary_results)
 
         genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('germline_genes_of_interest_file'))
-        germline_variants = self.parse_germline_variants(wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE))
-        germ_nonsil_genes, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants = self.get_subset_of_germline_variants(germline_variants, genes_of_interest)
+        germline_variants = tools.parse_germline_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE))
+        germ_nonsil_genes, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants = tools.get_subset_of_germline_variants(germline_variants, genes_of_interest)
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
 
         results = {
@@ -74,59 +74,3 @@ class main(plugin_base):
             self.add_ini_discovered(key)
         self.set_ini_default(core_constants.ATTRIBUTES, 'research')
         self.set_priority_defaults(self.PRIORITY)
-
-    def parse_germline_variants(self, sample_variants_file_path):
-        sample_variants = {}
-        sample_variants_file_path = tools.check_path_exists(self, sample_variants_file_path)
-        with open(sample_variants_file_path, 'r') as sample_variants_file:
-            for row in csv.DictReader(sample_variants_file, delimiter=","):
-                ## only saving non-silent germline variants to save on memory
-                if 'germline' in row['mutation_class'] and row['mutation_type'] in phe.NONSILENT_CHANGES:
-                    gene = row['gene']
-                    variant_key = f"{row['mutation_type']},{row['position']},{row['base_change']}"
-
-                    variant_characteristics = {
-                        'gene': gene,
-                        'mutation_type': row['mutation_type'],
-                        'mutation_class': row['mutation_class'],
-                        'rarity': row['rarity'],
-                        'clinvar': row['clinvar'],
-                        'dbsnp': row['dbsnp'],
-                        'copy_number': row['copy_number'],
-                        'ab_counts': row['ab_counts'],
-                        'cosmic_census_flag': row['cosmic_census_flag'],
-                        'nuc_context': row['nuc_context'],
-                        'aa_context': row['aa_context'],
-                    }
-                    if gene in sample_variants:
-                        sample_variants[gene][variant_key] = variant_characteristics
-                    else:
-                        sample_variants[gene] = {}
-                        sample_variants[gene][variant_key] = variant_characteristics
-        return(sample_variants) 
-
-    def get_subset_of_germline_variants(self, sample_variants, gene_order):
-        germline_nonsilent_gene_count = 0
-        germ_nonsil_genes_rare = 0
-        germ_pathogenic = 0
-        reportable_germline_variants = []
-        for gene in gene_order:
-            if gene in sample_variants:
-                for variant in sample_variants[gene]:
-                    germline_nonsilent_gene_count = germline_nonsilent_gene_count + 1
-                    if sample_variants[gene][variant]['rarity'] != "common":
-                        reportable_germline_variants.append(sample_variants[gene][variant])
-                        germ_nonsil_genes_rare += 1
-                        mutation_type = sample_variants[gene][variant]['mutation_type']
-                        clinvar = sample_variants[gene][variant]['clinvar'] 
-                        if (mutation_type in ["frameshift", "stopgain"] or clinvar.startswith('CLINSIG=pathogenic')) and \
-                            sample_variants[gene][variant]['dbsnp'] != "NA" and \
-                            sample_variants[gene][variant]['dbsnp'] not in phe.EXCLUDED_GERMLINE_PATHOGENIC_VARIANTS :
-                            germ_pathogenic += 1
-        return(germline_nonsilent_gene_count, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants)
-
-    def get_germline_variant_counts(self, summary_results):
-        germ_variant_count = int(summary_results.get("germline_snv_count")) + int(summary_results.get("germline_indel_count"))
-        germ_nonsilent_count = int(summary_results.get("germline_missense_count")) + int(summary_results.get("germline_nonsense_count"))
-        return(germ_variant_count, germ_nonsilent_count)
-
