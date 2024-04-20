@@ -1,0 +1,17 @@
+IDH1	action
+IDH2	action
+FGFR1	action
+FGFR2	action
+FGFR3	action
+BRAF	action
+ERBB2	action
+MET	driver
+PIK3CA	driver
+NRG1	driver
+MYC	driver
+MTAP	driver
+CDKN2A	driver
+TP53	driver
+KRAS	driver
+ARID1A	driver
+MDM2	driver

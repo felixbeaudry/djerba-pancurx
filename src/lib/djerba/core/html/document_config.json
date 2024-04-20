@@ -1,20 +1,29 @@
 {
-    "document_types": ["clinical", "research", "simple"],
+    "document_types": ["clinical", "research", "simple", "slide"],
     "document_settings": {
 	"clinical": {
 	    "document_header": "clinical_header.html",
 	    "document_footer": "clinical_footer.html",
-	    "stylesheet": "stylesheet.css"
+	    "stylesheet": "stylesheet.css",
+	    "javascript": "sorttable.js"
 	},
 	"research": {
 	    "document_header": "research_header.html",
 	    "document_footer": "footer.html",
-	    "stylesheet": "stylesheet.css"
+	    "stylesheet": "stylesheet.css",
+	    "javascript": "sorttable.js"
 	},
 	"simple": {
 	    "document_header": "simple_header.html",
 	    "document_footer": "footer.html",
-	    "stylesheet": "stylesheet.css"
-	}	
+	    "stylesheet": "stylesheet.css",
+	    "javascript": "sorttable.js"
+	},
+	"slide": {
+	    "document_header": "slide_header.html",
+	    "document_footer": "footer.html",
+	    "stylesheet": "slide_stylesheet.css",
+	    "javascript": "sorttable.js"
+	}		
     }
 }

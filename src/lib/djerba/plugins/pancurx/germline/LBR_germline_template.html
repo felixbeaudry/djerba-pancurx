@@ -1,0 +1,34 @@
+<%
+      import djerba.plugins.pancurx.constants as plugin
+      from djerba.plugins.pancurx.html import make_somatic_table_rows
+      from djerba.util.html import html_builder
+      reportable_germline_variants = results.get('reportable_germline_variants')
+      ploidy = results.get('ploidy')
+%>
+
+<div id="main">
+
+<h2 class="lbr">Germline Variants</h2>
+<div style="padding:0px 0px 0px 50px">
+      <table style="width:100%" >
+
+            <tr><td><b>Germline Non-silent Variants:</b></td><td>${results.get(plugin.GERM_NONSILENT_COUNT)}</td>
+                <td><b>Germline Non-silent Variants in common Biliary Cancer Genes:</b></td><td>${results.get(plugin.GERM_NONSIL_SUBSET_COUNT)}</td></tr>
+            <tr> <td><b>Germline Pathogenic Variants:</b></td><td>${results.get(plugin.GERM_PATHOGENIC_COUNT)}</td>
+                 <td><b>Germline Rare Non-silent Variants in common Biliary Cancer Genes:</b></td><td>${results.get(plugin.GERM_NONSIL_SUBSET_RARE_COUNT)}</td> </tr>
+      </table>
+	<br>
+      % if results.get(plugin.GERM_NONSIL_SUBSET_RARE_COUNT) > 0:
+            <table style="width:100%" class="sortable">
+                  <tr><td>Gene</td><td>Variant</td><td>Somatic Copy Number</td><td>Somatic A.B Count</td><td>Additional Information</td></tr>
+
+
+                  
+                        % for row in make_somatic_table_rows(reportable_germline_variants, ploidy):
+                              ${row}
+                        % endfor
+
+            </table>
+      % endif
+</div>
+</div>
