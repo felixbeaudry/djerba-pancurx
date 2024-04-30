@@ -1,0 +1,6 @@
+HLA-A	action
+HLA-B	action
+HLA-C	action
+PDCD1	action
+CD274	action
+TIGIT 	action

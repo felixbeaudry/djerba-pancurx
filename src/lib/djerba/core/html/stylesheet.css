@@ -73,6 +73,7 @@ th, td {
 table
 {
 border-collapse:collapse;
+font-size: 14px;
 }
 /* Sortable tables */
 table.sortable thead {

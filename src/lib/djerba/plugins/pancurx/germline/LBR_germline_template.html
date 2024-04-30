@@ -1,6 +1,6 @@
 <%
       import djerba.plugins.pancurx.constants as plugin
-      from djerba.plugins.pancurx.html import make_somatic_table_rows
+      from djerba.plugins.pancurx.html import make_germline_table_rows
       from djerba.util.html import html_builder
       reportable_germline_variants = results.get('reportable_germline_variants')
       ploidy = results.get('ploidy')
@@ -24,7 +24,7 @@
 
 
                   
-                        % for row in make_somatic_table_rows(reportable_germline_variants, ploidy):
+                        % for row in make_germline_table_rows(reportable_germline_variants, ploidy):
                               ${row}
                         % endfor
 

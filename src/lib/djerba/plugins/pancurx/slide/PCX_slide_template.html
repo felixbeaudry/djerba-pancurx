@@ -31,7 +31,7 @@
 			<tr>
 				<td><b>Tumour:</b> ${results.get(plugin.TUMOUR_ID)} (${results.get(plugin.TUMOUR_TISSUE)})</td>
 				<td align="right">${results.get(plugin.TUMOUR_COVERAGE)}X </td>
-				% if results.get(plugin.NORMAL_COVERAGE) > 80 :
+				% if results.get(plugin.TUMOUR_COVERAGE) > 80 :
 				<td>${td_class(True, 'QC')}</td>
 				% else:
 				<td>${td_class(False, 'QC')}</td>

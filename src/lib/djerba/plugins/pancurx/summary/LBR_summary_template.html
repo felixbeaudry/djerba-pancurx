@@ -19,19 +19,32 @@
       <div style="padding:0px 0px 0px 50px">
             <table style="width:100%">
                   <tr>
-                        <td><b>Donor ID:</b> ${results.get(plugin.DONOR_ID)}</td>
-                        <td><b>Tumour Sample:</b> ${results.get(plugin.TUMOUR_ID)}</td>
-                        <td><b>Normal Sample:</b> ${results.get(plugin.NORMAL_ID)}</td>
+                        <td style="width:300px"><b>Donor ID:</b> ${results.get(plugin.DONOR_ID)}</td>
+                        <td style="width:500px"><b>External IDs:</b> ${results.get(plugin.EXTERNAL_IDS)}</td>
+                  </tr>
+            </table>
+
+            <hr style="border-top:lightgrey">
+            <table style="width:100%">
+                  <tr>
+                        <td style="width:300px"><b>Normal Sample ID:</b> ${results.get(plugin.NORMAL_ID)}</td>
+                        <td style="width:200px"><b>Normal Tissue:</b> ${results.get(plugin.NORMAL_TISSUE)}</td>
+                        <td style="width:300px"><b>Normal Coverage:</b> ${results.get(plugin.NORMAL_COVERAGE)}x (>30x)</td>
+                  </tr>
+            </table>
+
+            <hr style="border-top:lightgrey">
+            <table style="width:100%">
+                  <tr>
+                        <td style="width:300px"><b>Tumour Sample ID:</b> ${results.get(plugin.TUMOUR_ID)}</td>
+                        <td style="width:200px"><b>Tumour Tissue:</b> ${results.get(plugin.TUMOUR_TISSUE)}</td>
+                        <td style="width:300px"><b>Location Subtype:</b> ${results.get(plugin.LOCATION_SUBTYPE)}</td>
                   </tr>
                   <tr>
-                        <td><b>External IDs:</b> ${results.get(plugin.EXTERNAL_IDS)}</td>
-                        <td><b>Tumour Tissue:</b> ${results.get(plugin.TUMOUR_TISSUE)}</td>
-                        <td><b>Normal Tissue:</b> ${results.get(plugin.NORMAL_TISSUE)}</td>
-                  </tr>
-                  <tr>
+                        <td><b>Tumour Sample Type:</b> ${results.get(plugin.SAMPLE_TYPE)}</td>
+                        <td><b>Tumour Cellularity:</b> ${results.get(plugin.CELLULARITY)}%</td>
                         <td><b>Tumour Coverage:</b> ${results.get(plugin.TUMOUR_COVERAGE)}x (>30x)</td>
-                        <td><b>Normal Coverage:</b> ${results.get(plugin.NORMAL_COVERAGE)}x (>30x)</td>
-                        <td><b>Cellularity:</b> ${results.get(plugin.CELLULARITY)}%</td>
+                        
                   </tr>
             </table>
 

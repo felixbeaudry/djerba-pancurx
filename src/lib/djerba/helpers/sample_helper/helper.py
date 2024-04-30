@@ -29,14 +29,19 @@ class main(helper_base):
             wrapper.set_my_param('comparison_cohort_file', file_path)
 
         if wrapper.my_param_is_null('genes_of_interest_file'):
-            file_name = '.'.join( (wrapper.get_my_string('template_type'), 'genes.txt'))
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), phe.DEFAULT_GENE_FILE))
             file_path = os.path.join(DATA_LOCATION, file_name)
             wrapper.set_my_param('genes_of_interest_file', file_path)
 
         if wrapper.my_param_is_null('germline_genes_of_interest_file'):
-            file_name = '.'.join( (wrapper.get_my_string('template_type'), 'germline.genes.txt'))
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), phe.DEFAULT_GERMLINE_GENE_FILE))
             file_path = os.path.join(DATA_LOCATION, file_name)
             wrapper.set_my_param('germline_genes_of_interest_file', file_path)
+
+        if wrapper.my_param_is_null('immune_genes_of_interest_file'):
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), 'immune.genes.txt'))
+            file_path = os.path.join(DATA_LOCATION, file_name)
+            wrapper.set_my_param('immune_genes_of_interest_file', file_path)
 
         all_params = {
             phe.DONOR :  wrapper.get_my_string(phe.DONOR),
@@ -45,6 +50,7 @@ class main(helper_base):
             'comparison_cohort_file': wrapper.get_my_string('comparison_cohort_file'),
             'genes_of_interest_file': wrapper.get_my_string('genes_of_interest_file'),
             'germline_genes_of_interest_file': wrapper.get_my_string('germline_genes_of_interest_file'),
+            'immune_genes_of_interest_file': wrapper.get_my_string('immune_genes_of_interest_file'),
             'template_type': wrapper.get_my_string('template_type'),
         }
         self.write_sample_info(all_params)
@@ -61,6 +67,7 @@ class main(helper_base):
         self.add_ini_required(phe.NORMAL_SAMPLE_ID)
         discovered = [
             'comparison_cohort_file',
+            'immune_genes_of_interest_file',
             'germline_genes_of_interest_file',
             'genes_of_interest_file',
             'template_type',

@@ -38,11 +38,10 @@ class main(helper_base):
         donor = wrapper.get_my_string(phe.DONOR)
         sample = wrapper.get_my_string(phe.TUMOUR_SAMPLE_ID)
         normal = wrapper.get_my_string(phe.NORMAL_SAMPLE_ID)
-        seqtype = wrapper.get_my_string(phe.SEQTYPE)
-        aligner = wrapper.get_my_string(phe.ALIGNER)
-        aligner_version = wrapper.get_my_string(phe.ALIGNER_VERSION)
-        SEQ_PATH = os.path.join(seqtype, aligner, aligner_version)
-        path_finder = assemble_file_paths(SEQ_PATH, donor, sample, normal)
+
+
+        
+        path_finder = assemble_file_paths( donor, sample, normal)
         all_paths = {
 
             phe.COSMIC_SIGNNLS_PATH : path_finder.make_cosmic_signals_path(),
@@ -60,6 +59,7 @@ class main(helper_base):
             "snv_annovar": path_finder.make_snv_annovar(),
             "indel_annovar": path_finder.make_indel_annovar(),
             phe.GERMLINE_ANNOVAR_PATH: path_finder.make_germline_annovar(),
+            phe.MAVIS_FUSIONS_PATH: path_finder.make_mavis_fusion(),
 
             # eventually the summary and figure scripts will be ported into djerba
             # and djerba won't need to look for these files
@@ -85,9 +85,6 @@ class main(helper_base):
     def specify_params(self):
         self.logger.debug("Specifying params for provenance helper")
         self.set_priority_defaults(self.PRIORITY)
-        self.set_ini_default(phe.SEQTYPE, phe.DEFAULT_SEQTYPE)
-        self.set_ini_default(phe.ALIGNER, phe.DEFAULT_ALIGNER)
-        self.set_ini_default(phe.ALIGNER_VERSION, phe.DEFAULT_ALIGNER_VERSION)
         discovered = [
             phe.TUMOUR_ID,
             phe.DONOR_ID,
@@ -103,21 +100,31 @@ class main(helper_base):
 class assemble_file_paths(logger):
     
     PLOT_DIRECTORY = "results/plots"
-
-    def __init__(self, SEQ_PATH, donor, sample, normal_sample, log_level=logging.WARNING, log_path=None):
+    
+    
+    
+    def __init__(self, donor, sample, normal_sample, log_level=logging.WARNING, log_path=None):
         self.log_level = log_level
         self.log_path = log_path
         self.logger = self.get_logger(log_level, __name__, log_path)
         self.donor = donor
         self.sample = sample
         self.normal_sample = normal_sample
-        self.root_extended = os.path.join(phe.DEFAULT_ROOTPATH, donor, sample, SEQ_PATH)
-        self.archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, sample, SEQ_PATH)
-        self.normal_root_extended = os.path.join(phe.DEFAULT_ROOTPATH, donor, normal_sample, SEQ_PATH)
-        self.normal_archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, normal_sample, SEQ_PATH)
+        seq_path = os.path.join(phe.DEFAULT_SEQTYPE, phe.DEFAULT_ALIGNER, phe.DEFAULT_ALIGNER_VERSION)
+        rna_seq_path = os.path.join(phe.DEFAULT_RNA_SEQTYPE, phe.DEFAULT_RNA_ALIGNER, phe.DEFAULT_RNA_ALIGNER_VERSION)
+        self.root_extended = os.path.join(phe.DEFAULT_ROOTPATH, donor, sample, seq_path)
+        self.rna_root_extended = os.path.join(phe.DEFAULT_ROOTPATH, donor, sample, rna_seq_path)
+        self.archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, sample, seq_path)
+        self.normal_root_extended = os.path.join(phe.DEFAULT_ROOTPATH, donor, normal_sample, seq_path)
+        self.normal_archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, normal_sample, seq_path)
 
         #TEMP: plot path is different
         self.plot_path = os.path.join('/.mounts/labs/PCSI/users/fbeaudry/btc_plots', sample)
+
+    def make_mavis_fusion(self):
+        file_name = "".join(("mavis_summary_all_",self.sample,".tab"))
+        file_path = os.path.join(self.rna_root_extended, "starfusion/1.9.0/mavis/summary", file_name)
+        return(file_path)
 
     def make_bam_paths(self):
         file_name = "".join((self.sample, '.bam'))

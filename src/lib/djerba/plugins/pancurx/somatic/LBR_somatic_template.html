@@ -25,8 +25,6 @@
 
       </table>
 
-<p style="page-break-after:always;"></p>
-
 <h3>Mutational Load</h3>
 
 <table style="width:100%">
@@ -89,6 +87,8 @@
         <tr><td bgcolor="#332288" style="color:white" >SBS3</td><td>HRD</td><td>${sigs.get('SBS3')}</td></tr>
         <tr><td bgcolor="#44AA99"  style="color:white">SBS5</td><td></td><td>${sigs.get('SBS5')}</td></tr>
         <tr><td bgcolor="#117733">SBS6</td><td>MMRD</td><td>${sigs.get('SBS6')}</td></tr>
+        <tr><td >SBS24</td><td>Aflotoxin</td><td>${sigs.get('SBS24')}</td></tr>
+
       </table>
       </td>
       <td>
@@ -98,7 +98,9 @@
         <tr><td bgcolor="#AA4499"  style="color:white">SBS13</td><td>APOBEC</td><td>${sigs.get('SBS13')}</td></tr>
         <tr><td bgcolor="#661100"  style="color:white">SBS17</td><td></td><td>${sigs.get('SBS17')}</td></tr>
         <tr><td bgcolor="#882255"  style="color:white">SBS18</td><td>ROS</td><td>${sigs.get('SBS18')}</td></tr>
-        <tr><td bgcolor="#117733">SBS20 & 26</td><td>POLD, MMRD</td><td>${sigs.get('SBS2026')}</td></tr>
+        <tr><td bgcolor="#117733">SBS20 & 26</td><td>POLD, MMRD</td><td>${sigs.get('SBS20') + sigs.get('SBS26')}</td></tr> 
+        <tr><td >SBS30</td><td>NTHL1</td><td>${sigs.get('SBS30')}</td></tr>
+
       </table>
     </td>
     </tr></table>
@@ -111,21 +113,15 @@
 		<td style="text-align:center"><img id='SV_BIN_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SV_BIN_PLOT)}"/></td>
   
 		</tr></table>
-  
-<p style="page-break-after:always;"></p>
 
 <h3>Ploidy and Chromothripsis</h3>
-
-      <p style="text-align: center;">
-            <a href="${results.get(plugin.CELLULOID_DIR)}">View Alternate Solutions in the Celluloid Directory (OICR VPN REQUIRED)</a><br>
-      </p>
 
       <img id='CELLULOID' style='width: 100%; object-fit: contain' src="${results.get(plugin.CELLULOID_PLOT)}"/>
 
 <h3>Whole Genome Summary</h3>
 
       <img id='DSBR' style='width: 100%; object-fit: contain' src="${results.get(plugin.WHOLE_GENOME_PLOT)}"/>
-      <p style="page-break-after:always;"></p>
+      
 
 
 </div>

@@ -1,0 +1,32 @@
+<%
+      import djerba.plugins.pancurx.constants as plugin
+      from djerba.plugins.pancurx.html import make_immune_table_rows
+      from djerba.util.html import html_builder
+      reportable_variants = results.get('reportable_variants')
+      ploidy = results.get('ploidy')
+
+%>
+
+<div id="main">
+
+
+<h2 class="lbr">Immune Inference</h2>
+<div style="padding:0px 0px 0px 50px">
+      <p>Tumors can evade immune surveillance through various mechanisms, 
+            including downregulating antigen presentation or activating immune checkpoint pathways like PD-1/PD-L1. 
+            Further, immunotherapy leverages the body's immune system to recognize and eliminate cancer cells and 
+            its success hinges on deciphering the tumor microenvironment. </p>
+
+            <table style="width:100%" class="sortable">
+                  <tr><td>Gene</td><td>Copy Number</td><td>A.B Count</td></tr>
+            
+                        % for row in make_immune_table_rows(reportable_variants, ploidy):
+                              ${row}
+                        % endfor
+            
+                  </table>
+            
+
+</div>
+</div>
+

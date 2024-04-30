@@ -34,7 +34,8 @@ class main(plugin_base):
         wrapper = tools.fill_file_if_null(self, wrapper, phe.WHOLE_GENOME_PLOT, phe.WHOLE_GENOME_PLOT, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.CELLULOID_PLOT, phe.CELLULOID_PLOT, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.CELLULOID_DIR, phe.CELLULOID_DIR, core_constants.DEFAULT_PATH_INFO)
-        
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.COSMIC_SIGNNLS_PATH, phe.COSMIC_SIGNNLS_PATH, core_constants.DEFAULT_PATH_INFO)
+
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'indel.vaf', phe.INDEL_VAF_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'snv.vaf', phe.SNV_VAF_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'indel.stack_count', phe.INDEL_BIN_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
@@ -56,7 +57,7 @@ class main(plugin_base):
         data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest)
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
         data[core_constants.RESULTS]['loads'] = tools.get_loads_from_summary(summary_results)
-        data[core_constants.RESULTS]['sigs'] = tools.get_sigs_from_summary(summary_results)
+        data[core_constants.RESULTS]['sigs'] = tools.parse_cosmic_signatures(self, wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH))
         data[core_constants.RESULTS][phe.CELLULOID_DIR] =  wrapper.get_my_string(phe.CELLULOID_DIR)
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
@@ -86,6 +87,7 @@ class main(plugin_base):
 
     def specify_params(self):
         discovered = [
+            phe.COSMIC_SIGNNLS_PATH,
             phe.PARAM_PATH,
             phe.SAMPLE_VARIANTS_FILE,
             phe.WHOLE_GENOME_PLOT,

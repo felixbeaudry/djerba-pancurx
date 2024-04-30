@@ -32,6 +32,13 @@ class main(plugin_base):
 
         if wrapper.my_param_is_null(phe.REPORT_DATE):
             wrapper.set_my_param(phe.REPORT_DATE, phe.NONE_SPECIFIED)
+
+        if wrapper.my_param_is_null(phe.SAMPLE_TYPE):
+            wrapper.set_my_param(phe.SAMPLE_TYPE, phe.NONE_SPECIFIED)
+        if wrapper.my_param_is_null(phe.LOCATION_SUBTYPE):
+            wrapper.set_my_param(phe.LOCATION_SUBTYPE, phe.NONE_SPECIFIED)
+
+
         if wrapper.my_param_is_null(phe.EXTERNAL_IDS):
             external_ids = tools.parse_lims(self, wrapper.get_my_string(phe.DONOR_ID))
             wrapper.set_my_param(phe.EXTERNAL_IDS, external_ids)
@@ -70,6 +77,8 @@ class main(plugin_base):
             phe.EXTERNAL_IDS,
             phe.TUMOUR_TISSUE,
             phe.NORMAL_TISSUE,
+            phe.SAMPLE_TYPE,
+            phe.LOCATION_SUBTYPE,
         ]
         data[core_constants.RESULTS] = {k: wrapper.get_my_string(k) for k in results_keys}
         if wrapper.get_my_string(phe.REPORT_DATE) == phe.NONE_SPECIFIED:
@@ -113,7 +122,10 @@ class main(plugin_base):
             phe.EXTERNAL_IDS,
             phe.TUMOUR_TISSUE,
             phe.NORMAL_TISSUE,
-            'template_type'
+            'template_type',
+            phe.SAMPLE_TYPE,
+            phe.LOCATION_SUBTYPE 
+
             
         ]
         for key in discovered:
