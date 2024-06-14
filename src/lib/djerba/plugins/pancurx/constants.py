@@ -15,11 +15,24 @@ DEFAULT_ALIGNER = 'bwa'
 DEFAULT_ALIGNER_VERSION = '0.7.17'
 DEFAULT_CELLULOID_VERSION = "v0.11.7"
 
+#DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
+DEFAULT_CIBERSORT_LOADINGS_PATH='pancurx/LM22.txt'
+DEFAULT_CIBERSORT_GENES_PATH='pancurx/hgnc_complete_set.txt'
+DEFAULT_CIBERSORT_COMPARISON_PATH='pancurx/MATRIX.txt'
+
+
+DEFAULT_RNA_SEQTYPE = 'rna'
+DEFAULT_RNA_ALIGNER = 'star'
+DEFAULT_RNA_ALIGNER_VERSION = '2.7.4a'
+
 # DATA FILES
 DEFAULT_HUGO_SYN_FILE_PATH = "/.mounts/labs/PCSI/raw_data/hugo/HUGO_synonyms_171213.txt"
 DEFAULT_COSMIC_CENSUS_FILE_PATH = "/.mounts/labs/PCSI/users/rdenroche/phoenix/phoenixParser/cosmic_census_20161115.tsv" #TODO: check use?
 DEFAULT_REFSEQ_FILE_PATH = "/.mounts/labs/PCSI/references/GRCh38/rna/refSeq/hg38_refSeq_genes.txt"
 DEFAULT_REFERENCE_COHORT = '/.mounts/labs/PCSI/users/fbeaudry/PanCuRx_Analysis_Pipeline/scripts/plot/data/pdac_20170926_matrix.csv'
+
+DEFAULT_GENE_FILE = 'genes.txt'
+DEFAULT_GERMLINE_GENE_FILE = 'germline.genes.txt'
 
 # report attributes
 REPORT_VERSION = "report_version"
@@ -39,6 +52,8 @@ NORMAL_TISSUE = "normal_tissue"
 SEQTYPE = 'seqtype'
 ALIGNER = 'aligner'
 ALIGNER_VERSION = 'aligner_version'
+SAMPLE_TYPE = 'sample_type'
+LOCATION_SUBTYPE = 'location_subtype'
 
 # sample attributes
 CELLULARITY = "cellularity"
@@ -110,6 +125,8 @@ WHOLE_CHROMOSOME_PLOTS = "whole_chromosome_plots"
 DSBR_RESULTS = "DSBR_results"
 MMR_RESULTS = "MMR_results"
 REPORTING_NAME = "reporting_name"
+MAVIS_FUSIONS_PATH = "mavis_fusions"
+TPM_PATH = "tpm_path"
 
 CHROMOSOME_1_PLOT = 'chromosome_1_plot'
 CHROMOSOME_2_PLOT = 'chromosome_2_plot' 
@@ -141,10 +158,6 @@ CHROMOSOME_PLOTS = {"chr1" : CHROMOSOME_1_PLOT,
 
 EXCLUDED_GERMLINE_PATHOGENIC_VARIANTS = ['rs11571833']
 
-#Retired on Apr 9th 2024, in favour of gene list file in data/
-DRIVER_GENE_ORDER = ["KRAS", "TP53", "CDKN2A", "SMAD4", "MAP2K4", "ARID1A", "RNF43", "TGFBR2", "KDM6A"]
-GERMLINE_GENE_ORDER = ["POLE", "POLD1", "EPCAM", "MLH1", "MSH2", "MSH6", "PMS1", "PMS2", "BRCA1", "BRCA2", "PALB2", "ATM", "APC", "MUTYH", "CDKN2A", "STK11", "TP53", "SMAD4", "RAD51C", "CHEK2" ,"BRIP1", "RNF43"]
-
 DSBR_GENES = ["BRCA1", "BRCA2", "PALB2", "RAD51", "RAD51B", "RAD51C", "RAD51D", "XRCC2", "XRCC3", "DMC1", "BRIP1"]
 MMR_GENES = ["MLH1", "MSH2", "MSH6", "PMS2", "EPCAM"]
 
@@ -163,6 +176,17 @@ NONSILENT_CHANGES =  [
 	"translocation breakpoint" 
 ]
 
+
+NONSILENT_CHANGES_RANK =  {
+    "nonsynonymous"  : 0,
+    "stopgain" : 1,
+	"frameshift" : 2,
+    "splicing" : 3,
+	"nonframeshift" : 4 ,
+	"stoploss" : 5,
+}
+
+
 COSMIC_MUTATION_TYPES = {
 	"A" : "strong amplification",
 	"D" : "homozygous deletion",
@@ -174,19 +198,20 @@ COSMIC_MUTATION_TYPES = {
 }
 
 COSMIC_SIGNATURE_SET = {
-	"Signature.1": "csnnls_sig1",
-	"Signature.2": "csnnls_sig2",
-	"Signature.3": "csnnls_sig3",
-	"Signature.5": "csnnls_sig5",
-	"Signature.6": "csnnls_sig6",
-	"Signature.8": "csnnls_sig8",
-	"Signature.13": "csnnls_sig13",
-	"Signature.17": "csnnls_sig17",
-	"Signature.18": "csnnls_sig18",
-	"Signature.20": "csnnls_sig20",
-	"Signature.26": "csnnls_sig26",
-	"Residuals": "csnnls_residuals",
-	"N.Mutations": "csnnls_n.mutations",
+	"Signature.1": "SBS1",
+	"Signature.2": "SBS2",
+	"Signature.3": "SBS3",
+	"Signature.5": "SBS5",
+	"Signature.6": "SBS6",
+	"Signature.8": "SBS8",
+	"Signature.13": "SBS13",
+	"Signature.17a": "SBS17a",
+    "Signature.17b": "SBS17b",
+	"Signature.18": "SBS18",
+	"Signature.20": "SBS20",
+    "Signature.24": "SBS24",
+	"Signature.26": "SBS26",
+    "Signature.30": "SBS30"
 }
 
 DSBR_SNV_LOAD = "dsbr_snv_load"
@@ -268,6 +293,8 @@ SV_RANGE_CUTOFF = {
 	'typical': 35,
 	'low': 0
 }
+
+
 
 #updated 2024.04.03
 LIMS_TISSUE_CODES = {

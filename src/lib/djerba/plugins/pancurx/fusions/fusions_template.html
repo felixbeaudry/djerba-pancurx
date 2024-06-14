@@ -1,0 +1,30 @@
+<%
+      import djerba.plugins.pancurx.constants as plugin
+      from djerba.plugins.pancurx.html import make_fusion_table_rows
+      from djerba.util.html import html_builder
+
+%>
+
+
+
+<h2 class="lbr">Fusions (WTS)</h2>
+<div style="padding:0px 0px 0px 50px; break-inside: avoid; display: table;">
+      <p>Gene fusions, critical in carcinogenesis, often entail oncogenes resulting from chromosomal rearrangements. 
+            Their detection relies on RNA analysis rather than whole-genome sequencing (WGS), as active expression correlates with pathogenesis.
+      Confidence is based on the number of RNA reads spanning the fusion breakpoint and manual review is often recommended.  </p>
+
+      % if results.get('fusion_count') > 0:
+            <table style="width:100%" class="sortable">
+                  <tr><td>Fusion</td><td>Confidence</td><td>Event Type</td><td>Reading Frame</td><td>Splicing</td></tr>
+                  % for variant_row in make_fusion_table_rows(results.get('fusions')):
+                        ${variant_row}
+                  % endfor
+
+            </table>
+      % else:
+            <p>No interesting fusions to report.</p>
+      % endif
+
+
+</div>
+

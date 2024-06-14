@@ -10,14 +10,18 @@
 
 %>
 
-<div id="main">
 
-<h2 class='lbr'>Somatic Mutations</h2>
-<div style="padding:0px 0px 0px 50px">
-<h3>Gene of Interest Status</h3>
-	
-      <table style="width:100%" class="sortable">
-      <tr><td>Gene</td><td>Variant</td><td>Copy Number</td><td>A.B Count</td><td>Additional Information</td></tr>
+<h2 class='lbr'>Somatic Genome</h2>
+<!-- <div style="padding:0px 0px 0px 50px; break-inside: avoid;display: table;"> -->
+
+<div style="padding:0px 0px 0px 50px; ">
+<h3 class="lbr">Mutational Status of Common Biliary Driver Genes</h3>
+
+      <p class="lbr">Below are listed the mutational status of genes that are commonly altered in biliary tract cancers. 
+      Actionable alterations are listed regardless of their mutational status, while most oncogenes are only listed if mutated.</p>	
+
+      <table class="lbr sortable" style="width:100%" >
+      <tr><td>Gene</td><td>Chr.</td><td>Variant</td><td>Copy Number</td><td>A.B Count</td><td>Additional Information</td></tr>
 
             % for row in make_somatic_table_rows(reportable_variants, ploidy):
                   ${row}
@@ -25,110 +29,75 @@
 
       </table>
 
-<p style="page-break-after:always;"></p>
-
-<h3>Mutational Load</h3>
-
-<table style="width:100%">
-	<table>
-		<tr>
-		<td colspan="3"><b>TMB (genome-wide):</b> ${loads.get('TMB')} mutations / mb</td>
-		</tr>
-		<tr>
-		<td style="width:33%"><b>Nonsynonymous SNVs:</b> ${loads.get('nonsyn_count')} </td>
-		<td style="width:33%"><b>Frameshift deletions:</b> ${loads.get('del_frameshift_count')}  </td>
-		<td style="width:33%"><b>Genes with Deletion BPs:</b> ${loads.get('sv_del_bp_gene_count')}  </td>
-		</tr>
-		<tr>
-		<td><b>Stopgain SNVs:</b> ${loads.get('stopgain_count')}  </td>
-		<td><b>Nonframeshift deletions:</b> ${loads.get('del_nonframeshift_count')}  </td>
-		<td><b>Genes with Duplication BPs:</b> ${loads.get('sv_dup_bp_gene_count')}  </td>
-		</tr>
-		<tr>
-		<td><b>Stoploss SNVs:</b> ${loads.get('stoploss_count')} </td>
-		<td><b>Frameshift Insertions:</b> ${loads.get('ins_frameshift_count')} </td>
-		<td><b>Genes with Inversion BPs:</b> ${loads.get('sv_inv_bp_gene_count')} </td>
-		</tr>
-		<tr>
-		<td><b>Splicing SNVs:</b> ${loads.get('splice_count')}  </td>
-		<td><b>Nonframeshift Insertions:</b> ${loads.get('ins_nonframeshift_count')} </td>
-		<td><b>Genes with Translocation BPs:</b> ${loads.get('sv_tra_bp_gene_count')} </td>
-		</tr>
-		<tr>
-		<td><b>Total Deleterious SNVs:</b> ${loads.get('total_del_snv')}</td>
-		<td><b>Total Deleterious Indels:</b> ${loads.get('total_del_indel')}</td>
-		<td><b>Total Deleterious SV Breakpoints:</b> ${loads.get('total_del_sv')}</td>
-		</tr>
-		</table>
-		
-		<br>
-		
-      <table style="width:100%"><tr>
-      <tr>
-      <td style="text-align:center"><b>${loads.get('snv_count')} SNVs (${loads.get('snv_percentile')}% PR)</b></td>
-      <td style="text-align:center"><b>${loads.get('indel_count')} In/Dels (${loads.get('indel_percentile')}% PR)</b></td>
-      <td style="text-align:center"><b>${loads.get('sv_count')} SVs (${loads.get('sv_percentile')}% PR)</b></td>
-      </tr>
-
-      <td style="text-align:center"><img id='HISTBOX_SNV' style='width: 100%; object-fit: contain' src="${results.get(plugin.HISTBOX_SNV)}"/></td>
-      <td style="text-align:center"><img id='HISTBOX_INDEL' style='width: 100%; object-fit: contain' src="${results.get(plugin.HISTBOX_INDEL)}"/></td>
-      <td style="text-align:center"><img id='HISTBOX_SV' style='width: 100%; object-fit: contain' src="${results.get(plugin.HISTBOX_SV)}"/></td>
-
-      </tr></table>
-
-      <img id='SNV_VAF_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SNV_VAF_PLOT)}"/>
-      <img id='INDEL_VAF_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.INDEL_VAF_PLOT)}"/>
+</div>
 
 
-      <h3>Mutational Signatures</h3>
-      <table style="width:90%;margin-left: auto;margin-right: auto;"><tr><td>
-      <table >
-        <tr><th style="width:20%"></th><th style="width:40%">Proposed Aetiology</th><th style="width:30%">Proportion</th>
-        <tr><td bgcolor="#88CCEE" >SBS1</td><td>Clock-like</td><td> ${sigs.get('SBS1')} </td></tr>
-        <tr><td bgcolor="#CC6677"  style="color:white">SBS2</td><td>APOBEC</td><td>${sigs.get('SBS2')}</td></tr>
-        <tr><td bgcolor="#332288" style="color:white" >SBS3</td><td>HRD</td><td>${sigs.get('SBS3')}</td></tr>
-        <tr><td bgcolor="#44AA99"  style="color:white">SBS5</td><td></td><td>${sigs.get('SBS5')}</td></tr>
-        <tr><td bgcolor="#117733">SBS6</td><td>MMRD</td><td>${sigs.get('SBS6')}</td></tr>
-      </table>
-      </td>
-      <td>
-      <table >
-            <tr><th style="width:20%"></th><th style="width:40%">Proposed Aetiology</th><th style="width:30%">Proportion</th>
-        <tr><td bgcolor="#DDCC77">SBS8</td><td></td><td>${sigs.get('SBS8')}</td></tr>
-        <tr><td bgcolor="#AA4499"  style="color:white">SBS13</td><td>APOBEC</td><td>${sigs.get('SBS13')}</td></tr>
-        <tr><td bgcolor="#661100"  style="color:white">SBS17</td><td></td><td>${sigs.get('SBS17')}</td></tr>
-        <tr><td bgcolor="#882255"  style="color:white">SBS18</td><td>ROS</td><td>${sigs.get('SBS18')}</td></tr>
-        <tr><td bgcolor="#117733">SBS20 & 26</td><td>POLD, MMRD</td><td>${sigs.get('SBS2026')}</td></tr>
-      </table>
-    </td>
-    </tr></table>
-    <br>
+<div style="padding:0px 0px 0px 50px; ">
+      <h3 class="lbr">Copy Number Profile</h3>
       
-	<table style="width:100%"><tr>
+            <p class="lbr">This tumour is <b> ${results.get('ploidy_long')}</b> and inferred sex chromosomes are ${results.get(plugin.INFERRED_SEX)}.
+                  <p>
+      
+                       <img id='ONCOSLIDE_CNV_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_CNV_PLOT)}"/>
+      
+      </div>
+      
+       
+<div style="padding:0px 0px 0px 50px; ">
+<h3 class="lbr">Mutational Load</h3>
 
-		<td style="text-align:center"><img id='SNV_CONTEXT_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SNV_CONTEXT_PLOT)}"/></td>
-            <td style="text-align:center"><img id='INDEL_BIN_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.INDEL_BIN_PLOT)}"/></td>
-		<td style="text-align:center"><img id='SV_BIN_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SV_BIN_PLOT)}"/></td>
-  
-		</tr></table>
-  
-<p style="page-break-after:always;"></p>
+      <p class="lbr">In this tumour, the <b>TMB (genome-wide) is ${loads.get('TMB')} mutations / kb</b>.  <br><br>
+      Tumour Mutation Burden (TMB) represents the number of non-inherited mutations per million bases (Mb) of genomic sequence in tumor tissue. 
+      Essentially, it quantifies how many mutations occur in the genome of cancer cells. TMB has gained prominence due to its association with immunotherapy response.
+      Below are the comparisons of this sample with the LBR cohort for each mutation type:<p>
 
-<h3>Ploidy and Chromothripsis</h3>
+      <table class="lbr" style="width:100%">
+            <tr>
+                  <td style="text-align:center"><b>${loads.get('snv_count')} SNVs (${loads.get('snv_percentile')}% PR)</b></td>
+                  <td style="text-align:center"><b>${loads.get('indel_count')} In/Dels (${loads.get('indel_percentile')}% PR)</b></td>
+                  <td style="text-align:center"><b>${loads.get('sv_count')} SVs (${loads.get('sv_percentile')}% PR)</b></td>
+            </tr>
+            <tr>
+                  <td style="text-align:center"><img id='HISTBOX_SNV' style='width: 100%; object-fit: contain' src="${results.get(plugin.HISTBOX_SNV)}"/></td>
+                  <td style="text-align:center"><img id='HISTBOX_INDEL' style='width: 100%; object-fit: contain' src="${results.get(plugin.HISTBOX_INDEL)}"/></td>
+                  <td style="text-align:center"><img id='HISTBOX_SV' style='width: 100%; object-fit: contain' src="${results.get(plugin.HISTBOX_SV)}"/></td>
+            </tr>
+      </table>
 
-      <p style="text-align: center;">
-            <a href="${results.get(plugin.CELLULOID_DIR)}">View Alternate Solutions in the Celluloid Directory (OICR VPN REQUIRED)</a><br>
-      </p>
+</div>
 
-      <img id='CELLULOID' style='width: 100%; object-fit: contain' src="${results.get(plugin.CELLULOID_PLOT)}"/>
+<div style="padding:0px 0px 0px 50px; ">
+      <h3 class="lbr">Mutational Signatures</h3>
+      <p class="lbr">Mutational signatures can be used as a physiological readout of the biological history of a cancer 
+            and also have potential use for discerning ongoing mutational processes from historical ones, thus possibly revealing new targets for anticancer therapies.
+          Below are listed the proportion of single base pair substitutions assigned to COSMIC (version 3) signatures and that signature's  aetiologies.</p>
+          
+          
+      <div style=" break-inside: avoid;display: table;"> 
 
-<h3>Whole Genome Summary</h3>
 
-      <img id='DSBR' style='width: 100%; object-fit: contain' src="${results.get(plugin.WHOLE_GENOME_PLOT)}"/>
-      <p style="page-break-after:always;"></p>
+                  <img id='SNV_CONTEXT_PLOT' style='height: 300px; position: relative; float:left; margin-left: 50px; margin-right: 50px; ' src="${results.get(plugin.SNV_CONTEXT_PLOT)}"/>
+
+
+                  <table class="lbr sortable">
+                        <tr><th style="width: 100px"></th><th style="width: 150px">Proposed Aetiology</th><th style="width: 100px">Proportion</th>
+                        <tr><td bgcolor="#88CCEE" >SBS1</td><td>Clock-like</td><td> ${sigs.get('SBS1')} </td></tr>
+                        <tr><td bgcolor="#CC6677"  style="color:white">SBS2</td><td>APOBEC</td><td>${sigs.get('SBS2')}</td></tr>
+                        <tr><td bgcolor="#332288" style="color:white" >SBS3</td><td>HRD</td><td>${sigs.get('SBS3')}</td></tr>
+                        <tr><td bgcolor="#44AA99"  style="color:white">SBS5</td><td></td><td>${sigs.get('SBS5')}</td></tr>
+                        <tr><td bgcolor="#117733">SBS6</td><td>MMRD</td><td>${sigs.get('SBS6')}</td></tr>
+                        <tr><td bgcolor="#DDCC77">SBS8</td><td></td><td>${sigs.get('SBS8')}</td></tr>
+                        <tr><td bgcolor="#AA4499"  style="color:white">SBS13</td><td>APOBEC</td><td>${sigs.get('SBS13')}</td></tr>
+                        <tr><td bgcolor="#661100"  style="color:white">SBS17</td><td></td><td>${round(sigs.get('SBS17a') + sigs.get('SBS17b'), 2)}</td></tr>
+                        <tr><td bgcolor="#882255"  style="color:white">SBS18</td><td>ROS</td><td>${sigs.get('SBS18')}</td></tr>
+                        <tr><td bgcolor="#117733">SBS20 & 26</td><td>POLD, MMRD</td><td>${round(sigs.get('SBS20') + sigs.get('SBS26'), 2)}</td></tr> 
+                        <tr><td >SBS24</td><td>Aflotoxin</td><td>${sigs.get('SBS24')}</td></tr>
+                        <tr><td >SBS30</td><td>NTHL1</td><td>${sigs.get('SBS30')}</td></tr>
+                  </table>
+                  <br><br>
+      </div>
+
 
 
 </div>
 
-</div>
- 

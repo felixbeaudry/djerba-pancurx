@@ -8,7 +8,7 @@ import requests
 import json
 from djerba.util.image_to_base64 import converter
 import djerba.plugins.pancurx.constants as phe
-
+import shutil
 
 def add_underscore_to_donor(donor):
     if "EPPIC" in donor:
@@ -37,17 +37,17 @@ def convert_svg_plot(self, plot_path, plot_name):
     converted_plot = image_converter.convert_svg(plot_path, plot_name)
     return converted_plot
 
-def fill_file_if_null(self, wrapper, workflow_name, ini_param, path_info):
-    if wrapper.my_param_is_null(ini_param):
-        if self.workspace.has_file(path_info):
-            path_info = self.workspace.read_json(path_info)
-            workflow_path = path_info.get(workflow_name)
-            if workflow_path == None:
-                msg = 'Cannot find {0}'.format(ini_param)
-                self.logger.error(msg)
-                raise RuntimeError(msg)
-            wrapper.set_my_param(ini_param, workflow_path)
-    return(wrapper)
+def copy_if_not_exists(source_path, destination_path):
+    if not os.path.exists(destination_path):
+        shutil.copyfile(source_path, destination_path)
+
+def custom_sort_key(this_dictionary):
+    this_rank = None
+    if this_dictionary['mutation_type'] in phe.NONSILENT_CHANGES_RANK:
+        this_rank = phe.NONSILENT_CHANGES_RANK[this_dictionary['mutation_type']]
+    else:
+        this_rank = len(phe.NONSILENT_CHANGES_RANK)
+    return(this_rank)
 
 def fill_categorized_file_if_null(self, wrapper, file_type_name, ini_param, path_info, category):
     if wrapper.my_param_is_null(ini_param):
@@ -62,23 +62,136 @@ def fill_categorized_file_if_null(self, wrapper, file_type_name, ini_param, path
             wrapper.set_my_param(ini_param, workflow_path)
     return(wrapper)
 
-def get_subset_of_somatic_variants(self, sample_variants, subset_order):
-    reportable_variants = []
-    for gene in subset_order :
-        if gene in sample_variants:
-            for variant in sample_variants[gene]:
-                reportable_variants.append(sample_variants[gene][variant])
+def fill_file_if_null(self, wrapper, workflow_name, ini_param, path_info):
+    if wrapper.my_param_is_null(ini_param):
+        if self.workspace.has_file(path_info):
+            path_info = self.workspace.read_json(path_info)
+            workflow_path = path_info.get(workflow_name)
+            if workflow_path == None:
+                msg = 'Cannot find {0}'.format(ini_param)
+                self.logger.error(msg)
+                raise RuntimeError(msg)
+            wrapper.set_my_param(ini_param, workflow_path)
+    return(wrapper)
 
-    return(reportable_variants)
+def find_external_id_in_json_dict(lims_dict, this_donor):
+    external_id = "NA"
+    for donor in range(len(lims_dict)):
+        if lims_dict[donor]['name'] == this_donor:
+            for attribute in range(len(lims_dict[donor]['attributes'])):
+                if lims_dict[donor]['attributes'][attribute]['name'] == "External Name":
+                    external_id = lims_dict[donor]['attributes'][attribute]['value']
+                    # external_id = external_id.replace(',', ' ')
+    return(external_id)
 
-def get_all_somatic_variants(self, sample_variants):
+def get_all_somatic_variants(self, sample_variants, inferred_sex):
     all_variants = []
     sample_variants_sorted = dict(sorted(sample_variants.items()))
     for gene in sample_variants_sorted:
         for variant in sample_variants_sorted[gene]:
             if sample_variants_sorted[gene][variant]['mutation_type'] != 'NA':
-                all_variants.append(sample_variants_sorted[gene][variant])
-    return(all_variants)
+                this_cytoband = sample_variants_sorted[gene][variant]['gene_chr']
+                this_chromosome = list(this_cytoband)[0]
+                if inferred_sex == "XY":
+                    all_variants.append(sample_variants_sorted[gene][variant])
+                elif this_chromosome != 'Y':
+                    all_variants.append(sample_variants_sorted[gene][variant])
+                else:
+                    msg = "Skipping Y chromosome in XX"
+                    self.logger.info(msg)
+    sorted_list_of_dicts = sorted(all_variants, key=custom_sort_key)
+    return(sorted_list_of_dicts)
+
+def get_genes_of_interest(self, genes_of_interest_file_path):
+    genes_of_interest = {}
+    genes_of_interest_file_path = check_path_exists(self, genes_of_interest_file_path)
+    with open(genes_of_interest_file_path, 'r') as genes_of_interest_file:
+        for row in csv.reader(genes_of_interest_file, delimiter="\t"):
+            genes_of_interest[row[0]] = row[1]
+    return(genes_of_interest)
+
+def get_germline_variant_counts( summary_results):
+    germ_variant_count = int(summary_results.get("germline_snv_count")) + int(summary_results.get("germline_indel_count"))
+    germ_nonsilent_count = int(summary_results.get("germline_missense_count")) + int(summary_results.get("germline_nonsense_count"))
+    return(germ_variant_count, germ_nonsilent_count)
+
+def get_loads_from_summary(summary_file):
+    loads = {
+        'snv_count' : int(summary_file.get("snv_count")),
+        'indel_count' : int(summary_file.get("indel_count")),
+        'sv_count' : int(summary_file.get("sv_count")),
+        'TMB' : round((int(summary_file.get("snv_count")) + int(summary_file.get("indel_count"))) / 3000, 2),
+        'nonsyn_count' : summary_file.get('nonsyn_count'),
+        'del_frameshift_count' : summary_file.get('del_frameshift_count'),
+        'sv_del_bp_gene_count': summary_file.get('sv_del_bp_gene_count'),
+        'stopgain_count': summary_file.get('stopgain_count'),
+        'del_nonframeshift_count': summary_file.get('del_nonframeshift_count'),
+        'sv_dup_bp_gene_count': summary_file.get('sv_dup_bp_gene_count'),
+        'stoploss_count': summary_file.get('stoploss_count'),
+        'ins_frameshift_count': summary_file.get('ins_frameshift_count'),
+        'sv_inv_bp_gene_count': summary_file.get('sv_inv_bp_gene_count'),
+        'splice_count': summary_file.get('splice_count'),
+        'ins_nonframeshift_count': summary_file.get('ins_nonframeshift_count'),
+        'sv_tra_bp_gene_count': summary_file.get('sv_tra_bp_gene_count'),
+        'total_del_snv' :int(summary_file.get('splice_count')) + 
+                            int(summary_file.get('stoploss_count')) +
+                                int(summary_file.get('stopgain_count')) + 
+                                int(summary_file.get('nonsyn_count')),
+        'total_del_indel' : int(summary_file.get('ins_nonframeshift_count') )+ 
+                            int(summary_file.get('ins_frameshift_count') )+ 
+                            int( summary_file.get('del_nonframeshift_count')) + 
+                            int(summary_file.get('del_frameshift_count')),
+        'total_del_sv': int(summary_file.get('sv_dup_bp_gene_count') )+ 
+                        int(summary_file.get('sv_del_bp_gene_count')) + 
+                        int(summary_file.get('sv_inv_bp_gene_count')) + 
+                        int(summary_file.get('sv_tra_bp_gene_count'))
+    }
+    loads['TMB_quantified'] = get_load_quantified(loads['TMB'], phe.TMB_RANGE_CUTOFF)
+    loads['snv_quantified'] = get_load_quantified(loads['snv_count'], phe.SNV_RANGE_CUTOFF)
+    loads['indel_quantified'] = get_load_quantified(loads['indel_count'], phe.INDEL_RANGE_CUTOFF)
+    loads['sv_quantified'] = get_load_quantified(loads['sv_count'], phe.SV_RANGE_CUTOFF)
+
+    return(loads)
+
+def get_load_quantified(sample_value, quantification_dictionary):
+    sample_quantification = ''
+    for this_quantification, this_cutoff in quantification_dictionary.items():
+        if this_cutoff < sample_value:
+            sample_quantification = this_quantification
+            break
+    quantification_string = "".join((str(sample_value), " (",sample_quantification,")"))
+    return(quantification_string)
+
+
+def get_subset_of_germline_variants(sample_variants, gene_order):
+    germline_nonsilent_gene_count = 0
+    germ_nonsil_genes_rare = 0
+    germ_pathogenic = 0
+    reportable_germline_variants = []
+    for gene in gene_order.keys():
+        if gene in sample_variants:
+            for variant in sample_variants[gene]:
+                germline_nonsilent_gene_count = germline_nonsilent_gene_count + 1
+                if sample_variants[gene][variant]['rarity'] != "common":
+                    reportable_germline_variants.append(sample_variants[gene][variant])
+                    germ_nonsil_genes_rare += 1
+                    mutation_type = sample_variants[gene][variant]['mutation_type']
+                    clinvar = sample_variants[gene][variant]['clinvar'] 
+                    if (clinvar.startswith('CLINSIG=pathogenic')) and \
+                        sample_variants[gene][variant]['dbsnp'] != "NA" and \
+                        sample_variants[gene][variant]['dbsnp'] not in phe.EXCLUDED_GERMLINE_PATHOGENIC_VARIANTS :
+                        print("----germline pathogenic----", gene, variant)
+                        germ_pathogenic += 1
+    return(germline_nonsilent_gene_count, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants)
+
+def get_subset_of_somatic_variants(self, sample_variants, subset_order):
+    reportable_variants = []
+    for gene in subset_order.keys() :
+        if gene in sample_variants:
+            for variant in sample_variants[gene]:
+                reportable_variants.append(sample_variants[gene][variant])
+
+    return(reportable_variants)
 
 def get_tissue_from_sample_id(sample_name):
     tissue = "NA"
@@ -92,7 +205,7 @@ def parse_celluloid_params(self, celluloid_params_file_path, ploidy_or_cellulari
     with open(celluloid_params_file_path, 'r') as celluloid_params_file:
         for row in csv.DictReader(celluloid_params_file, delimiter=" "):
             cellularity = "{:.1f}".format(float(row["T1"])*100)
-            ploidy = "{:.3f}".format(float(row["Ploidy"]))
+            ploidy = "{:.2f}".format(float(row["Ploidy"]))
     ploidy_string = ''
     if float(ploidy) > phe.DIPLOID_CUTOFF:
         ploidy_string = "polyploid ({0})".format(ploidy)
@@ -121,28 +234,11 @@ def parse_cosmic_signatures(self, cosmic_signatures_file_path):
             row[header[header_position]] = signature_value
     for signature_name in phe.COSMIC_SIGNATURE_SET:
         if signature_name in row:
-            signature_results[phe.COSMIC_SIGNATURE_SET[signature_name]] = row[signature_name]
-    return(signature_results)
+            signature_results[phe.COSMIC_SIGNATURE_SET[signature_name]] = float(row[signature_name])
+    sigs_total = sum(signature_results.values(), )
+    sigs = {key: round( value / sigs_total , 2) for key, value in signature_results.items()}
 
-
-def get_sigs_from_summary(summary_file):
-    #TODO: use tools.parse_cosmic_signatures()
-    sigs = {
-        'SBS1' : float(summary_file.get("csnnls_sig1")),
-        'SBS2' : float(summary_file.get("csnnls_sig2")),
-        'SBS3' : float(summary_file.get("csnnls_sig3")),
-        'SBS5' : float(summary_file.get("csnnls_sig5")),
-        'SBS6' : float(summary_file.get('csnnls_sig6')),
-        'SBS8' : float(summary_file.get('csnnls_sig8')),
-        'SBS13': float(summary_file.get('csnnls_sig13')),
-        'SBS17': float(summary_file.get('csnnls_sig17')),
-        'SBS18': float(summary_file.get('csnnls_sig18')),
-        'SBS2026': float(summary_file.get('csnnls_sig20')) + float(summary_file.get('csnnls_sig26'))
-    }
-    sigs_total = sum(sigs.values(), )
-    sigs = {key: round( value / sigs_total , 2) for key, value in sigs.items()}
     return(sigs)
-
 
 def parse_coverage(self, coverage_file_path):
     coverage_file_path = check_path_exists(self, coverage_file_path)
@@ -156,22 +252,41 @@ def parse_coverage(self, coverage_file_path):
                 median_coverage = float(median_coverage)
     return(median_coverage)
 
-def get_genes_of_interest(self, genes_of_interest_file_path):
-    genes_of_interest = []
-    genes_of_interest_file_path = check_path_exists(self, genes_of_interest_file_path)
-    with open(genes_of_interest_file_path, 'r') as genes_of_interest_file:
-        for row in csv.reader(genes_of_interest_file, delimiter="\t"):
-            genes_of_interest.append(row[0])
-    return(genes_of_interest)
+def parse_fusions(self, fusions_file_path, min_split_reads = 8):
+    fusion_count = 0
+    sample_fusions = []
+    fusions_file_path = check_path_exists(self, fusions_file_path)
+    with open(fusions_file_path, 'r') as fusions_file:
+        for row in csv.DictReader(fusions_file, delimiter="\t"):
+            if int(row['break1_split_reads']) >= min_split_reads and \
+                int(row['break2_split_reads']) >= min_split_reads and \
+                row['gene1_aliases'] != 'None' and \
+                row['gene2_aliases'] != 'None' :  
+                fusion_characteristics = {
+                    'gene1_aliases': row['gene1_aliases'],
+                    'break1_chromosome': row['break1_chromosome'],
+                    'gene2_aliases': row['gene2_aliases'],
+                    'break2_chromosome': row['break2_chromosome'],
+                    'fusion_product': "::".join((row['gene1_aliases'], row['gene2_aliases'])),
+                    'gene_product_type': row['gene_product_type'],
+                    'event_type': row['event_type'],
+                    'fusion_splicing_pattern': row['fusion_splicing_pattern'],
+                    'break1_split_reads': row['break1_split_reads'],
+                    'break2_split_reads': row['break2_split_reads'],
+                    'linking_split_reads': row['linking_split_reads'],                    
+                }
+                fusion_count = fusion_count + 1
+                sample_fusions.append(fusion_characteristics)
+    return(sample_fusions, fusion_count)
 
-def parse_somatic_variants(self, sample_variants_file_path, gene_list = []):
+
+def parse_germline_variants(self, sample_variants_file_path):
     sample_variants = {}
     sample_variants_file_path = check_path_exists(self, sample_variants_file_path)
     with open(sample_variants_file_path, 'r') as sample_variants_file:
         for row in csv.DictReader(sample_variants_file, delimiter=","):
             ## only saving non-silent germline variants to save on memory
-            if 'somatic' in row['mutation_class']:
-               
+            if 'germline' in row['mutation_class'] and row['mutation_type'] in phe.NONSILENT_CHANGES:
                 gene = row['gene']
                 variant_key = f"{row['mutation_type']},{row['position']},{row['base_change']}"
 
@@ -187,94 +302,13 @@ def parse_somatic_variants(self, sample_variants_file_path, gene_list = []):
                     'cosmic_census_flag': row['cosmic_census_flag'],
                     'nuc_context': row['nuc_context'],
                     'aa_context': row['aa_context'],
-                    'position': row['position']
                 }
-                # add variant to gene or create gene
                 if gene in sample_variants:
                     sample_variants[gene][variant_key] = variant_characteristics
                 else:
                     sample_variants[gene] = {}
                     sample_variants[gene][variant_key] = variant_characteristics
-            elif row['gene'] in gene_list and ('NA' in row['mutation_class'] or 'germline' in row['mutation_class']):
-                gene = row['gene']
-                variant_key = "No Variant"
-
-                variant_characteristics = {
-                    'gene': gene,
-                    'mutation_type': 'NA',
-                    'mutation_class': 'NA',
-                    'rarity': 'NA',
-                    'clinvar': 'NA',
-                    'dbsnp': 'NA',
-                    'copy_number': row['copy_number'],
-                    'ab_counts': row['ab_counts'],
-                    'cosmic_census_flag': 'NA',
-                    'nuc_context': 'NA',
-                    'aa_context': 'NA',
-                    'position': 'NA'
-                }
-
-                sample_variants[gene] = {}
-                sample_variants[gene][variant_key] = variant_characteristics
-
     return(sample_variants) 
-
-def parse_summary_file(self, summary_file_path):
-    row = {}
-    summary_file_path = check_path_exists(self, summary_file_path)
-    with open(summary_file_path, 'r') as summary_file:
-        line = summary_file.readline().strip()
-        header = line.split(',')
-        line = summary_file.readline().strip()
-        row = dict(zip(header, line.split(',')))
-    return(row)
-
-    
-
-def get_loads_from_summary(summary_file):
-    loads = {
-        'snv_count' : summary_file.get("snv_count"),
-        'indel_count' : summary_file.get("indel_count"),
-        'sv_count' : summary_file.get("sv_count"),
-        'TMB' : round((int(summary_file.get("snv_count")) + int(summary_file.get("indel_count"))) / 3000, 2),
-        'nonsyn_count' : summary_file.get('nonsyn_count'),
-        'del_frameshift_count' : summary_file.get('del_frameshift_count'),
-        'sv_del_bp_gene_count': summary_file.get('sv_del_bp_gene_count'),
-        'stopgain_count': summary_file.get('stopgain_count'),
-        'del_nonframeshift_count': summary_file.get('del_nonframeshift_count'),
-        'sv_dup_bp_gene_count': summary_file.get('sv_dup_bp_gene_count'),
-        'stoploss_count': summary_file.get('stoploss_count'),
-        'ins_frameshift_count': summary_file.get('ins_frameshift_count'),
-        'sv_inv_bp_gene_count': summary_file.get('sv_inv_bp_gene_count'),
-        'splice_count': summary_file.get('splice_count'),
-        'ins_nonframeshift_count': summary_file.get('ins_nonframeshift_count'),
-        'sv_tra_bp_gene_count': summary_file.get('sv_tra_bp_gene_count'),
-        'total_del_snv' :int(summary_file.get('splice_count')) + 
-                            int(summary_file.get('stoploss_count')) +
-                                int(summary_file.get('stopgain_count')) + 
-                                int(summary_file.get('nonsyn_count')),
-        'total_del_indel' : int(summary_file.get('ins_nonframeshift_count') )+ 
-                            int(summary_file.get('ins_frameshift_count') )+ 
-                            int( summary_file.get('del_nonframeshift_count')) + 
-                            int(summary_file.get('del_frameshift_count')),
-        'total_del_sv': int(summary_file.get('sv_dup_bp_gene_count') )+ 
-                        int(summary_file.get('sv_del_bp_gene_count')) + 
-                        int(summary_file.get('sv_inv_bp_gene_count')) + 
-                        int(summary_file.get('sv_tra_bp_gene_count'))
-
-    }
-    return(loads)
-
-    
-def find_external_id_in_json_dict(lims_dict, this_donor):
-    external_id = "NA"
-    for donor in range(len(lims_dict)):
-        if lims_dict[donor]['name'] == this_donor:
-            for attribute in range(len(lims_dict[donor]['attributes'])):
-                if lims_dict[donor]['attributes'][attribute]['name'] == "External Name":
-                    external_id = lims_dict[donor]['attributes'][attribute]['value']
-                    external_id = external_id.replace(',', ' ')
-    return(external_id)
 
 def parse_lims(self, donor):
     donor = add_underscore_to_donor(donor)
@@ -286,20 +320,6 @@ def parse_lims(self, donor):
         lims_json_dict = json.loads(r.text)
         external_ids = find_external_id_in_json_dict(lims_json_dict , donor)
     return(external_ids)
-
-class MissingLIMSError(Exception):
-    pass
-
-
-def parse_TDP(self, TDP_file_path):
-    row = {}
-    TDP_file_path = check_path_exists(self, TDP_file_path)
-    with open(TDP_file_path, 'r') as TDP_file:
-        line = TDP_file.readline().strip()
-        header = line.split(',')
-        line = TDP_file.readline().strip()
-        row = dict(zip(header, line.split(',')))
-    return(round(float(row["score"]),2))
 
 def parse_multifactor_marker(self, summary_results, html_headers, marker_cutoffs):
     result = []
@@ -344,19 +364,46 @@ def parse_multifactor_marker(self, summary_results, html_headers, marker_cutoffs
             result.append(result_tmp)
     return(result, hallmark_tally)
 
+def parse_sex(self, sex_file_path, template="PCX"):
+    sex_file_path = check_path_exists(self, sex_file_path)
+    with open(sex_file_path) as sex_file:
+        for row in sex_file:
+            short_sex = row.strip()
+            if template == "PCX":
+                if short_sex == 'M':
+                    inferredSex = "Male"
+                elif short_sex == 'F':
+                    inferredSex = "Female"
+                else:
+                    msg = "Cannot infer sex {0} from file: {1}".format(short_sex, sex_file_path)
+                    self.logger.error(msg)
+                    raise RuntimeError(msg)
+            else:
+                if short_sex == 'M':
+                    inferredSex = "XY"
+                elif short_sex == 'F':
+                    inferredSex = "XX"
+                else:
+                    msg = "Cannot infer sex {0} from file: {1}".format(short_sex, sex_file_path)
+                    self.logger.error(msg)
+                    raise RuntimeError(msg)
 
-def parse_germline_variants(self, sample_variants_file_path):
+    return(inferredSex)
+
+def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}):
     sample_variants = {}
     sample_variants_file_path = check_path_exists(self, sample_variants_file_path)
     with open(sample_variants_file_path, 'r') as sample_variants_file:
         for row in csv.DictReader(sample_variants_file, delimiter=","):
             ## only saving non-silent germline variants to save on memory
-            if 'germline' in row['mutation_class'] and row['mutation_type'] in phe.NONSILENT_CHANGES:
+            if 'somatic' in row['mutation_class']:
+               
                 gene = row['gene']
                 variant_key = f"{row['mutation_type']},{row['position']},{row['base_change']}"
 
                 variant_characteristics = {
                     'gene': gene,
+                    'gene_chr': row['gene_chr'],
                     'mutation_type': row['mutation_type'],
                     'mutation_class': row['mutation_class'],
                     'rarity': row['rarity'],
@@ -367,36 +414,77 @@ def parse_germline_variants(self, sample_variants_file_path):
                     'cosmic_census_flag': row['cosmic_census_flag'],
                     'nuc_context': row['nuc_context'],
                     'aa_context': row['aa_context'],
+                    'position': row['position']
                 }
+                # add variant to gene or create gene
                 if gene in sample_variants:
                     sample_variants[gene][variant_key] = variant_characteristics
                 else:
                     sample_variants[gene] = {}
                     sample_variants[gene][variant_key] = variant_characteristics
+            elif row['gene'] in gene_list.keys() and ('NA' in row['mutation_class'] or 'germline' in row['mutation_class']):
+                if gene_list[row['gene']] != 'rare':
+                    gene = row['gene']
+                    variant_key = "No Variant"
+
+                    variant_characteristics = {
+                        'gene': gene,
+                        'gene_chr': row['gene_chr'],
+                        'mutation_type': 'NA',
+                        'mutation_class': 'NA',
+                        'rarity': 'NA',
+                        'clinvar': 'NA',
+                        'dbsnp': 'NA',
+                        'copy_number': row['copy_number'],
+                        'ab_counts': row['ab_counts'],
+                        'cosmic_census_flag': 'NA',
+                        'nuc_context': 'NA',
+                        'aa_context': 'NA',
+                        'position': 'NA'
+                    }
+
+                    sample_variants[gene] = {}
+                    sample_variants[gene][variant_key] = variant_characteristics
+
     return(sample_variants) 
 
-def get_subset_of_germline_variants(sample_variants, gene_order):
-    germline_nonsilent_gene_count = 0
-    germ_nonsil_genes_rare = 0
-    germ_pathogenic = 0
-    reportable_germline_variants = []
-    for gene in gene_order:
-        if gene in sample_variants:
-            for variant in sample_variants[gene]:
-                germline_nonsilent_gene_count = germline_nonsilent_gene_count + 1
-                if sample_variants[gene][variant]['rarity'] != "common":
-                    reportable_germline_variants.append(sample_variants[gene][variant])
-                    germ_nonsil_genes_rare += 1
-                    mutation_type = sample_variants[gene][variant]['mutation_type']
-                    clinvar = sample_variants[gene][variant]['clinvar'] 
-                    if (mutation_type in ["frameshift", "stopgain"] or clinvar.startswith('CLINSIG=pathogenic')) and \
-                        sample_variants[gene][variant]['dbsnp'] != "NA" and \
-                        sample_variants[gene][variant]['dbsnp'] not in phe.EXCLUDED_GERMLINE_PATHOGENIC_VARIANTS :
-                        germ_pathogenic += 1
-    return(germline_nonsilent_gene_count, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants)
+def parse_summary_file(self, summary_file_path):
+    row = {}
+    summary_file_path = check_path_exists(self, summary_file_path)
+    with open(summary_file_path, 'r') as summary_file:
+        line = summary_file.readline().strip()
+        header = line.split(',')
+        line = summary_file.readline().strip()
+        row = dict(zip(header, line.split(',')))
+    return(row)
 
-def get_germline_variant_counts( summary_results):
-    germ_variant_count = int(summary_results.get("germline_snv_count")) + int(summary_results.get("germline_indel_count"))
-    germ_nonsilent_count = int(summary_results.get("germline_missense_count")) + int(summary_results.get("germline_nonsense_count"))
-    return(germ_variant_count, germ_nonsilent_count)
+def parse_TDP(self, TDP_file_path):
+    row = {}
+    TDP_file_path = check_path_exists(self, TDP_file_path)
+    with open(TDP_file_path, 'r') as TDP_file:
+        line = TDP_file.readline().strip()
+        header = line.split(',')
+        line = TDP_file.readline().strip()
+        row = dict(zip(header, line.split(',')))
+    return(round(float(row["score"]),2))
 
+
+def try_two_null_files(self, wrapper, workflow_name, ini_param, path_info, first_file):
+    if wrapper.my_param_is_null(ini_param):
+        this_file = os.path.join(self.workspace.print_location(), first_file )
+        if self.workspace.has_file(this_file):
+            wrapper.set_my_param(ini_param, this_file)
+        elif self.workspace.has_file(path_info):
+            path_info = self.workspace.read_json(path_info)
+            workflow_path = path_info.get(workflow_name)
+            if workflow_path == None:
+                msg = 'Cannot find {0}'.format(ini_param)
+                self.logger.error(msg)
+                raise RuntimeError(msg)
+            wrapper.set_my_param(ini_param, workflow_path)
+    return(wrapper)
+
+
+
+class MissingLIMSError(Exception):
+    pass

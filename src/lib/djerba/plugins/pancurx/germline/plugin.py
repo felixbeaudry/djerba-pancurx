@@ -14,7 +14,7 @@ import djerba.plugins.pancurx.tools as tools
 
 class main(plugin_base):
 
-    PRIORITY = 300
+    PRIORITY = 250
     PLUGIN_VERSION = '1.0.0'
     TEMPLATE_NAME = 'germline_template.html'
 

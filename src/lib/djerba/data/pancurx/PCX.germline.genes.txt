@@ -1,22 +1,22 @@
-POLE
-POLD1
-EPCAM
-MLH1
-MSH2
-MSH6
-PMS1
-PMS2
-BRCA1
-BRCA2
-PALB2
-ATM
-APC
-MUTYH
-CDKN2A
-STK11
-TP53
-SMAD4
-RAD51C
-CHEK2
-BRIP1
-RNF43
+POLE	action
+POLD1	action
+EPCAM	action
+MLH1	action
+MSH2	action
+MSH6	action
+PMS1	action
+PMS2	action
+BRCA1	action
+BRCA2	action
+PALB2	action
+ATM	action
+APC	action
+MUTYH	action
+CDKN2A	action
+STK11	action
+TP53	action
+SMAD4	action
+RAD51C	action
+CHEK2	action
+BRIP1	action
+RNF43	action

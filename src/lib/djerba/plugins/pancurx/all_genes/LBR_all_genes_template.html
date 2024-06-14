@@ -1,0 +1,90 @@
+<%
+      import djerba.plugins.pancurx.constants as plugin
+      from djerba.plugins.pancurx.html import make_somatic_table_rows
+      from djerba.util.html import html_builder
+
+
+      all_variants = results.get('all_variants')
+      ploidy = results.get('ploidy')
+
+%>
+
+
+
+<h2 class="lbr">Additional Information</h2>
+
+<div style="padding:0px 0px 0px 50px; break-inside: avoid; display: table;">
+
+      <h3 class="lbr">Whole Genome View</h3>
+      <p class="lbr">
+
+      The figure below displays the whole genome of the tumour. The rainfall plot is a visualization commonly used in cancer genomics to illustrate the distribution of somatic point mutations.
+      The y-axis is the base pair distance between consecutive mutations (logarithmic scale) and reveals mutation clustering at various scales (low values are mutational hotspots). 
+      Tumor heterozygosity indicates whether the tumor cells retain the same heterozygous status as the germline (normal) cells or if they undergo loss of heterozygosity (LOH): areas where the fuzzy areas are far apart likely represent LOH.
+      The middle panels show copy number and structural variants across the karyograms of the chromosomes.
+      </p>
+
+
+      <img id='DSBR' style='width: 100%; object-fit: contain' src="${results.get(plugin.WHOLE_GENOME_PLOT)}"/>
+
+</div>
+<div style="padding:0px 0px 0px 50px; ">
+
+      <h3 class="lbr">Cellularity Solution</h3>
+      <p class="lbr">
+            The figure below is created by Celluloid and summarizes the copy number profile, cellularity and clonality of the sample.
+      </p>
+
+      <table class="lbr" style="text-align:center; width:100%"><tr><td >
+      <img id='CELLULOID' style='width: 60%; object-fit: contain' src="${results.get(plugin.CELLULOID_PLOT)}"/>
+      </td></tr></table>
+
+
+      <h3 class="lbr">Mutational Spectra</h3>
+      <p class="lbr">
+            The figures of this section breakdown the context, size and frequency of different mutation types in the tumour. 
+            The patterns can be informative of the general types of mutational processes in this tumour.
+      </p>
+
+      <table class="lbr" style="text-align:center; width:100%">
+            <tr>
+                  <td style="width:125px">
+                        <img id='INDEL_BIN_PLOT' style='width: 90%; object-fit: contain' src="${results.get(plugin.INDEL_BIN_PLOT)}"/>
+                  </td>
+                  <td style="width:225px">
+                        <img id='SV_BIN_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SV_BIN_PLOT)}"/>
+                  </td>
+                  <td>
+                        <table style="width:100%">
+                              <tr>
+                                    <td>
+                                          <img id='SNV_VAF_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SNV_VAF_PLOT)}"/>
+                                    </td>
+                              </tr>
+                              <tr>
+                                    <td>
+                                          <img id='INDEL_VAF_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.INDEL_VAF_PLOT)}"/>
+                                    </td>
+                              </tr>
+                        </table>                  
+                  </td>
+	      </tr>
+      </table>
+
+
+
+
+
+      <h3 class="lbr">All Somatic Exonic Non-Silent Variants</h2>
+
+      <table class="lbr sortable" style="width:100%" >
+            <tr> <td>Gene</td><td>Chr.</td><td>Variant</td><td>Copy Number</td><td>A.B Count</td><td>Additional Information</td></tr>
+                  % for variant_row in make_somatic_table_rows(all_variants, ploidy):
+                        ${variant_row}
+                  % endfor
+      </table>
+      <p class="lbr">Copy Numbers and A.B ratios annotated with a * represent instances where we estimate more than one copy state within the gene.</p>
+
+</div>
+
+

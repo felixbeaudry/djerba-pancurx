@@ -29,12 +29,15 @@ class main(plugin_base):
         wrapper = tools.fill_file_if_null(self, wrapper, phe.DONOR_ID, phe.DONOR_ID, core_constants.DEFAULT_SAMPLE_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.NORMAL_ID, phe.NORMAL_ID, core_constants.DEFAULT_SAMPLE_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.EXTERNAL_IDS, phe.EXTERNAL_IDS, core_constants.DEFAULT_SAMPLE_INFO)
 
         if wrapper.my_param_is_null(phe.REPORT_DATE):
             wrapper.set_my_param(phe.REPORT_DATE, phe.NONE_SPECIFIED)
-        if wrapper.my_param_is_null(phe.EXTERNAL_IDS):
-            external_ids = tools.parse_lims(self, wrapper.get_my_string(phe.DONOR_ID))
-            wrapper.set_my_param(phe.EXTERNAL_IDS, external_ids)
+
+        if wrapper.my_param_is_null(phe.SAMPLE_TYPE):
+            wrapper.set_my_param(phe.SAMPLE_TYPE, phe.NONE_SPECIFIED)
+        if wrapper.my_param_is_null(phe.LOCATION_SUBTYPE):
+            wrapper.set_my_param(phe.LOCATION_SUBTYPE, phe.NONE_SPECIFIED)
         
         if wrapper.my_param_is_null(phe.TUMOUR_TISSUE):
             tissue = tools.get_tissue_from_sample_id(wrapper.get_my_string(phe.TUMOUR_ID))
@@ -54,7 +57,6 @@ class main(plugin_base):
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'sv.bar_count', phe.ONCOSLIDE_SV_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'oncoplot.SVs', phe.ONCOSLIDE_CNV_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
 
-
         return wrapper.get_config()
 
     def extract(self, config):
@@ -70,6 +72,8 @@ class main(plugin_base):
             phe.EXTERNAL_IDS,
             phe.TUMOUR_TISSUE,
             phe.NORMAL_TISSUE,
+            phe.SAMPLE_TYPE,
+            phe.LOCATION_SUBTYPE,
         ]
         data[core_constants.RESULTS] = {k: wrapper.get_my_string(k) for k in results_keys}
         if wrapper.get_my_string(phe.REPORT_DATE) == phe.NONE_SPECIFIED:
@@ -113,7 +117,10 @@ class main(plugin_base):
             phe.EXTERNAL_IDS,
             phe.TUMOUR_TISSUE,
             phe.NORMAL_TISSUE,
-            'template_type'
+            'template_type',
+            phe.SAMPLE_TYPE,
+            phe.LOCATION_SUBTYPE 
+
             
         ]
         for key in discovered:

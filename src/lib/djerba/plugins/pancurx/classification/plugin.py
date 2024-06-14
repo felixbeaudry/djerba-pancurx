@@ -52,7 +52,7 @@ class main(plugin_base):
             phe.HLA_TYPES
         ]
         data[core_constants.RESULTS] = {k: wrapper.get_my_string(k) for k in results_keys}
-        data[core_constants.RESULTS][phe.INFERRED_SEX] = self.parse_sex(wrapper.get_my_string(phe.SEX_PATH))
+        data[core_constants.RESULTS][phe.INFERRED_SEX] = tools.parse_sex(self, wrapper.get_my_string(phe.SEX_PATH), wrapper.get_my_string('template_type'))
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), phe.PLOIDY)
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
         data[core_constants.RESULTS]['tandem_duplicator_phenotype_score'] = tools.parse_TDP(self, wrapper.get_my_string(phe.TDP_PATH))
@@ -91,19 +91,5 @@ class main(plugin_base):
         self.set_ini_default(core_constants.ATTRIBUTES, 'research')
         self.set_priority_defaults(self.PRIORITY)
 
-    def parse_sex(self, sex_file_path):
-        sex_file_path = tools.check_path_exists(self, sex_file_path)
-        with open(sex_file_path) as sex_file:
-            for row in sex_file:
-                short_sex = row.strip()
-                if short_sex == 'M':
-                    inferredSex = "Male"
-                elif short_sex == 'F':
-                    inferredSex = "Female"
-                else:
-                    msg = "Cannot infer sex {0} from file: {1}".format(short_sex, sex_file_path)
-                    self.logger.error(msg)
-                    raise RuntimeError(msg)
-        return(inferredSex)
             
 	
