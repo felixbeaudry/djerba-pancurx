@@ -138,6 +138,7 @@ def make_somatic_table_rows(row_fields, ploidy):
         ab_class, ab = process_ab(row['ab_counts'])
         cells = [
             hb.td(row['gene'], italic=True),
+            hb.td(row['gene_chr'], italic=False),
             hb.td(mutation),
             '<td {0}>{1}</td>'.format(cn_class, cn),
             '<td {0}>{1}</td>'.format(ab_class, ab),
@@ -156,7 +157,7 @@ def process_ab(ab_full):
             ab = this_ab
             break
     a_b_list = ab.split('.')
-    ab = " | ".join(a_b_list)
+    ab = ".".join(a_b_list)
     ab_class = ''
     if a_b_list[0] == "0":
         ab_class = 'class="cn_loh"'

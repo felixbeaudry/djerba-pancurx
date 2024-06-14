@@ -1,3 +1,4 @@
+
 @media screen {
 	#main {
 		max-width: 1000px;
@@ -13,14 +14,34 @@
 	}
 }
 
+p.lbr {
+	font-family: sans-serif;
+	font-size: 13px;
+  }
 
-h1 {
+  table.pcx{
+	border-collapse:collapse;
+}
+
+table.lbr{
+	border-collapse:collapse;
+	font-size: 13px;
+	font-family: sans-serif;
+}
+
+h1.lbr {
+	font-family: sans-serif;
+	text-align: center;
+	line-height: 1.8;
+	border-radius: 10px;
+	page-break-after: avoid;
+	padding: 0px 0px 0px 0px; 
+	font-size: 35px;
+}
+
+h1.pcx {
 	color: #FFFFFF;
 	background-color: #444444 !important;
-/*	color: #FFFFFF;
-	background-color: #38793B;
-	color: #DFDEEB;
-	background-color: #323379; */
 	font-family: Verdana, sans-serif;
 	text-align: center;
 	line-height: 1.8;
@@ -31,7 +52,7 @@ h1 {
 h2.pcx {
 	color: #FFFFFF;
 	background-color: #444444;
-	font-family: Verdana, sans-serif;
+	font-family: Helvetica, sans-serif;
 	text-align: center;
 	line-height: 1.5;
 	border-radius: 10px;
@@ -42,25 +63,36 @@ h2.pcx {
 h2.lbr {
 	color: #FFFFFF;
 	background-color: #908b8b;
-	font-family: Verdana, sans-serif;
+	font-family:  sans-serif;
 	line-height: 1.2;
 	page-break-after: avoid;
-   padding:0px 8px
+	padding:20px 0px 5px 5px; 
+	margin: 10px 0px 0px 0px;
+
 }
 
-
-h3 {
+h3.pcx {
 	color: #000000;
 	background-color: #DDDDDD;
-/*	color: #000000;
-	background-color: #8DC63F;
-	color: #000000;
-	background-color: #ACA8C8; */
 	font-family: Verdana, sans-serif;
 	text-align: left;
 	border-radius: 10px;
 	padding-left: 25px;
 	page-break-after: avoid;
+}
+
+
+h3.lbr {
+	color: #000000;
+	background-color: #DDDDDD;
+	font-family: sans-serif;
+	text-align: left;
+	border-radius: 10px;
+	padding-left: 25px;
+	page-break-after: avoid;
+	padding:20px 0px 5px 5px; 
+	margin: 10px 0px 0px 0px;
+
 }
 
 th {
@@ -70,11 +102,9 @@ th {
 th, td {
 	padding: 3px !important;
 }
-table
-{
-border-collapse:collapse;
-font-size: 14px;
-}
+
+
+
 /* Sortable tables */
 table.sortable thead {
 		background-color:#FFFFFF;
@@ -82,7 +112,6 @@ table.sortable thead {
 		font-weight: bold;
 		cursor: default;
 }
-
 
 .frameshift {
 	color: #AC7719;

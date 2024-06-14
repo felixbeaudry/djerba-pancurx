@@ -8,6 +8,7 @@ from djerba.helpers.base import helper_base
 import djerba.plugins.pancurx.constants as phe
 from djerba.util.logger import logger
 from djerba.util.subprocess_runner import subprocess_runner
+import djerba.plugins.pancurx.tools as tools
 
 class main(helper_base):
 
@@ -19,6 +20,8 @@ class main(helper_base):
         """
         config = self.apply_defaults(config)
         wrapper = self.get_config_wrapper(config)
+
+
         if wrapper.my_param_is_null('template_type'):
             wrapper.set_my_param('template_type', 'PCX')
 
@@ -43,17 +46,25 @@ class main(helper_base):
             file_path = os.path.join(DATA_LOCATION, file_name)
             wrapper.set_my_param('immune_genes_of_interest_file', file_path)
 
-        all_params = {
-            phe.DONOR :  wrapper.get_my_string(phe.DONOR),
-            phe.TUMOUR_SAMPLE_ID : wrapper.get_my_string(phe.TUMOUR_SAMPLE_ID),
-            phe.NORMAL_SAMPLE_ID : wrapper.get_my_string(phe.NORMAL_SAMPLE_ID),
-            'comparison_cohort_file': wrapper.get_my_string('comparison_cohort_file'),
-            'genes_of_interest_file': wrapper.get_my_string('genes_of_interest_file'),
-            'germline_genes_of_interest_file': wrapper.get_my_string('germline_genes_of_interest_file'),
-            'immune_genes_of_interest_file': wrapper.get_my_string('immune_genes_of_interest_file'),
-            'template_type': wrapper.get_my_string('template_type'),
-        }
-        self.write_sample_info(all_params)
+        if wrapper.my_param_is_null(phe.EXTERNAL_IDS):
+            external_ids = tools.parse_lims(self, wrapper.get_my_string(phe.DONOR))
+            wrapper.set_my_param(phe.EXTERNAL_IDS, external_ids)
+
+        if self.workspace.has_file(core_constants.DEFAULT_SAMPLE_INFO):
+            self.logger.debug("sample info {0} exists already".format(core_constants.DEFAULT_SAMPLE_INFO))
+        else:
+            all_params = {
+                phe.DONOR :  wrapper.get_my_string(phe.DONOR),
+                phe.TUMOUR_SAMPLE_ID : wrapper.get_my_string(phe.TUMOUR_SAMPLE_ID),
+                phe.NORMAL_SAMPLE_ID : wrapper.get_my_string(phe.NORMAL_SAMPLE_ID),
+                phe.EXTERNAL_IDS : wrapper.get_my_string(phe.EXTERNAL_IDS),
+                'comparison_cohort_file': wrapper.get_my_string('comparison_cohort_file'),
+                'genes_of_interest_file': wrapper.get_my_string('genes_of_interest_file'),
+                'germline_genes_of_interest_file': wrapper.get_my_string('germline_genes_of_interest_file'),
+                'immune_genes_of_interest_file': wrapper.get_my_string('immune_genes_of_interest_file'),
+                'template_type': wrapper.get_my_string('template_type'),
+            }
+            self.write_sample_info(all_params)
         return wrapper.get_config()
 
     def extract(self, config):
@@ -71,10 +82,11 @@ class main(helper_base):
             'germline_genes_of_interest_file',
             'genes_of_interest_file',
             'template_type',
+            phe.EXTERNAL_IDS,
         ]
         for key in discovered:
             self.add_ini_discovered(key)
 
-    def write_sample_info(self, path_info):
-        self.workspace.write_json(core_constants.DEFAULT_SAMPLE_INFO, path_info)
-        self.logger.debug("Wrote path info to workspace: {0}".format(core_constants.DEFAULT_SAMPLE_INFO))
+    def write_sample_info(self,sample_info):
+        self.workspace.write_json(core_constants.DEFAULT_SAMPLE_INFO, sample_info)
+        self.logger.debug("Wrote sample info to workspace: {0}".format(core_constants.DEFAULT_SAMPLE_INFO))

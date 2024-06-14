@@ -41,6 +41,14 @@ def copy_if_not_exists(source_path, destination_path):
     if not os.path.exists(destination_path):
         shutil.copyfile(source_path, destination_path)
 
+def custom_sort_key(this_dictionary):
+    this_rank = None
+    if this_dictionary['mutation_type'] in phe.NONSILENT_CHANGES_RANK:
+        this_rank = phe.NONSILENT_CHANGES_RANK[this_dictionary['mutation_type']]
+    else:
+        this_rank = len(phe.NONSILENT_CHANGES_RANK)
+    return(this_rank)
+
 def fill_categorized_file_if_null(self, wrapper, file_type_name, ini_param, path_info, category):
     if wrapper.my_param_is_null(ini_param):
         if self.workspace.has_file(path_info):
@@ -73,24 +81,33 @@ def find_external_id_in_json_dict(lims_dict, this_donor):
             for attribute in range(len(lims_dict[donor]['attributes'])):
                 if lims_dict[donor]['attributes'][attribute]['name'] == "External Name":
                     external_id = lims_dict[donor]['attributes'][attribute]['value']
-                    external_id = external_id.replace(',', ' ')
+                    # external_id = external_id.replace(',', ' ')
     return(external_id)
 
-def get_all_somatic_variants(self, sample_variants):
+def get_all_somatic_variants(self, sample_variants, inferred_sex):
     all_variants = []
     sample_variants_sorted = dict(sorted(sample_variants.items()))
     for gene in sample_variants_sorted:
         for variant in sample_variants_sorted[gene]:
             if sample_variants_sorted[gene][variant]['mutation_type'] != 'NA':
-                all_variants.append(sample_variants_sorted[gene][variant])
-    return(all_variants)
+                this_cytoband = sample_variants_sorted[gene][variant]['gene_chr']
+                this_chromosome = list(this_cytoband)[0]
+                if inferred_sex == "XY":
+                    all_variants.append(sample_variants_sorted[gene][variant])
+                elif this_chromosome != 'Y':
+                    all_variants.append(sample_variants_sorted[gene][variant])
+                else:
+                    msg = "Skipping Y chromosome in XX"
+                    self.logger.info(msg)
+    sorted_list_of_dicts = sorted(all_variants, key=custom_sort_key)
+    return(sorted_list_of_dicts)
 
 def get_genes_of_interest(self, genes_of_interest_file_path):
-    genes_of_interest = []
+    genes_of_interest = {}
     genes_of_interest_file_path = check_path_exists(self, genes_of_interest_file_path)
     with open(genes_of_interest_file_path, 'r') as genes_of_interest_file:
         for row in csv.reader(genes_of_interest_file, delimiter="\t"):
-            genes_of_interest.append(row[0])
+            genes_of_interest[row[0]] = row[1]
     return(genes_of_interest)
 
 def get_germline_variant_counts( summary_results):
@@ -151,7 +168,7 @@ def get_subset_of_germline_variants(sample_variants, gene_order):
     germ_nonsil_genes_rare = 0
     germ_pathogenic = 0
     reportable_germline_variants = []
-    for gene in gene_order:
+    for gene in gene_order.keys():
         if gene in sample_variants:
             for variant in sample_variants[gene]:
                 germline_nonsilent_gene_count = germline_nonsilent_gene_count + 1
@@ -169,7 +186,7 @@ def get_subset_of_germline_variants(sample_variants, gene_order):
 
 def get_subset_of_somatic_variants(self, sample_variants, subset_order):
     reportable_variants = []
-    for gene in subset_order :
+    for gene in subset_order.keys() :
         if gene in sample_variants:
             for variant in sample_variants[gene]:
                 reportable_variants.append(sample_variants[gene][variant])
@@ -347,7 +364,33 @@ def parse_multifactor_marker(self, summary_results, html_headers, marker_cutoffs
             result.append(result_tmp)
     return(result, hallmark_tally)
 
-def parse_somatic_variants(self, sample_variants_file_path, gene_list = []):
+def parse_sex(self, sex_file_path, template="PCX"):
+    sex_file_path = check_path_exists(self, sex_file_path)
+    with open(sex_file_path) as sex_file:
+        for row in sex_file:
+            short_sex = row.strip()
+            if template == "PCX":
+                if short_sex == 'M':
+                    inferredSex = "Male"
+                elif short_sex == 'F':
+                    inferredSex = "Female"
+                else:
+                    msg = "Cannot infer sex {0} from file: {1}".format(short_sex, sex_file_path)
+                    self.logger.error(msg)
+                    raise RuntimeError(msg)
+            else:
+                if short_sex == 'M':
+                    inferredSex = "XY"
+                elif short_sex == 'F':
+                    inferredSex = "XX"
+                else:
+                    msg = "Cannot infer sex {0} from file: {1}".format(short_sex, sex_file_path)
+                    self.logger.error(msg)
+                    raise RuntimeError(msg)
+
+    return(inferredSex)
+
+def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}):
     sample_variants = {}
     sample_variants_file_path = check_path_exists(self, sample_variants_file_path)
     with open(sample_variants_file_path, 'r') as sample_variants_file:
@@ -360,6 +403,7 @@ def parse_somatic_variants(self, sample_variants_file_path, gene_list = []):
 
                 variant_characteristics = {
                     'gene': gene,
+                    'gene_chr': row['gene_chr'],
                     'mutation_type': row['mutation_type'],
                     'mutation_class': row['mutation_class'],
                     'rarity': row['rarity'],
@@ -378,27 +422,29 @@ def parse_somatic_variants(self, sample_variants_file_path, gene_list = []):
                 else:
                     sample_variants[gene] = {}
                     sample_variants[gene][variant_key] = variant_characteristics
-            elif row['gene'] in gene_list and ('NA' in row['mutation_class'] or 'germline' in row['mutation_class']):
-                gene = row['gene']
-                variant_key = "No Variant"
+            elif row['gene'] in gene_list.keys() and ('NA' in row['mutation_class'] or 'germline' in row['mutation_class']):
+                if gene_list[row['gene']] != 'rare':
+                    gene = row['gene']
+                    variant_key = "No Variant"
 
-                variant_characteristics = {
-                    'gene': gene,
-                    'mutation_type': 'NA',
-                    'mutation_class': 'NA',
-                    'rarity': 'NA',
-                    'clinvar': 'NA',
-                    'dbsnp': 'NA',
-                    'copy_number': row['copy_number'],
-                    'ab_counts': row['ab_counts'],
-                    'cosmic_census_flag': 'NA',
-                    'nuc_context': 'NA',
-                    'aa_context': 'NA',
-                    'position': 'NA'
-                }
+                    variant_characteristics = {
+                        'gene': gene,
+                        'gene_chr': row['gene_chr'],
+                        'mutation_type': 'NA',
+                        'mutation_class': 'NA',
+                        'rarity': 'NA',
+                        'clinvar': 'NA',
+                        'dbsnp': 'NA',
+                        'copy_number': row['copy_number'],
+                        'ab_counts': row['ab_counts'],
+                        'cosmic_census_flag': 'NA',
+                        'nuc_context': 'NA',
+                        'aa_context': 'NA',
+                        'position': 'NA'
+                    }
 
-                sample_variants[gene] = {}
-                sample_variants[gene][variant_key] = variant_characteristics
+                    sample_variants[gene] = {}
+                    sample_variants[gene][variant_key] = variant_characteristics
 
     return(sample_variants) 
 

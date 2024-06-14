@@ -3,7 +3,7 @@
 %>
 
 <div id="header">
-<table border="0" style="width:100%">
+<table class="pcx" border="0" style="width:100%">
       <tr style="vertical-align:top;">
             <td style="width:33.33%"><h4>Genome Summary v${results.get(plugin.REPORT_VERSION)}</h4></td>
             <td style="width:33.33%"><h4 style="text-align:center;">${results.get(plugin.TUMOUR_ID)}</h4></td>
@@ -14,7 +14,7 @@
 
 <div id="main">
       <h1 class="pcx">PanCuRx Genomics Summary</h1>
-      <table style="width:100%">
+      <table class="pcx" style="width:100%">
             <tr>
                   <td><b>Donor ID:</b> ${results.get(plugin.DONOR_ID)}</td>
                   <td><b>Tumour Sample:</b> ${results.get(plugin.TUMOUR_ID)}</td>
@@ -27,7 +27,7 @@
             </tr>
       </table>
 
-      <table><tr>
+      <table class="pcx"><tr>
             <td style='width: 10%; vertical-align: bottom;'><img id='ONCOSLIDE_DRIVER_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_DRIVER_PLOT)}"/></td>
             <td style='width: 10%; vertical-align: bottom;'><img id='ONCOSLIDE_SNV_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_SNV_PLOT)}"/></td>
             <td style='width: 10%; vertical-align: bottom;'><img id='ONCOSLIDE_INDEL_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_INDEL_PLOT)}"/></td>
@@ -37,10 +37,10 @@
       </tr></table>
 
 
-      <p><b>This report is for research purposes only.</b></p>
+      <p class="pcx"><b>This report is for research purposes only.</b></p>
 
-      <h3>DNA Sequencing Quality Metrics</h3>
-      <table style="width:100%">
+      <h3 class="pcx">DNA Sequencing Quality Metrics</h3>
+      <table class="pcx" style="width:100%">
       <tr>
             <td><b>Tumour Coverage:</b> ${results.get(plugin.TUMOUR_COVERAGE)}x (>30x)</td>
             <td><b>Normal Coverage:</b> ${results.get(plugin.NORMAL_COVERAGE)}x (>30x)</td>
@@ -48,5 +48,5 @@
       </tr>
       </table>
 
-</div>
+
 

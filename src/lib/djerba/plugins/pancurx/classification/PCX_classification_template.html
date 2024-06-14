@@ -12,7 +12,6 @@
             <td><b>Waddell Class:</b> ${results.get(plugin.WADDELL_CLASS)}</td>
             <td><b>Ploidy:</b> ${results.get(plugin.PLOIDY)}</td>
             <td><b>Inferred Sex:</b> ${results.get(plugin.INFERRED_SEX)}</td>
-            <td><b>TDP:</b> ${results.get('tandem_duplicator_phenotype_score')}</td>
       </tr>
       % if results.get(plugin.MOFFITT_CLASS) != "NA" :
       <tr>
@@ -29,7 +28,7 @@
       % endif
       </table>
 
-	<h3>HR Deficiency Hallmark Score</h3>
+	<h3 class="pcx">HR Deficiency Hallmark Score</h3>
 
       <table style="width:100%">
             <tr>
@@ -48,7 +47,7 @@
             </tbody>
       </table>
 
-      <h3>MMR Deficiency Hallmark Score</h3>
+      <h3 class="pcx">MMR Deficiency Hallmark Score</h3>
 
       <table style="width:100%">
             <tr>

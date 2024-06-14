@@ -15,6 +15,12 @@ DEFAULT_ALIGNER = 'bwa'
 DEFAULT_ALIGNER_VERSION = '0.7.17'
 DEFAULT_CELLULOID_VERSION = "v0.11.7"
 
+#DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
+DEFAULT_CIBERSORT_LOADINGS_PATH='pancurx/LM22.txt'
+DEFAULT_CIBERSORT_GENES_PATH='pancurx/hgnc_complete_set.txt'
+DEFAULT_CIBERSORT_COMPARISON_PATH='pancurx/MATRIX.txt'
+
+
 DEFAULT_RNA_SEQTYPE = 'rna'
 DEFAULT_RNA_ALIGNER = 'star'
 DEFAULT_RNA_ALIGNER_VERSION = '2.7.4a'
@@ -120,6 +126,7 @@ DSBR_RESULTS = "DSBR_results"
 MMR_RESULTS = "MMR_results"
 REPORTING_NAME = "reporting_name"
 MAVIS_FUSIONS_PATH = "mavis_fusions"
+TPM_PATH = "tpm_path"
 
 CHROMOSOME_1_PLOT = 'chromosome_1_plot'
 CHROMOSOME_2_PLOT = 'chromosome_2_plot' 
@@ -169,6 +176,17 @@ NONSILENT_CHANGES =  [
 	"translocation breakpoint" 
 ]
 
+
+NONSILENT_CHANGES_RANK =  {
+    "nonsynonymous"  : 0,
+    "stopgain" : 1,
+	"frameshift" : 2,
+    "splicing" : 3,
+	"nonframeshift" : 4 ,
+	"stoploss" : 5,
+}
+
+
 COSMIC_MUTATION_TYPES = {
 	"A" : "strong amplification",
 	"D" : "homozygous deletion",
@@ -187,7 +205,8 @@ COSMIC_SIGNATURE_SET = {
 	"Signature.6": "SBS6",
 	"Signature.8": "SBS8",
 	"Signature.13": "SBS13",
-	"Signature.17": "SBS17",
+	"Signature.17a": "SBS17a",
+    "Signature.17b": "SBS17b",
 	"Signature.18": "SBS18",
 	"Signature.20": "SBS20",
     "Signature.24": "SBS24",
@@ -274,6 +293,8 @@ SV_RANGE_CUTOFF = {
 	'typical': 35,
 	'low': 0
 }
+
+
 
 #updated 2024.04.03
 LIMS_TISSUE_CODES = {

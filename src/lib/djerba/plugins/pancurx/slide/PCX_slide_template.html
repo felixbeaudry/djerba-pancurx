@@ -7,6 +7,8 @@
 	sigs = results.get('sigs')
 	reportable_variants = results.get('reportable_variants')
 	reportable_germline_variants = results.get('reportable_germline_variants')
+	reportable_genes = results.get('reportable_genes')
+	reportable_germline_genes = results.get('reportable_germline_genes')
 	ploidy = results.get('ploidy_numeric')
 %>
 
@@ -66,7 +68,7 @@
 				<tr><th align="left" style="width:22%">Gene</th><th align="left">Variant(s)</th><th style="width:10%">CN</th></tr>
 
 				
-						% for row in make_somatic_slide_rows(reportable_germline_variants, ploidy):
+						% for row in make_somatic_slide_rows(reportable_germline_variants, ploidy, reportable_germline_genes):
 							${row}
 						% endfor
 
@@ -80,7 +82,7 @@
 	<table style="width:100%" class="sortable">
 		<tr><th align="left" style="width:22%">Gene</th><th align="left">Variant(s)</th><th style="width:10%">CN</th></tr>
 
-			  % for row in make_somatic_slide_rows(reportable_variants, ploidy):
+			  % for row in make_somatic_slide_rows(reportable_variants, ploidy, reportable_genes):
 					${row}
 			  % endfor
   

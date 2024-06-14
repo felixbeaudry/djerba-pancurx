@@ -317,7 +317,7 @@ class main(main_base):
         with open(json_path, 'w') as out_file:
             out_file.write(json.dumps(data))
         if archive:
-            self.upload_archive(data)
+            self.logger.info("Omitting archive upload at extract step")
         else:
             self.logger.info("Omitting archive upload at extract step")
         self.logger.info('Finished Djerba extract step')
@@ -352,7 +352,7 @@ class main(main_base):
         self.logger.info('Starting Djerba render step')
         # Archive the JSON data structure, if needed
         if archive:
-            self.upload_archive(data)
+            self.logger.debug("Omitting archive upload at render step")
         else:
             self.logger.debug("Omitting archive upload at render step")
         # run the main rendering operation
@@ -522,7 +522,7 @@ class main(main_base):
         data_new = self.base_extract(config)
         data = self.update_data_from_file(data_new, json_path, force)
         if archive:
-            self.upload_archive(data)
+            self.logger.info("Omitting archive upload for update")
         else:
             self.logger.info("Omitting archive upload for update")
         if out_dir:

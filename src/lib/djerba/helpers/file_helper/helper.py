@@ -60,6 +60,7 @@ class main(helper_base):
             "indel_annovar": path_finder.make_indel_annovar(),
             phe.GERMLINE_ANNOVAR_PATH: path_finder.make_germline_annovar(),
             phe.MAVIS_FUSIONS_PATH: path_finder.make_mavis_fusion(),
+            phe.TPM_PATH: path_finder.make_stringtie(),
 
             # eventually the summary and figure scripts will be ported into djerba
             # and djerba won't need to look for these files
@@ -121,6 +122,11 @@ class assemble_file_paths(logger):
         #TEMP: plot path is different
         self.plot_path = os.path.join('/.mounts/labs/PCSI/users/fbeaudry/btc_plots', sample)
 
+    def make_stringtie(self):
+        file_name = "".join((self.sample,"_stringtie_abundance.txt"))
+        file_path = os.path.join(self.rna_root_extended, "stringtie/2.0.6/", file_name)
+        return(file_path)
+
     def make_mavis_fusion(self):
         file_name = "".join(("mavis_summary_all_",self.sample,".tab"))
         file_path = os.path.join(self.rna_root_extended, "starfusion/1.9.0/mavis/summary", file_name)
@@ -150,7 +156,7 @@ class assemble_file_paths(logger):
         return(file_path)
 
     def make_cosmic_signals_path(self):
-        file_name = "".join((self.sample,"_signatures.txt"))
+        file_name = "".join((self.sample,"_SBS_signatures.txt"))
         file_path = os.path.join(self.root_extended, "cosmicSigNNLS", file_name)
         return(file_path)
 

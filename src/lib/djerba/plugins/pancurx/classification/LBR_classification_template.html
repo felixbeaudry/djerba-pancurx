@@ -4,40 +4,21 @@
 
 %>
 
-<div id="main">
 
-      <h2 class="lbr">Classifications</h2>
-      <div style="padding:0px 0px 0px 50px">
-      <table style="width:100%">
-      <tr>
-            <td><b>Waddell Class:</b> ${results.get(plugin.WADDELL_CLASS)}</td>
-            <td><b>Ploidy:</b> ${results.get(plugin.PLOIDY)}</td>
-            <td><b>Inferred Sex Chromosomes:</b> ${results.get(plugin.INFERRED_SEX)}</td>
-      </tr>
-      % if results.get(plugin.MOFFITT_CLASS) != "NA" :
-      <tr>
-            <td><b>Alexandrov Class:</b> ${results.get(plugin.ALEXANDROV_CLASS)}</td>
-            <td><b>Collisson Class:</b> ${results.get(plugin.COLLISSON_CLASS)}</td>
-            <td><b>Moffitt Class:</b> ${results.get(plugin.MOFFITT_CLASS)}</td>
-      <tr>
-      % endif
 
-      % if results.get(plugin.HLA_TYPES) != "NA" :
-      <tr>
-            <td colspan="3"><b>HLA Types:</b> ${results.get(plugin.HLA_TYPES)}</td>
-      </tr>
-      % endif
-      </table>
+<h2 class="lbr">Hallmark Scores</h2>
 
-	<h3>HR Deficiency Hallmark Score</h3>
-      <p>Homologous Recombination Deficiency (HRD) is a cellular condition where key genes 
+<div style="padding:0px 0px 0px 50px; break-inside: avoid; display: table;">
+ 
+	<h3 class="lbr">HR Deficiency Hallmark Score</h3>
+      <p class="lbr">Homologous Recombination Deficiency (HRD) is a cellular condition where key genes 
             involved in homologous recombination, like BRCA1 and BRCA2, are mutated or deficient. 
             This impairs the accurate repair of DNA double-strand breaks, leading to 
             genomic instability and an increased risk of cancers, particularly breast and 
             ovarian cancers. HRD is associated with heightened sensitivity to certain 
             DNA-damaging treatments, aiding in treatment selection. </p>
 
-      <table style="width:100%">
+      <table class="lbr" style="width:100%">
             <tr>
             % for row in make_hallmark_tally_table(results.get('dsbr_tally'), 10, '#322288'):
                   ${row}
@@ -46,22 +27,25 @@
       </table>
       <br>
 
-      <table width="100%">
+      <table class="lbr" width="100%">
             <tbody>
             % for row in make_class_table_rows(results.get(plugin.DSBR_RESULTS), plugin.DSBR_RESULTS):
                   ${row}
             % endfor
             </tbody>
       </table>
+</div>
 
-      <h3>MMR Deficiency Hallmark Score</h3>
-      <p>
+<div style="padding:0px 0px 0px 50px; break-inside: avoid; display: table;">
+
+      <h3 class="lbr">MMR Deficiency Hallmark Score</h3>
+      <p class="lbr">
         Mismatch Repair Deficiency (MMRd) is a cellular condition marked by impaired DNA mismatch repair mechanisms. 
         This deficiency prevents the correction of errors that occur during DNA replication, 
         leading to the accumulation of mutations and microsatellite instability. MMRd is often associated with Lynch syndrome,
          a hereditary cancer syndrome, and increases the risk of various cancers, particularly colorectal cancer. </p>
 
-      <table style="width:100%">
+      <table class="lbr" style="width:100%">
             <tr>
             % for row in make_hallmark_tally_table(results.get('mmr_tally'), 4, '#107733'):
                   ${row}
@@ -70,7 +54,7 @@
       </table>
       <br>
 
-      <table width="100%">
+      <table class="lbr" width="100%">
             <tbody>
             % for row in make_class_table_rows(results.get(plugin.MMR_RESULTS), plugin.MMR_RESULTS):
                   ${row}
@@ -79,4 +63,4 @@
       </table>
 
 </div>
-</div>
+

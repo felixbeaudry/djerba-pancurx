@@ -24,6 +24,7 @@ class main(plugin_base):
 
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'tumour', phe.TUMOUR_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'normal', phe.NORMAL_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
+        wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
 
 
         return wrapper.get_config()
@@ -35,13 +36,16 @@ class main(plugin_base):
         data = self.get_starting_plugin_data(wrapper, self.PLUGIN_VERSION)
         data[core_constants.RESULTS][phe.TUMOUR_BAM_PATH] = wrapper.get_my_string(phe.TUMOUR_BAM_PATH)
         data[core_constants.RESULTS][phe.NORMAL_BAM_PATH] = wrapper.get_my_string(phe.NORMAL_BAM_PATH)
+        data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
+
         for this_chromosome_plot in phe.CHROMOSOME_PLOTS.values():
             data[core_constants.RESULTS][this_chromosome_plot] = tools.convert_plot(self,wrapper.get_my_string(this_chromosome_plot), this_chromosome_plot)
         return(data)
 
     def render(self, data):
         renderer = mako_renderer(self.get_module_dir())
-        return renderer.render_name(self.TEMPLATE_NAME, data)
+        template_name = data[core_constants.RESULTS]['template_type'] 
+        return renderer.render_name(template_name, data)
 
     def specify_params(self):
         self.set_ini_default(core_constants.ATTRIBUTES, 'research')
@@ -49,6 +53,7 @@ class main(plugin_base):
         discovered = [
             phe.TUMOUR_BAM_PATH,
             phe.NORMAL_BAM_PATH,
+            'template_type'
         ]
         for this_chromosome_plot in phe.CHROMOSOME_PLOTS.values():
             discovered.append(this_chromosome_plot)
