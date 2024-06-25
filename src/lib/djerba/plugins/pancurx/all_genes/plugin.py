@@ -56,6 +56,10 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.SV_BIN_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.SV_BIN_PLOT), phe.SV_BIN_PLOT)
         data[core_constants.RESULTS][phe.WHOLE_GENOME_PLOT] = tools.convert_plot(self, wrapper.get_my_string(phe.WHOLE_GENOME_PLOT), phe.WHOLE_GENOME_PLOT)
         data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
+        
+        ploidy_long = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), phe.PLOIDY)
+        data[core_constants.RESULTS]['ploidy_long'] = ploidy_long
+        data[core_constants.RESULTS][phe.INFERRED_SEX] = tools.parse_sex(self, wrapper.get_my_string(phe.SEX_PATH), wrapper.get_my_string('template_type'))
 
         return data
 

@@ -47,8 +47,11 @@ class main(helper_base):
             wrapper.set_my_param('immune_genes_of_interest_file', file_path)
 
         if wrapper.my_param_is_null(phe.EXTERNAL_IDS):
-            external_ids = tools.parse_lims(self, wrapper.get_my_string(phe.DONOR))
-            wrapper.set_my_param(phe.EXTERNAL_IDS, external_ids)
+            if self.workspace.has_file(core_constants.DEFAULT_SAMPLE_INFO):
+                wrapper = tools.fill_file_if_null(self, wrapper, phe.EXTERNAL_IDS, phe.EXTERNAL_IDS, core_constants.DEFAULT_SAMPLE_INFO)
+            else:
+                external_ids = tools.parse_lims(self, wrapper.get_my_string(phe.DONOR))
+                wrapper.set_my_param(phe.EXTERNAL_IDS, external_ids)
 
         if self.workspace.has_file(core_constants.DEFAULT_SAMPLE_INFO):
             self.logger.debug("sample info {0} exists already".format(core_constants.DEFAULT_SAMPLE_INFO))

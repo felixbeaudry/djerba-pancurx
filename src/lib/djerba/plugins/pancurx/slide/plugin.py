@@ -49,9 +49,7 @@ class main(plugin_base):
         if wrapper.my_param_is_null(phe.MOFFIT):
             wrapper.set_my_param(phe.MOFFIT, 'NA')
 
-        if wrapper.my_param_is_null(phe.EXTERNAL_IDS):
-            external_ids = tools.parse_lims(self, wrapper.get_my_string(phe.DONOR_ID))
-            wrapper.set_my_param(phe.EXTERNAL_IDS, external_ids)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.EXTERNAL_IDS, phe.EXTERNAL_IDS, core_constants.DEFAULT_SAMPLE_INFO)
 
         if wrapper.my_param_is_null(phe.TUMOUR_TISSUE):
             tissue = tools.get_tissue_from_sample_id(wrapper.get_my_string(phe.TUMOUR_ID))

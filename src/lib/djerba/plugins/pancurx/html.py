@@ -4,6 +4,9 @@ import djerba.core.constants as core_constants
 import djerba.plugins.pancurx.constants as phe
 from djerba.util.html import html_builder as hb
 
+def k_comma_format(value):
+    value_formatted = f'{value:,}'
+    return(value_formatted)
 
 def make_class_table_rows(multifactor_marker_results, type):
     row_fields = multifactor_marker_results 
@@ -73,18 +76,50 @@ def make_hallmark_tally_table(hallmark_tally, hallmark_length, color):
     return(rows)
 
 
-def make_immune_table_rows(row_fields, ploidy):
+def make_immune_table_rows(row_fields, ploidy, expression):
     rows = []
     for row in row_fields:
-        cn_class, cn = process_cn(row['copy_number'], ploidy)
-        ab_class, ab = process_ab(row['ab_counts'])
-        cells = [
-            hb.td(row['gene'], italic=True),
-            '<td {0}>{1}</td>'.format(cn_class, cn),
-            '<td {0}>{1}</td>'.format(ab_class, ab),
-        ]
-        rows.append(hb.tr(cells))
+        if row['gene'] in ['PDCD1','CD274']:
+            cn_class, cn = process_cn(row['copy_number'], ploidy)
+            expression_class = get_expression_percentile_class(expression[row['gene']]['cohort_perc'])
+            expression_percentile = make_ordinal(expression[row['gene']]['cohort_perc'])
+            cells = [
+                hb.td(row['gene'], italic=True),
+                '<td {0}>{1}</td>'.format(expression_class, expression_percentile),
+                '<td {0}>{1}</td>'.format(cn_class, cn),
+
+            ]
+            rows.append(hb.tr(cells))
     return rows
+
+def make_hla_table_rows(row_fields, ploidy):
+    all_cells = ''
+    for row in row_fields:
+        if row['gene'] in ['HLA-A','HLA-B','HLA-C']:
+            ab_class, ab = process_ab(row['ab_counts'])
+            all_cells = ''.join((
+                all_cells,
+                hb.td(row['gene'], italic=True),
+               '<td {0}>{1}</td>'.format(ab_class, ab)
+            ))
+    return all_cells
+
+
+def make_ordinal(n):
+    '''
+    Convert an integer into its ordinal representation::
+
+        make_ordinal(0)   => '0th'
+        make_ordinal(3)   => '3rd'
+        make_ordinal(122) => '122nd'
+        make_ordinal(213) => '213th'
+    '''
+    n = int(n)
+    if 11 <= (n % 100) <= 13:
+        suffix = 'th'
+    else:
+        suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
+    return str(n) + suffix
 
 def make_signatures_string(signature_dict):
     signature_strings = []
@@ -222,6 +257,18 @@ def get_cn_cell_class(cn, ploidy):
     elif float(cn) > (ploidy + phe.DEFAULT_GAIN_ADDEND_CUTOFF):
         cn_class = 'class="cn_gain"'
     return(cn_class)
+
+def get_expression_percentile_class(percentile):
+    expression_percentile_class = ''
+    if float(percentile) < 20 and float(percentile) > 10:
+        expression_percentile_class = 'class="cn_loh"'
+    elif float(percentile) < 10  :
+        expression_percentile_class = 'class="cn_loss"'
+    elif float(percentile) > 80 and float(percentile) < 90:
+        expression_percentile_class = 'class="cn_gain"'
+    elif float(percentile) > 90:
+        expression_percentile_class = 'class="cn_very_gain"'
+    return(expression_percentile_class)
 
 def process_gene_context(row):
 

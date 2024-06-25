@@ -9,6 +9,7 @@ import json
 from djerba.util.image_to_base64 import converter
 import djerba.plugins.pancurx.constants as phe
 import shutil
+from scipy import stats
 
 def add_underscore_to_donor(donor):
     if "EPPIC" in donor:
@@ -389,6 +390,29 @@ def parse_sex(self, sex_file_path, template="PCX"):
                     raise RuntimeError(msg)
 
     return(inferredSex)
+
+def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_cohort_path):
+    expression_dict = {}
+    input_tpm_path = check_path_exists(self, input_tpm_path)
+    comparison_cohort_path = check_path_exists(self, comparison_cohort_path)
+    with open(input_tpm_path, 'r') as input_tpm_file:
+        for row in csv.DictReader(input_tpm_file, delimiter="\t"):
+            if row['Gene Name'] in genes_of_interest:
+                data = {
+                    'gene' : row['Gene Name'],
+                    'input_tpm': row['TPM']
+                }
+                expression_dict[row['Gene Name']] = data
+    with open(comparison_cohort_path, 'r') as comparison_cohort_file:
+        for row in csv.DictReader(comparison_cohort_file, delimiter="\t"):
+            if row['gene_name'] in expression_dict:
+                dict_items = list(row.values())
+                cohort_expression_list = dict_items[1:]
+                this_tpm = expression_dict[row['gene_name']]['input_tpm']
+                this_percentile = round(stats.percentileofscore(cohort_expression_list, this_tpm ,  'rank'), 2)
+                expression_dict[row['gene_name']]['cohort_perc'] = this_percentile
+    return(expression_dict)
+
 
 def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}):
     sample_variants = {}

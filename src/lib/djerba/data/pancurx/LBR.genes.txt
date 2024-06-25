@@ -25,3 +25,8 @@ STK11	rare
 SMAD4	rare
 EGFR	rare
 RET	rare
+POLE	rare
+POLD1	rare
+MAP2K4	rare
+RNF43	rare
+KDM6A	rare

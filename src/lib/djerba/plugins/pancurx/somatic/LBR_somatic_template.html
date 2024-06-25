@@ -1,6 +1,6 @@
 <%
       import djerba.plugins.pancurx.constants as plugin
-      from djerba.plugins.pancurx.html import make_somatic_table_rows
+      from djerba.plugins.pancurx.html import make_somatic_table_rows, k_comma_format
       from djerba.util.html import html_builder
       loads = results.get('loads')
       sigs = results.get('sigs')
@@ -30,17 +30,6 @@
       </table>
 
 </div>
-
-
-<div style="padding:0px 0px 0px 50px; ">
-      <h3 class="lbr">Copy Number Profile</h3>
-      
-            <p class="lbr">This tumour is <b> ${results.get('ploidy_long')}</b> and inferred sex chromosomes are ${results.get(plugin.INFERRED_SEX)}.
-                  <p>
-      
-                       <img id='ONCOSLIDE_CNV_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.ONCOSLIDE_CNV_PLOT)}"/>
-      
-      </div>
       
        
 <div style="padding:0px 0px 0px 50px; ">
@@ -53,9 +42,9 @@
 
       <table class="lbr" style="width:100%">
             <tr>
-                  <td style="text-align:center"><b>${loads.get('snv_count')} SNVs (${loads.get('snv_percentile')}% PR)</b></td>
-                  <td style="text-align:center"><b>${loads.get('indel_count')} In/Dels (${loads.get('indel_percentile')}% PR)</b></td>
-                  <td style="text-align:center"><b>${loads.get('sv_count')} SVs (${loads.get('sv_percentile')}% PR)</b></td>
+                  <td style="text-align:center"><b>${k_comma_format(loads.get('snv_count'))} SNVs (${loads.get('snv_percentile')}% PR)</b></td>
+                  <td style="text-align:center"><b>${k_comma_format(loads.get('indel_count'))} In/Dels (${loads.get('indel_percentile')}% PR)</b></td>
+                  <td style="text-align:center"><b>${k_comma_format(loads.get('sv_count'))} SVs (${loads.get('sv_percentile')}% PR)</b></td>
             </tr>
             <tr>
                   <td style="text-align:center"><img id='HISTBOX_SNV' style='width: 100%; object-fit: contain' src="${results.get(plugin.HISTBOX_SNV)}"/></td>
@@ -91,7 +80,7 @@
                         <tr><td bgcolor="#661100"  style="color:white">SBS17</td><td></td><td>${round(sigs.get('SBS17a') + sigs.get('SBS17b'), 2)}</td></tr>
                         <tr><td bgcolor="#882255"  style="color:white">SBS18</td><td>ROS</td><td>${sigs.get('SBS18')}</td></tr>
                         <tr><td bgcolor="#117733">SBS20 & 26</td><td>POLD, MMRD</td><td>${round(sigs.get('SBS20') + sigs.get('SBS26'), 2)}</td></tr> 
-                        <tr><td >SBS24</td><td>Aflotoxin</td><td>${sigs.get('SBS24')}</td></tr>
+                        <tr><td >SBS24</td><td>Aflatoxin</td><td>${sigs.get('SBS24')}</td></tr>
                         <tr><td >SBS30</td><td>NTHL1</td><td>${sigs.get('SBS30')}</td></tr>
                   </table>
                   <br><br>
