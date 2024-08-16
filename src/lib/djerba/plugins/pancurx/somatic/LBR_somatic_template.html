@@ -15,13 +15,13 @@
 <!-- <div style="padding:0px 0px 0px 50px; break-inside: avoid;display: table;"> -->
 
 <div style="padding:0px 0px 0px 50px; ">
-<h3 class="lbr">Mutational Status of Common Biliary Driver Genes</h3>
+<h3 class="lbr">Mutational Status of Common Biliary Driver and Targetable Genes</h3>
 
       <p class="lbr">Below are listed the mutational status of genes that are commonly altered in biliary tract cancers. 
       Actionable alterations are listed regardless of their mutational status, while most oncogenes are only listed if mutated.</p>	
 
       <table class="lbr sortable" style="width:100%" >
-      <tr><td>Gene</td><td>Chr.</td><td>Variant</td><td>Copy Number</td><td>A.B Count</td><td>Additional Information</td></tr>
+      <tr><td>Gene</td><td>Chr.</td><td>Variant</td><td>CN</td><td>A.B</td><td>Additional Information</td></tr>
 
             % for row in make_somatic_table_rows(reportable_variants, ploidy):
                   ${row}

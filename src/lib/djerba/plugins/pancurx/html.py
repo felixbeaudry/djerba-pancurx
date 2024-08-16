@@ -43,21 +43,24 @@ def make_fusion_table_rows(row_fields):
         rows.append(hb.tr(cells))
     return rows
 
+def build_dbsnp_url(dbsnp):
+    url='https:/www.ncbi.nlm.nih.gov/snp/'+dbsnp
+    return '<a href="{0}">{1}</a>'.format(url, dbsnp)
 
-def make_germline_table_rows(row_fields, ploidy):
+
+def make_germline_table_rows(row_fields):
     rows = []
     for row in row_fields:
         mutation = process_gene_context(row)
-        additional_string = process_additional(row)
-        cn_class, cn = process_cn(row['copy_number'], ploidy)
+        #additional_string = process_additional(row)
         ab_class, ab = process_ab(row['ab_counts'])
         cells = [
             hb.td(row['gene'], italic=True),
             hb.td(mutation),
-            '<td {0}>{1}</td>'.format(cn_class, cn),
             '<td {0}>{1}</td>'.format(ab_class, ab),
-
-            hb.td(additional_string)
+            hb.td(row['clinvar'].replace("_"," ")),
+            hb.td(build_dbsnp_url(row['dbsnp']))
+            #hb.td(additional_string)
         ]
         rows.append(hb.tr(cells))
     return rows
@@ -79,7 +82,7 @@ def make_hallmark_tally_table(hallmark_tally, hallmark_length, color):
 def make_immune_table_rows(row_fields, ploidy, expression):
     rows = []
     for row in row_fields:
-        if row['gene'] in ['PDCD1','CD274']:
+        if row['gene'] in ['PDCD1','CD274','TIGIT','CTLA4']:
             cn_class, cn = process_cn(row['copy_number'], ploidy)
             expression_class = get_expression_percentile_class(expression[row['gene']]['cohort_perc'])
             expression_percentile = make_ordinal(expression[row['gene']]['cohort_perc'])
@@ -276,22 +279,35 @@ def process_gene_context(row):
         mutation_string = ''
     else:
         mutation_string = row['mutation_type']
-        if row['mutation_class'] in ("somatic snv", "somatic indel", "germline snp", "germline indel") and row['nuc_context'] != '':
+        # if row['mutation_class'] in ("somatic snv", "somatic indel") and row['nuc_context'] != '':
         
-            nuc_context = row['nuc_context'].split("|")
-            nuc_context = nuc_context[0].split(":")
-            mutation_string = ''.join((row['mutation_type']," (",nuc_context[1],')'))
+        #     nuc_context = row['nuc_context'].split("|")
+        #     nuc_context = nuc_context[0].split(":")
+        #     mutation_string = ''.join((row['mutation_type']," (",nuc_context[1],')'))
+            
+        #     if row['aa_context'] != 'NA':
+        #         aa_context = row['aa_context'].split("|")
+        #         aa_context = aa_context[0].split(":")
+        #         mutation_string = ''.join((row['mutation_type']," (",nuc_context[1],';',aa_context[1],')'))
+        #         if len(mutation_string) > 40:
+        #             mutation_string = ''.join((row['mutation_type']," (",nuc_context[1],')'))
+
+        if row['mutation_class'] in ( "somatic snv", "somatic indel", "germline snp", "germline indel") and row['nuc_context'] != '':
+ 
+            nuc_context = row['nuc_context']
+
+            mutation_string = ' '.join((row['mutation_type'],"(",nuc_context,')'))
             
             if row['aa_context'] != 'NA':
-                aa_context = row['aa_context'].split("|")
-                aa_context = aa_context[0].split(":")
-                mutation_string = ''.join((row['mutation_type']," (",nuc_context[1],';',aa_context[1],')'))
+                aa_context = row['aa_context']
+
+                mutation_string = ' '.join((row['mutation_type'],"(",nuc_context,';',aa_context,')'))
                 if len(mutation_string) > 40:
-                    mutation_string = ''.join((row['mutation_type']," (",nuc_context[1],')'))
+                    mutation_string = ' '.join((row['mutation_type'],"(",nuc_context,'; large charge)'))
 
         elif row['mutation_class'] in ("somatic sv", "somatic cnv"):
             if row['position'] != 'NA':
-                mutation_string = ''.join((row['mutation_type']," (",row['position'],')'))
+                mutation_string = ' '.join((row['mutation_type'],"(",row['position'],')'))
 
     return(mutation_string)
 
@@ -301,18 +317,28 @@ def process_gene_context_for_slide(row):
         mutation_string = ''
     else:
         mutation_string = row['mutation_type']
-        if row['mutation_class'] in ("somatic snv", "somatic indel", "germline snp", "germline indel") and row['nuc_context'] != '':
+        # if row['mutation_class'] in ("somatic snv", "somatic indel") and row['nuc_context'] != '':
         
+        #     if row['aa_context'] != 'NA':
+        #         aa_context = row['aa_context'].split("|")
+        #         aa_context = aa_context[0].split(":")
+        #         mutation_string = aa_context[1]
+        #         if len(mutation_string) > 40:
+        #             mutation_string = nuc_context[1]
+        #     else:
+        #         nuc_context = row['nuc_context'].split("|")
+        #         nuc_context = nuc_context[0].split(":")
+        #         mutation_string = nuc_context[1]
+        if row['mutation_class'] in ("germline snp", "germline indel", "somatic snv", "somatic indel") and row['nuc_context'] != '':
+            
+            nuc_context = row['nuc_context']
+
             if row['aa_context'] != 'NA':
-                aa_context = row['aa_context'].split("|")
-                aa_context = aa_context[0].split(":")
-                mutation_string = aa_context[1]
+                mutation_string = row['aa_context']
                 if len(mutation_string) > 40:
                     mutation_string = nuc_context[1]
             else:
-                nuc_context = row['nuc_context'].split("|")
-                nuc_context = nuc_context[0].split(":")
-                mutation_string = nuc_context[1]
+                mutation_string = nuc_context
 
         elif row['mutation_class'] in ("somatic sv", "somatic cnv"):
             if row['position'] != 'NA':

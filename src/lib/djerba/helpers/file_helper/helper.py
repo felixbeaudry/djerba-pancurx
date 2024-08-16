@@ -34,17 +34,27 @@ class main(helper_base):
         wrapper = tools.fill_file_if_null(self, wrapper, phe.DONOR_ID, phe.DONOR_ID, core_constants.DEFAULT_SAMPLE_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.NORMAL_ID, phe.NORMAL_ID, core_constants.DEFAULT_SAMPLE_INFO)
 
-
         donor = wrapper.get_my_string(phe.DONOR)
         sample = wrapper.get_my_string(phe.TUMOUR_SAMPLE_ID)
         normal = wrapper.get_my_string(phe.NORMAL_SAMPLE_ID)
-
-
         
         path_finder = assemble_file_paths( donor, sample, normal)
+
+        if wrapper.my_param_is_null(phe.COSMIC_SIGNNLS_PATH):
+            wrapper.set_my_param(phe.COSMIC_SIGNNLS_PATH, path_finder.make_cosmic_signals_path())
+
+        if wrapper.my_param_is_null(phe.SEX_PATH):
+            wrapper.set_my_param(phe.SEX_PATH, path_finder.make_sex_chromosome_path())
+
+        if wrapper.my_param_is_null(phe.GERMLINE_ANNOVAR_PATH):
+            wrapper.set_my_param(phe.GERMLINE_ANNOVAR_PATH, path_finder.make_germline_annovar())
+
         all_paths = {
 
-            phe.COSMIC_SIGNNLS_PATH : path_finder.make_cosmic_signals_path(),
+            phe.COSMIC_SIGNNLS_PATH : wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH),
+            phe.SEX_PATH: wrapper.get_my_string(phe.SEX_PATH),
+            phe.GERMLINE_ANNOVAR_PATH: wrapper.get_my_string(phe.GERMLINE_ANNOVAR_PATH),
+
             "coveragePaths": path_finder.make_coverage_paths(),
             "bam_paths": path_finder.make_bam_paths(),
             "indelPath" : path_finder.make_indel_path(),
@@ -54,11 +64,10 @@ class main(helper_base):
             "svPath" : path_finder.make_structural_path(),
             "segPath" : path_finder.make_celluloid_seg_path(),
             phe.CELLULOID_DIR: path_finder.make_celluloid_dir_path(),
-            phe.SEX_PATH: path_finder.make_sex_chromosome_path(),
             phe.TDP_PATH : path_finder.make_tdp_path(),
             "snv_annovar": path_finder.make_snv_annovar(),
             "indel_annovar": path_finder.make_indel_annovar(),
-            phe.GERMLINE_ANNOVAR_PATH: path_finder.make_germline_annovar(),
+            
             phe.MAVIS_FUSIONS_PATH: path_finder.make_mavis_fusion(),
             phe.TPM_PATH: path_finder.make_stringtie(),
 
@@ -82,14 +91,16 @@ class main(helper_base):
     def extract(self, config):
         wrapper = self.get_config_wrapper(config)
 
-
     def specify_params(self):
         self.logger.debug("Specifying params for provenance helper")
         self.set_priority_defaults(self.PRIORITY)
         discovered = [
             phe.TUMOUR_ID,
             phe.DONOR_ID,
-            phe.NORMAL_ID,            
+            phe.NORMAL_ID,
+            phe.COSMIC_SIGNNLS_PATH,
+            phe.SEX_PATH  ,
+            phe.GERMLINE_ANNOVAR_PATH
         ]
         for key in discovered:
             self.add_ini_discovered(key)
@@ -101,8 +112,6 @@ class main(helper_base):
 class assemble_file_paths(logger):
     
     PLOT_DIRECTORY = "results/plots"
-    
-    
     
     def __init__(self, donor, sample, normal_sample, log_level=logging.WARNING, log_path=None):
         self.log_level = log_level
@@ -120,7 +129,7 @@ class assemble_file_paths(logger):
         self.normal_archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, normal_sample, seq_path)
 
         #TEMP: plot path is different
-        self.plot_path = os.path.join('/.mounts/labs/PCSI/users/fbeaudry/btc_plots', sample)
+        self.plot_path = os.path.join(phe.DEFAULT_PLOTPATH, sample)
 
     def make_stringtie(self):
         file_name = "".join((self.sample,"_stringtie_abundance.txt"))
@@ -170,14 +179,29 @@ class assemble_file_paths(logger):
         }
         return(file_paths)
 
-    def make_germline_annovar(self):
+    def make_germline_annovar_old(self):
+        #deprecated by snakemake
         file_name = "".join((self.sample,"_germline_final.hg38_multianno.txt.gz"))
         file_path = os.path.join(self.root_extended, "final_germline_variants/annovar/20170716", file_name)
         snv_annovar = {
             "data": file_path,
             "index": "".join((file_path,".tbi"))
         }
-        return(snv_annovar)
+        return(file_path)
+
+    def make_germline_annovar(self):
+        file_name = "".join((self.sample,"_germline_final.hg38_multianno.txt.gz"))
+        file_path = os.path.join(self.root_extended, "final_germline_variants", file_name)
+        snv_annovar = {
+            "data": file_path,
+            "index": "".join((file_path,".tbi"))
+        }
+        return(file_path)
+
+    def make_germline_path(self):
+        file_name = "".join((self.sample,"_germline_final.vcf.gz"))
+        file_path = os.path.join(self.root_extended, "final_germline_variants", file_name)
+        return(file_path)
 
     def make_germline_path(self):
         file_name = "".join((self.sample,"_germline_final.vcf.gz"))
@@ -203,9 +227,15 @@ class assemble_file_paths(logger):
         file_path = os.path.join(self.root_extended, "final_indel", file_name)
         return(file_path)
 
-    def make_sex_chromosome_path(self):
+    def make_sex_chromosome_path_old(self):
+        # univa pipeline location, deprecated
         file_name = "".join((self.donor,".final_gender.txt"))
         file_path = os.path.join(self.root_extended, "gendertype/final", file_name)
+        return(file_path)
+
+    def make_sex_chromosome_path(self):
+        file_name = "".join((self.sample,".xyr_gender.txt"))
+        file_path = os.path.join(self.root_extended, "gendertype", file_name)
         return(file_path)
 
     def make_snv_path(self):

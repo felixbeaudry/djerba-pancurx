@@ -82,8 +82,13 @@ class main(plugin_base):
             data[core_constants.RESULTS][phe.REPORT_DATE] = wrapper.get_my_string(phe.REPORT_DATE)
         cellularity = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), phe.CELLULARITY)
         data[core_constants.RESULTS][phe.CELLULARITY] = cellularity
-        data[core_constants.RESULTS][phe.TUMOUR_COVERAGE] = tools.parse_coverage(self, wrapper.get_my_string(phe.TUMOUR_COVERAGE_PATH))
-        data[core_constants.RESULTS][phe.NORMAL_COVERAGE] = tools.parse_coverage(self, wrapper.get_my_string(phe.NORMAL_COVERAGE_PATH))
+        median_coverage_t, mean_coverage_t = tools.parse_coverage(self, wrapper.get_my_string(phe.TUMOUR_COVERAGE_PATH))
+        data[core_constants.RESULTS][phe.TUMOUR_COVERAGE] = median_coverage_t
+        data[core_constants.RESULTS]['mean_coverage_tumour'] = mean_coverage_t
+
+        median_coverage_n, mean_coverage_n = tools.parse_coverage(self, wrapper.get_my_string(phe.NORMAL_COVERAGE_PATH))
+        data[core_constants.RESULTS][phe.NORMAL_COVERAGE] = median_coverage_n
+        data[core_constants.RESULTS]['mean_coverage_normal'] = mean_coverage_n
 
         data[core_constants.RESULTS][phe.ONCOSLIDE_DRIVER_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.ONCOSLIDE_DRIVER_PLOT),   phe.ONCOSLIDE_DRIVER_PLOT)
         data[core_constants.RESULTS][phe.ONCOSLIDE_SNV_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.ONCOSLIDE_SNV_PLOT),   phe.ONCOSLIDE_SNV_PLOT)

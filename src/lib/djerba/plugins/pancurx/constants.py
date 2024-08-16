@@ -9,11 +9,16 @@ DEFAULT_GAIN_ADDEND_CUTOFF = 1
 # FILE PATH DEFAULTS
 DEFAULT_CORE_LIMS_URL = "http://pinery.gsi.oicr.on.ca/samples?type=Identity"
 DEFAULT_ROOTPATH = '/.mounts/labs/PCSI/pipeline/hg38'
+#TEMP: plot path is different
+DEFAULT_PLOTPATH = '/.mounts/labs/PCSI/users/fbeaudry/reports/btc_plots'
+DEFAULT_DATA_LOCATION = '/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-pancurx/src/lib/djerba/data/pancurx/'
 DEFAULT_ARCHIVEPATH = 'https://www.hpc.oicr.on.ca/archive/projects/PCSI/pipeline/hg38'
 DEFAULT_SEQTYPE = 'wgs'
 DEFAULT_ALIGNER = 'bwa'
 DEFAULT_ALIGNER_VERSION = '0.7.17'
 DEFAULT_CELLULOID_VERSION = "v0.11.7"
+DEFAULT_BLURB_FILE = 'blurb_template.txt'
+DEFAULT_MANE_FILE = 'MANE.GRCh38.v1.3.summary.txt'
 
 #DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
 DEFAULT_CIBERSORT_LOADINGS_PATH='pancurx/LM22.txt'
@@ -56,6 +61,7 @@ SAMPLE_TYPE = 'sample_type'
 LOCATION_SUBTYPE = 'location_subtype'
 
 # sample attributes
+SUMMARY_FILE = 'summary_file'
 CELLULARITY = "cellularity"
 TUMOUR_COVERAGE = "tumour_coverage"
 NORMAL_COVERAGE = "normal_coverage"

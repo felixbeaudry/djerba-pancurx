@@ -15,7 +15,7 @@ import djerba.plugins.pancurx.tools as tools
 
 class main(plugin_base):
 
-    PRIORITY = 300
+    PRIORITY = 250
     PLUGIN_VERSION = '1.0.0'
     TEMPLATE_NAME = 'somatic_template.html'
 
@@ -58,7 +58,11 @@ class main(plugin_base):
         
         genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('genes_of_interest_file'))
         somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), genes_of_interest)
-        data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest)
+
+        mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
+        mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
+
+        data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest, mane_transcripts)
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
         data[core_constants.RESULTS]['loads'] = tools.get_loads_from_summary(summary_results)
         data[core_constants.RESULTS]['sigs'] = tools.parse_cosmic_signatures(self, wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH))
@@ -86,6 +90,9 @@ class main(plugin_base):
         data[core_constants.RESULTS]['loads']['indel_percentile'] = self.get_percentile(data[core_constants.RESULTS]['loads']['indel_count'], wrapper.get_my_string('comparison_cohort_file'), 'indel_count')
         data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
         data[core_constants.RESULTS][phe.ONCOSLIDE_CNV_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.ONCOSLIDE_CNV_PLOT),   phe.ONCOSLIDE_CNV_PLOT)
+
+        cnvs_and_abs = tools.subset_and_deduplicate(somatic_variants)
+        self.workspace.write_json('cnvs_and_abs.json', cnvs_and_abs)
 
         return data
 

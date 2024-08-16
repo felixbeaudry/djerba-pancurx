@@ -45,7 +45,11 @@ class main(plugin_base):
         data = self.get_starting_plugin_data(wrapper, self.PLUGIN_VERSION)
         inferred_sex_chromosomes = tools.parse_sex(self, wrapper.get_my_string(phe.SEX_PATH), 'LBR')
 
+        mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
+        mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
+
         somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE))
+        somatic_variants = tools.get_mane_somatic_variants(self, somatic_variants,  mane_transcripts)
         data[core_constants.RESULTS]['all_variants'] = tools.get_all_somatic_variants(self, somatic_variants, inferred_sex_chromosomes)
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy

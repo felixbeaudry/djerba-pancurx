@@ -14,7 +14,7 @@ import djerba.plugins.pancurx.tools as tools
 
 class main(plugin_base):
 
-    PRIORITY = 250
+    PRIORITY = 300
     PLUGIN_VERSION = '1.0.0'
     TEMPLATE_NAME = 'germline_template.html'
 
@@ -23,12 +23,15 @@ class main(plugin_base):
         config = self.apply_defaults(config)
         wrapper = self.get_config_wrapper(config)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SUMMARY_FILE_PATH, phe.SUMMARY_FILE_PATH, core_constants.DEFAULT_PATH_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, phe.SAMPLE_VARIANTS_FILE, phe.SAMPLE_VARIANTS_FILE, core_constants.DEFAULT_PATH_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, phe.PARAM_PATH, phe.PARAM_PATH, core_constants.DEFAULT_PATH_INFO)
+       # wrapper = tools.fill_file_if_null(self, wrapper, phe.SAMPLE_VARIANTS_FILE, phe.SAMPLE_VARIANTS_FILE, core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.GERMLINE_ANNOVAR_PATH, phe.GERMLINE_ANNOVAR_PATH, core_constants.DEFAULT_PATH_INFO)
+       # wrapper = tools.fill_file_if_null(self, wrapper, phe.PARAM_PATH, phe.PARAM_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
 
         return wrapper.get_config()
+
+        
 
     def extract(self, config):
         wrapper = self.get_config_wrapper(config)
@@ -39,12 +42,22 @@ class main(plugin_base):
         germ_variant_count, germ_nonsilent_count = tools.get_germline_variant_counts(summary_results)
 
         genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('germline_genes_of_interest_file'))
-        germline_variants = tools.parse_germline_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE))
-        germ_nonsil_genes, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants = tools.get_subset_of_germline_variants(germline_variants, genes_of_interest)
-        ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
+        #germline_variants = tools.parse_germline_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE))
+        if self.workspace.has_file('germline.json'):
+            germline_variants = self.workspace.read_json('germline.json')
+        else:
+            germline_variants = tools.parse_annovar_germline_variants(self, wrapper.get_my_string(phe.GERMLINE_ANNOVAR_PATH))
+            self.workspace.write_json('germline.json', germline_variants)
+        
+        mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
+        mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
+
+        cnvs_and_abs = self.workspace.read_json('cnvs_and_abs.json')
+        germ_nonsil_genes, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants = tools.get_subset_of_germline_variants(germline_variants, genes_of_interest, mane_transcripts, cnvs_and_abs)
+        #ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
 
         results = {
-            phe.PLOIDY: ploidy,
+            #phe.PLOIDY: ploidy,
             phe.GERM_VARIANT_COUNT : germ_variant_count,
             phe.GERM_NONSILENT_COUNT: germ_nonsilent_count,
             phe.GERM_NONSIL_SUBSET_COUNT: germ_nonsil_genes,
@@ -64,8 +77,9 @@ class main(plugin_base):
 
     def specify_params(self):
         discovered = [
-            phe.PARAM_PATH,
-            phe.SAMPLE_VARIANTS_FILE,
+            #phe.PARAM_PATH,
+            #phe.SAMPLE_VARIANTS_FILE,
+            phe.GERMLINE_ANNOVAR_PATH,
             phe.SUMMARY_FILE_PATH,
             'template_type',
             'germline_genes_of_interest_file'

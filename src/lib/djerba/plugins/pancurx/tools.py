@@ -4,6 +4,7 @@ from decimal import Decimal
 import logging
 import re
 import os
+import gzip
 import requests
 import json
 from djerba.util.image_to_base64 import converter
@@ -92,13 +93,17 @@ def get_all_somatic_variants(self, sample_variants, inferred_sex):
         for variant in sample_variants_sorted[gene]:
             if sample_variants_sorted[gene][variant]['mutation_type'] != 'NA':
                 this_cytoband = sample_variants_sorted[gene][variant]['gene_chr']
-                this_chromosome = list(this_cytoband)[0]
-                if inferred_sex == "XY":
-                    all_variants.append(sample_variants_sorted[gene][variant])
-                elif this_chromosome != 'Y':
-                    all_variants.append(sample_variants_sorted[gene][variant])
+                if this_cytoband != '':
+                    this_chromosome = list(this_cytoband)[0]
+                    if inferred_sex == "XY":
+                        all_variants.append(sample_variants_sorted[gene][variant])
+                    elif this_chromosome != 'Y':
+                        all_variants.append(sample_variants_sorted[gene][variant])
+                    else:
+                        msg = "Skipping Y chromosome in XX"
+                        self.logger.info(msg)
                 else:
-                    msg = "Skipping Y chromosome in XX"
+                    msg = "Skipping unplaced cytoband"
                     self.logger.info(msg)
     sorted_list_of_dicts = sorted(all_variants, key=custom_sort_key)
     return(sorted_list_of_dicts)
@@ -164,7 +169,7 @@ def get_load_quantified(sample_value, quantification_dictionary):
     return(quantification_string)
 
 
-def get_subset_of_germline_variants(sample_variants, gene_order):
+def get_subset_of_germline_variants(sample_variants, gene_order, chosen_transcripts, cnvs_and_abs):
     germline_nonsilent_gene_count = 0
     germ_nonsil_genes_rare = 0
     germ_pathogenic = 0
@@ -173,26 +178,75 @@ def get_subset_of_germline_variants(sample_variants, gene_order):
         if gene in sample_variants:
             for variant in sample_variants[gene]:
                 germline_nonsilent_gene_count = germline_nonsilent_gene_count + 1
-                if sample_variants[gene][variant]['rarity'] != "common":
+                if sample_variants[gene][variant]['rarity'] != "common" and \
+                    (sample_variants[gene][variant]['clinvar'] != "Benign" or gene == 'DPYD'):
+                    this_chosen_transcript = chosen_transcripts[gene]
+                    if this_chosen_transcript in sample_variants[gene][variant]['aa_change']:
+                        chosen_frame = sample_variants[gene][variant]['aa_change'][this_chosen_transcript]
+                        sample_variants[gene][variant]['nuc_context'] = chosen_frame['dna_seq']
+                        sample_variants[gene][variant]['aa_context'] = chosen_frame['prot_seq']
+                    else:
+                        for this_transcript in sample_variants[gene][variant]['aa_change']:
+                            sample_variants[gene][variant]['nuc_context'] = sample_variants[gene][variant]['aa_change'][this_transcript]['dna_seq']
+                            sample_variants[gene][variant]['aa_context'] = sample_variants[gene][variant]['aa_change'][this_transcript]['prot_seq']
+                            continue
+                        
+                    sample_variants[gene][variant]['copy_number'] =  cnvs_and_abs[gene]['copy_number']
+                    sample_variants[gene][variant]['ab_counts'] =  cnvs_and_abs[gene]['ab_counts']
+
+                    sample_variants[gene][variant]['cosmic_census_flag'] =  "NA"
+
                     reportable_germline_variants.append(sample_variants[gene][variant])
                     germ_nonsil_genes_rare += 1
-                    mutation_type = sample_variants[gene][variant]['mutation_type']
                     clinvar = sample_variants[gene][variant]['clinvar'] 
-                    if (clinvar.startswith('CLINSIG=pathogenic')) and \
+                    if (clinvar.startswith('Pathogenic')) and \
                         sample_variants[gene][variant]['dbsnp'] != "NA" and \
                         sample_variants[gene][variant]['dbsnp'] not in phe.EXCLUDED_GERMLINE_PATHOGENIC_VARIANTS :
                         print("----germline pathogenic----", gene, variant)
                         germ_pathogenic += 1
     return(germline_nonsilent_gene_count, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants)
 
-def get_subset_of_somatic_variants(self, sample_variants, subset_order):
+def get_subset_of_somatic_variants(self, sample_variants, subset_order, mane_transcripts):
     reportable_variants = []
-    for gene in subset_order.keys() :
+    for gene in subset_order.keys():
         if gene in sample_variants:
             for variant in sample_variants[gene]:
-                reportable_variants.append(sample_variants[gene][variant])
+                if variant == "No Variant" and subset_order[gene] == 'rare':
+                    pass
+                else:
+                    sample_variants = get_mane_context(sample_variants, gene, variant, mane_transcripts, 'nuc_context')
+                    sample_variants = get_mane_context(sample_variants, gene, variant, mane_transcripts, 'aa_context')
+
+                    # if sample_variants[gene][variant]['nuc_context'] != 'NA':
+                    #     sample_variants[gene][variant]['nuc_context'] =   sample_variants[gene][variant]['nuc_context'][mane_transcripts[gene]]
+                    #     sample_variants[gene][variant]['aa_context'] =   sample_variants[gene][variant]['aa_context'][mane_transcripts[gene]]
+                    reportable_variants.append(sample_variants[gene][variant])
 
     return(reportable_variants)
+
+def get_mane_context(sample_variants, gene, variant, mane_transcripts, context_key):
+    if sample_variants[gene][variant][context_key] not in ['NA',''] and \
+        sample_variants[gene][variant] != "No Variant"   :
+        
+        if gene in mane_transcripts and mane_transcripts[gene] in sample_variants[gene][variant][context_key]  :
+            sample_variants[gene][variant][context_key] =   sample_variants[gene][variant][context_key][mane_transcripts[gene]]
+        else:
+            
+            for this_context in sample_variants[gene][variant][context_key]:
+                sample_variants[gene][variant][context_key] = sample_variants[gene][variant][context_key][this_context]
+                break
+    return(sample_variants)
+
+
+def get_mane_somatic_variants(self, sample_variants,  mane_transcripts):
+
+    for gene in sample_variants:
+
+        for variant in sample_variants[gene]:
+            sample_variants = get_mane_context(sample_variants, gene, variant, mane_transcripts, 'nuc_context')
+            sample_variants = get_mane_context(sample_variants, gene, variant, mane_transcripts, 'aa_context')
+
+    return(sample_variants)
 
 def get_tissue_from_sample_id(sample_name):
     tissue = "NA"
@@ -200,6 +254,84 @@ def get_tissue_from_sample_id(sample_name):
         match_group = re.match(r'^[A-Z0-9]+_...._(..)_', sample_name).group(1)
         tissue = phe.LIMS_TISSUE_CODES.get(match_group, match_group)
     return(tissue)
+
+def parse_mane_transcript(self, mane_transcript_path):
+    genes_and_transcripts = {}
+    mane_transcript_path = check_path_exists(self, mane_transcript_path)
+    with open(mane_transcript_path, 'rt') as mane_transcript_file:
+        for row in csv.DictReader(mane_transcript_file, delimiter="\t"):
+            if row['MANE_status'] == 'MANE Select':
+                refseq_nuc = row['RefSeq_nuc'].split('.')
+                genes_and_transcripts[row['symbol']] = refseq_nuc[0]
+    return(genes_and_transcripts)
+    
+def parse_annovar_germline_variants(self, sample_variants_file_path):
+    RARE_FREQUENCY = 0.01
+    print('parsing germline', end='')
+    sample_variants = {}
+    sample_variants_file_path = check_path_exists(self, sample_variants_file_path)
+    with gzip.open(sample_variants_file_path, 'rt') as sample_variants_file:
+        for row in csv.DictReader(sample_variants_file, delimiter="\t"):
+            if row['Func.refGene'] == 'exonic' \
+                and row['ExonicFunc.refGene'] != 'synonymous SNV':
+                    
+                    #order of estimators is legacy, could consider mean
+                    for frequency_estimator in [ "AF", "ExAC_ALL", "1000g2015aug_all", ]:
+                        
+                        if frequency_estimator in row:
+                            if row[frequency_estimator] in ["NA","."]:
+                                pop_frequency = 0
+                            else:
+                                pop_frequency = float(row[frequency_estimator])
+                            if pop_frequency == 0:
+                                pop_frequency_string = "Novel"
+                            elif pop_frequency > RARE_FREQUENCY:
+                                pop_frequency_string = "Common"
+                            elif pop_frequency < RARE_FREQUENCY:
+                                pop_frequency_string = "Rare"
+                            continue
+                    if  pop_frequency_string in ["Rare", "Novel"] and row['CLNSIG'] != "NA":      
+                        snp_id = '.'.join((row['Gene.refGene'], row['Start']))
+                        aa_changes = row[ 'AAChange.refGene'].split(",")
+                        
+                        aa_dict = {}
+
+                        for this_change in aa_changes:
+                            this_change_split = this_change.split(':')
+                            if len(this_change_split) > 1 and this_change_split[0] == row['Gene.refGene']:
+                                aa_dict[this_change_split[1]] = {
+                                    'exon' : this_change_split[2],
+                                    'dna_seq' : this_change_split[3],
+                                    'prot_seq' :  this_change_split[4],
+                                }
+                            else:
+                                aa_dict = None
+                        exonic_function = row['ExonicFunc.refGene'].split(" ")
+                        if(row['Start'] == row['End']):
+                            mutation_class = ' '.join(('germline', 'snp'))
+                        else:
+                            mutation_class = ' '.join(('germline', 'indel'))
+                        results = {
+                                'gene' : row['Gene.refGene'],
+                                'rarity' : pop_frequency_string,
+                                'start' : row['Start'],
+                                'end' : row['End'],
+                                'mutation_type' : exonic_function[0],
+                                'mutation_class' : mutation_class,
+                                'dbsnp' : row[ 'avsnp150'],
+                                'clinvar' : row['CLNSIG'],
+                                'aa_change' : aa_dict,
+                                
+                            }
+                        if row['Gene.refGene'] in sample_variants:
+                            sample_variants[row['Gene.refGene']][snp_id] = results
+                        else:
+                            sample_variants[row['Gene.refGene']] = {}
+                            sample_variants[row['Gene.refGene']][snp_id] = results
+
+                        print('.', end='')
+    print('.')
+    return(sample_variants)                                  
 
 def parse_celluloid_params(self, celluloid_params_file_path, ploidy_or_cellularity):
     celluloid_params_file_path = check_path_exists(self, celluloid_params_file_path)
@@ -251,7 +383,8 @@ def parse_coverage(self, coverage_file_path):
             if "GENOME_TERRITORY" in column:
                 genome, mean_coverage, sd, median_coverage, *extra = lines[column_number + 1].split('\t')
                 median_coverage = float(median_coverage)
-    return(median_coverage)
+                mean_coverage = round(float(mean_coverage), 1)
+    return(median_coverage, mean_coverage)
 
 def parse_fusions(self, fusions_file_path, min_split_reads = 8):
     fusion_count = 0
@@ -303,6 +436,7 @@ def parse_germline_variants(self, sample_variants_file_path):
                     'cosmic_census_flag': row['cosmic_census_flag'],
                     'nuc_context': row['nuc_context'],
                     'aa_context': row['aa_context'],
+                    'clinvar': row['clinvar'],
                 }
                 if gene in sample_variants:
                     sample_variants[gene][variant_key] = variant_characteristics
@@ -413,18 +547,28 @@ def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_coho
                 expression_dict[row['gene_name']]['cohort_perc'] = this_percentile
     return(expression_dict)
 
+def split_sequence_context_by_transcript(context_string):
+    full_nuc_context = {}
+    if context_string not in ["NA", ""]:
+        split_nuc_context = context_string.split("|")
+        for this_nuc_context in split_nuc_context:
+            this_nuc_context_split = this_nuc_context.split(":")
+            full_nuc_context[this_nuc_context_split[0]] = this_nuc_context_split[1]
+        return(full_nuc_context)
+    else:
+        return("NA")
+
 
 def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}):
     sample_variants = {}
     sample_variants_file_path = check_path_exists(self, sample_variants_file_path)
     with open(sample_variants_file_path, 'r') as sample_variants_file:
         for row in csv.DictReader(sample_variants_file, delimiter=","):
-            ## only saving non-silent germline variants to save on memory
+            gene = row['gene']
             if 'somatic' in row['mutation_class']:
                
-                gene = row['gene']
                 variant_key = f"{row['mutation_type']},{row['position']},{row['base_change']}"
-
+                
                 variant_characteristics = {
                     'gene': gene,
                     'gene_chr': row['gene_chr'],
@@ -436,8 +580,8 @@ def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}):
                     'copy_number': row['copy_number'],
                     'ab_counts': row['ab_counts'],
                     'cosmic_census_flag': row['cosmic_census_flag'],
-                    'nuc_context': row['nuc_context'],
-                    'aa_context': row['aa_context'],
+                    'nuc_context': split_sequence_context_by_transcript(row['nuc_context']),
+                    'aa_context': split_sequence_context_by_transcript(row['aa_context']),
                     'position': row['position']
                 }
                 # add variant to gene or create gene
@@ -446,21 +590,22 @@ def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}):
                 else:
                     sample_variants[gene] = {}
                     sample_variants[gene][variant_key] = variant_characteristics
-            elif row['gene'] in gene_list.keys() and ('NA' in row['mutation_class'] or 'germline' in row['mutation_class']):
-                if gene_list[row['gene']] != 'rare':
+            elif (row['gene'] in gene_list.keys() or 'germline' in row['mutation_class'] ) \
+                and ('NA' in row['mutation_class'] or 'germline' in row['mutation_class']) \
+                and gene not in sample_variants:
                     gene = row['gene']
                     variant_key = "No Variant"
 
                     variant_characteristics = {
                         'gene': gene,
                         'gene_chr': row['gene_chr'],
+                        'copy_number': row['copy_number'],
+                        'ab_counts': row['ab_counts'],
                         'mutation_type': 'NA',
                         'mutation_class': 'NA',
                         'rarity': 'NA',
                         'clinvar': 'NA',
                         'dbsnp': 'NA',
-                        'copy_number': row['copy_number'],
-                        'ab_counts': row['ab_counts'],
                         'cosmic_census_flag': 'NA',
                         'nuc_context': 'NA',
                         'aa_context': 'NA',
@@ -492,6 +637,16 @@ def parse_TDP(self, TDP_file_path):
         row = dict(zip(header, line.split(',')))
     return(round(float(row["score"]),2))
 
+def subset_and_deduplicate(data ):
+    subset_data = {}
+    for this_gene in data:
+        for this_variant in data[this_gene]:
+            if this_gene not in subset_data: 
+                subset_data[this_gene] = {
+                    'copy_number' : data[this_gene][this_variant]['copy_number'],
+                    'ab_counts' : data[this_gene][this_variant]['ab_counts'],
+                }
+    return(subset_data)
 
 def try_two_null_files(self, wrapper, workflow_name, ini_param, path_info, first_file):
     if wrapper.my_param_is_null(ini_param):

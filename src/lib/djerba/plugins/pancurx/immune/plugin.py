@@ -45,7 +45,11 @@ class main(plugin_base):
         genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('immune_genes_of_interest_file'))
 
         somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), genes_of_interest)
-        data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest)
+
+        mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
+        mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
+
+        data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest, mane_transcripts)
         data[core_constants.RESULTS]['gene_expression'] = tools.get_gene_expression(self, genes_of_interest, wrapper.get_my_string(phe.TPM_PATH), os.path.join(data_dir, phe.DEFAULT_CIBERSORT_COMPARISON_PATH))
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
