@@ -43,15 +43,14 @@ class main(plugin_base):
 
         wrapper = tools.try_two_null_files(self, wrapper, 'genes_of_interest_file', 'genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO, phe.DEFAULT_GENE_FILE)
         wrapper = tools.try_two_null_files(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO , phe.DEFAULT_GERMLINE_GENE_FILE)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'signatures_of_interest_file', 'signatures_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
 
         if wrapper.my_param_is_null(phe.SLIDE_DATE):
             wrapper.set_my_param(phe.SLIDE_DATE, phe.NONE_SPECIFIED)
         if wrapper.my_param_is_null(phe.MOFFIT):
             wrapper.set_my_param(phe.MOFFIT, 'NA')
 
-        if wrapper.my_param_is_null(phe.EXTERNAL_IDS):
-            external_ids = tools.parse_lims(self, wrapper.get_my_string(phe.DONOR_ID))
-            wrapper.set_my_param(phe.EXTERNAL_IDS, external_ids)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.EXTERNAL_IDS, phe.EXTERNAL_IDS, core_constants.DEFAULT_SAMPLE_INFO)
 
         if wrapper.my_param_is_null(phe.TUMOUR_TISSUE):
             tissue = tools.get_tissue_from_sample_id(wrapper.get_my_string(phe.TUMOUR_ID))
@@ -80,8 +79,10 @@ class main(plugin_base):
         ]
         data[core_constants.RESULTS] = {k: wrapper.get_my_string(k) for k in results_keys}
         data[core_constants.RESULTS][phe.CELLULOID_PLOT] = tools.convert_plot(self, wrapper.get_my_string(phe.CELLULOID_PLOT), phe.CELLULOID_PLOT)
-        data[core_constants.RESULTS][phe.TUMOUR_COVERAGE] = tools.parse_coverage(self, wrapper.get_my_string(phe.TUMOUR_COVERAGE_PATH))
-        data[core_constants.RESULTS][phe.NORMAL_COVERAGE] = tools.parse_coverage(self, wrapper.get_my_string(phe.NORMAL_COVERAGE_PATH))
+        median_coverage_t, mean_coverage_t = tools.parse_coverage(self, wrapper.get_my_string(phe.TUMOUR_COVERAGE_PATH))
+        data[core_constants.RESULTS][phe.TUMOUR_COVERAGE] = mean_coverage_t
+        median_coverage_n, mean_coverage_n = tools.parse_coverage(self, wrapper.get_my_string(phe.NORMAL_COVERAGE_PATH))
+        data[core_constants.RESULTS][phe.NORMAL_COVERAGE] = mean_coverage_n
         data[core_constants.RESULTS][phe.INDEL_BIN_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.INDEL_BIN_PLOT), phe.INDEL_BIN_PLOT)
         data[core_constants.RESULTS][phe.SV_BIN_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.SV_BIN_PLOT), phe.SV_BIN_PLOT)
         data[core_constants.RESULTS][phe.COSMIC_STACK_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.COSMIC_STACK_PLOT), phe.COSMIC_STACK_PLOT)
@@ -90,7 +91,9 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.TMB_STACK_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.TMB_STACK_PLOT), phe.TMB_STACK_PLOT)
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
         data[core_constants.RESULTS]['loads'] = tools.get_loads_from_summary(summary_results)
-        data[core_constants.RESULTS]['sigs'] = tools.parse_cosmic_signatures(self, wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH))
+
+
+        data[core_constants.RESULTS]['sigs'] = tools.parse_cosmic_signatures(self, wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH), wrapper.get_my_string('signatures_of_interest_file'))
 
         if wrapper.get_my_string(phe.SLIDE_DATE) == phe.NONE_SPECIFIED:
             data[core_constants.RESULTS][phe.SLIDE_DATE] = strftime("%a %b %d %H:%M:%S %Y")
@@ -115,13 +118,21 @@ class main(plugin_base):
         genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('genes_of_interest_file'))
         tools.copy_if_not_exists(wrapper.get_my_string('genes_of_interest_file'), os.path.join(self.workspace.print_location(), phe.DEFAULT_GENE_FILE))
         somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), genes_of_interest)
-        data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest)
+
+        mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
+        mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
+
+        reportable_variants, tier_mode = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest, mane_transcripts)
+        data[core_constants.RESULTS]['reportable_variants'] = reportable_variants
         data[core_constants.RESULTS]['reportable_genes'] = genes_of_interest
 
         germline_genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('germline_genes_of_interest_file'))
         tools.copy_if_not_exists(wrapper.get_my_string('germline_genes_of_interest_file'), os.path.join(self.workspace.print_location(), phe.DEFAULT_GERMLINE_GENE_FILE))
-        germline_variants = tools.parse_germline_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE))
-        germ_nonsil_genes, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants = tools.get_subset_of_germline_variants(germline_variants, germline_genes_of_interest)
+        
+        germline_variants = self.workspace.read_json('germline.json')
+        
+        cnvs_and_abs = self.workspace.read_json('cnvs_and_abs.json')
+        germ_nonsil_genes, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants = tools.get_subset_of_germline_variants(germline_variants, germline_genes_of_interest, mane_transcripts, cnvs_and_abs)
 
         data[core_constants.RESULTS]['reportable_germline_variants'] = reportable_germline_variants
         data[core_constants.RESULTS][phe.GERM_NONSIL_SUBSET_RARE_COUNT] = germ_nonsil_genes_rare
@@ -163,6 +174,7 @@ class main(plugin_base):
             'genes_of_interest_file',
             'germline_genes_of_interest_file',
             'template_type',
+            'signatures_of_interest_file'
 
         ]
         for key in discovered:

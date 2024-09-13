@@ -38,18 +38,26 @@ class main(plugin_base):
         wrapper = self.get_config_wrapper(config)
         attributes = wrapper.get_my_attributes()
         self.check_attributes_known(attributes)
+        finder = directory_finder(self.log_level, self.log_path)
+        data_dir = finder.get_data_dir()
+
         data = self.get_starting_plugin_data(wrapper, self.PLUGIN_VERSION)
         genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('immune_genes_of_interest_file'))
 
         somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), genes_of_interest)
-        data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest)
+
+        mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
+        mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
+
+        data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest, mane_transcripts)
+        data[core_constants.RESULTS]['gene_expression'] = tools.get_gene_expression(self, genes_of_interest, wrapper.get_my_string(phe.TPM_PATH), os.path.join(data_dir, phe.DEFAULT_CIBERSORT_COMPARISON_PATH))
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
-        finder = directory_finder(self.log_level, self.log_path)
-        data_dir = finder.get_data_dir()
+
         work_dir = self.workspace.get_work_dir()
         r_script_dir = os.path.join(finder.get_base_dir(), "plugins/pancurx/immune/")
         self.run_immunedeconv(wrapper.get_my_string(phe.TPM_PATH), r_script_dir, data_dir, work_dir ) 
+        data[core_constants.RESULTS]['immune_fig'] = tools.convert_svg_plot(self, os.path.join(work_dir, 'immunedeconv.txt.svg'), 'immune_fig')
 
         return data
 
@@ -62,7 +70,7 @@ class main(plugin_base):
             phe.PARAM_PATH,
             phe.SAMPLE_VARIANTS_FILE,
             'immune_genes_of_interest_file',
-            phe.TPM_PATH,
+            phe.TPM_PATH
         ]
         for key in discovered:
             self.add_ini_discovered(key)
@@ -70,17 +78,19 @@ class main(plugin_base):
         self.set_priority_defaults(self.PRIORITY)
 
     def run_immunedeconv(self, input_tpm, r_script_dir, data_dir, work_dir):
-  
-      cmd = [
-          'Rscript', r_script_dir + "/immune.R",
-          '--cibersort', r_script_dir,
-          '--loadings', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_LOADINGS_PATH),
-          '--genes', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_GENES_PATH),
-          '--comparison', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_COMPARISON_PATH),
-          '--input', input_tpm,
-          '--output', os.path.join(work_dir, 'immunedeconv.txt'),
-      ]
+        if self.workspace.has_file(os.path.join(work_dir, 'immunedeconv.txt')):
+            msg = "CIBERSORT file found"
+            self.logger.info(msg)
+        else:
+            cmd = [
+                'Rscript', r_script_dir + "/immune.R",
+                '--cibersort', r_script_dir,
+                '--loadings', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_LOADINGS_PATH),
+                '--genes', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_GENES_PATH),
+                '--comparison', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_COMPARISON_PATH),
+                '--input', input_tpm,
+                '--output', os.path.join(work_dir, 'immunedeconv.txt'),
+            ]
 
-      runner = subprocess_runner()
-      result = runner.run(cmd, "immunedeconv R script")
-      return result
+            runner = subprocess_runner()
+            runner.run(cmd, "immunedeconv R script")

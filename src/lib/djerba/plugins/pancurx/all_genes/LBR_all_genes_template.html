@@ -16,6 +16,9 @@
 <div style="padding:0px 0px 0px 50px; break-inside: avoid; display: table;">
 
       <h3 class="lbr">Whole Genome View</h3>
+      <p class="lbr">This tumour is <b> ${results.get('ploidy_long')}</b> and inferred sex chromosomes are ${results.get(plugin.INFERRED_SEX)}.
+            <p>
+
       <p class="lbr">
 
       The figure below displays the whole genome of the tumour. The rainfall plot is a visualization commonly used in cancer genomics to illustrate the distribution of somatic point mutations.
@@ -30,15 +33,6 @@
 </div>
 <div style="padding:0px 0px 0px 50px; ">
 
-      <h3 class="lbr">Cellularity Solution</h3>
-      <p class="lbr">
-            The figure below is created by Celluloid and summarizes the copy number profile, cellularity and clonality of the sample.
-      </p>
-
-      <table class="lbr" style="text-align:center; width:100%"><tr><td >
-      <img id='CELLULOID' style='width: 60%; object-fit: contain' src="${results.get(plugin.CELLULOID_PLOT)}"/>
-      </td></tr></table>
-
 
       <h3 class="lbr">Mutational Spectra</h3>
       <p class="lbr">
@@ -48,9 +42,6 @@
 
       <table class="lbr" style="text-align:center; width:100%">
             <tr>
-                  <td style="width:125px">
-                        <img id='INDEL_BIN_PLOT' style='width: 90%; object-fit: contain' src="${results.get(plugin.INDEL_BIN_PLOT)}"/>
-                  </td>
                   <td style="width:225px">
                         <img id='SV_BIN_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SV_BIN_PLOT)}"/>
                   </td>
@@ -71,6 +62,15 @@
 	      </tr>
       </table>
 
+      <h3 class="lbr">Cellularity Solution</h3>
+      <p class="lbr">
+            The figure below is created by Celluloid and summarizes the copy number profile, cellularity and clonality of the sample.
+      </p>
+
+      <table class="lbr" style="text-align:center; width:100%"><tr><td >
+      <img id='CELLULOID' style='width: 60%; object-fit: contain' src="${results.get(plugin.CELLULOID_PLOT)}"/>
+      </td></tr></table>
+
 
 
 
@@ -78,8 +78,9 @@
       <h3 class="lbr">All Somatic Exonic Non-Silent Variants</h2>
 
       <table class="lbr sortable" style="width:100%" >
-            <tr> <td>Gene</td><td>Chr.</td><td>Variant</td><td>Copy Number</td><td>A.B Count</td><td>Additional Information</td></tr>
-                  % for variant_row in make_somatic_table_rows(all_variants, ploidy):
+            <tr><td style="width:8%">Gene</td><td style="width:5%">Chr.</td><td style="width:5%">CN</td><td style="width:5%">A|B</td><td style="width:5%">tVAF</td><td style="width:45%">Variant</td><td style="width:17%"">Additional Information</td></tr>
+
+                  % for variant_row in make_somatic_table_rows(all_variants, ploidy, 'discovery', all_genes=True):
                         ${variant_row}
                   % endfor
       </table>

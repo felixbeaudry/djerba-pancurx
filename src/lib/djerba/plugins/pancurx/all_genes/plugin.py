@@ -45,7 +45,11 @@ class main(plugin_base):
         data = self.get_starting_plugin_data(wrapper, self.PLUGIN_VERSION)
         inferred_sex_chromosomes = tools.parse_sex(self, wrapper.get_my_string(phe.SEX_PATH), 'LBR')
 
+        mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
+        mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
+
         somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE))
+        somatic_variants = tools.get_mane_somatic_variants(self, somatic_variants,  mane_transcripts)
         data[core_constants.RESULTS]['all_variants'] = tools.get_all_somatic_variants(self, somatic_variants, inferred_sex_chromosomes)
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
@@ -56,6 +60,10 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.SV_BIN_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.SV_BIN_PLOT), phe.SV_BIN_PLOT)
         data[core_constants.RESULTS][phe.WHOLE_GENOME_PLOT] = tools.convert_plot(self, wrapper.get_my_string(phe.WHOLE_GENOME_PLOT), phe.WHOLE_GENOME_PLOT)
         data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
+        
+        ploidy_long = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), phe.PLOIDY)
+        data[core_constants.RESULTS]['ploidy_long'] = ploidy_long
+        data[core_constants.RESULTS][phe.INFERRED_SEX] = tools.parse_sex(self, wrapper.get_my_string(phe.SEX_PATH), wrapper.get_my_string('template_type'))
 
         return data
 

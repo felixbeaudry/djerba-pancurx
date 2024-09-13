@@ -1,32 +1,55 @@
 <%
       import djerba.plugins.pancurx.constants as plugin
-      from djerba.plugins.pancurx.html import make_immune_table_rows
+      from djerba.plugins.pancurx.html import make_immune_table_rows, make_hla_table_rows
       from djerba.util.html import html_builder
       reportable_variants = results.get('reportable_variants')
       ploidy = results.get('ploidy')
-
+      expression = results.get('gene_expression')
 %>
 
-<div id="main">
 
 
 <h2 class="lbr">Immune Inference</h2>
 <div style="padding:0px 0px 0px 50px">
-      <p>Tumors can evade immune surveillance through various mechanisms, 
-            including downregulating antigen presentation or activating immune checkpoint pathways like PD-1 (<em>PDCD1</em>) and PD-L1 (<em>CD274</em>). 
-            Further, immunotherapy leverages the body's immune system to recognize and eliminate cancer cells and 
-            its success hinges on deciphering the tumor microenvironment. </p>
 
-            <table style="width:100%" class="sortable">
-                  <tr><td>Gene</td><td>Copy Number</td><td>A.B Count</td></tr>
-            
-                        % for row in make_immune_table_rows(reportable_variants, ploidy):
-                              ${row}
-                        % endfor
-            
-                  </table>
-            
 
-</div>
+      <p class="lbr">
+            Immunotherapy leverages the body's immune system to recognize and eliminate cancer cells and 
+            its success hinges on deciphering the tumor microenvironment.
+            The problem is tumors can evade immune surveillance through various mechanisms. 
+      </p>
+
+      <h3 class="lbr">Somatic HLA Status</h3>
+
+      <p class="lbr">Somatic loss of Human Leukocyte Antigen (HLA) alleles is a common method of immune evasion. HLA loss appears below as (0.1).</p>
+      <table style="width:100%" class="lbr">
+            <tr>
+                  ${make_hla_table_rows(reportable_variants, ploidy)}
+            </tr>
+      </table>
+
+      <h3 class="lbr">Expression of Immune Checkpoint Regulators </h3>
+
+      <p class="lbr">
+      Another common evasion method is activating immune checkpoint pathways, by upregulating genes such as PD-1 (<em>PDCD1</em>) and PD-L1 (<em>CD274</em>). 
+      Below, we show gene expression relative to the LBR cohort (N=57) and copy number at these genes.
+      </p>
+
+      <table style="width:100%" class="lbr">
+            <tr><td style="width:100px"><b>Gene</b></td><td style="width:100px"><b>Gene Expression Percentile</b></td><td style="width:100px"><b>Somatic Copy Number</b></td></tr>
+      
+                  % for row in make_immune_table_rows(reportable_variants, ploidy, expression):
+                        ${row}
+                  % endfor
+      
+      </table>
+
+      <h3 class="lbr">Immune Cell Deconvolution</h3>
+
+      <p class="lbr">Finally, we show the results of immune cell deconvolution for this sample (shown as <b>X</b>) based on RNAseq 
+            for four cell types (CD8+ T-cells, CD4+ T-cells, Natural Killer [NK] T-cells, M1 Macrophages) 
+            and compare these results to the LBR cohort (N=57) shown as boxplots.</p>
+      <img style='height: 300px;  margin-left: 50px; margin-right: 50px; ' src="${results.get('immune_fig')}"/>
+
 </div>
 

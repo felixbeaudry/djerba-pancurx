@@ -25,3 +25,4 @@ BARD1	action
 BMPR1A	action
 NTHL1	action
 PTEN	action
+DPYD	action

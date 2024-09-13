@@ -14,7 +14,7 @@ from glob import glob
 from PyPDF2 import PdfMerger
 import djerba.util.ini_fields as ini
 from djerba.core.base import base as core_base
-from djerba.core.database import database
+#from djerba.core.database import database
 from djerba.core.extract import extraction_setup
 from djerba.core.ini_generator import ini_generator
 from djerba.core.json_validator import plugin_json_validator
@@ -370,12 +370,12 @@ class main(main_base):
         ap = arg_processor(args, self.logger, validate=False)
         mode = ap.get_mode()
         if mode == constants.SETUP:
-            assay = ap.get_assay()
+            #assay = ap.get_assay()
             compact = ap.get_compact()
             ini_path = ap.get_ini_path()
             if ini_path == None:
                 ini_path = os.path.join(os.getcwd(), 'config.ini')
-            self.setup(assay, ini_path, compact)
+            self.setup(ini_path, compact)
         elif mode == constants.CONFIGURE:
             ini_path = ap.get_ini_path()
             ini_path_out = ap.get_ini_out_path() # may be None
@@ -383,25 +383,25 @@ class main(main_base):
         elif mode == constants.EXTRACT:
             ini_path = ap.get_ini_path()
             json_arg = ap.get_json()
-            archive = ap.is_archive_enabled()
+            #archive = ap.is_archive_enabled()
             config = self.read_ini_path(ini_path)
-            self.extract(config, json_arg, archive)
+            self.extract(config, json_arg)
         elif mode == constants.RENDER:
             json_path = self.get_json_input_path(ap.get_json())
-            archive = ap.is_archive_enabled()
+            #archive = ap.is_archive_enabled()
             with open(json_path) as json_file:
                 data = json.loads(json_file.read())
-            self.render(data, ap.get_out_dir(), ap.is_pdf_enabled(), archive)
+            self.render(data, ap.get_out_dir(), ap.is_pdf_enabled())
         elif mode == constants.REPORT:
             ini_path = ap.get_ini_path()
             out_dir = ap.get_out_dir()
             ini_path_out = os.path.join(out_dir, 'full_config.ini')
             json_path = None # write JSON to default workspace location
-            archive = ap.is_archive_enabled()
+            #archive = ap.is_archive_enabled()
             config = self.configure(ini_path, ini_path_out)
             # upload to archive at the extract step, not the render step
-            data = self.extract(config, json_path, archive)
-            self.render(data, ap.get_out_dir(), ap.is_pdf_enabled(), archive=False)
+            data = self.extract(config, json_path, False)
+            self.render(data, ap.get_out_dir(), ap.is_pdf_enabled())
         elif mode == constants.UPDATE:
             ini_path = ap.get_ini_path()
             if ini_path == None:
@@ -412,89 +412,33 @@ class main(main_base):
                 summary_only = False
             jp = self.get_json_input_path(ap.get_json())
             out_dir = ap.get_out_dir()
-            archive = ap.is_archive_enabled()
+            #archive = ap.is_archive_enabled()
             pdf = ap.is_pdf_enabled()
             write = ap.is_write_json_enabled()
             force = ap.is_forced()
-            self.update(config_path, jp, out_dir, archive, pdf, summary_only, write, force)
+            self.update(config_path, jp, out_dir, False, pdf, summary_only, write, force)
         else:
             msg = "Mode '{0}' is not defined in Djerba core.main!".format(mode)
             self.logger.error(msg)
             raise RuntimeError(msg)
 
-    def setup(self, assay, ini_path, compact):
-        if assay == 'WGTS':
-            component_list = [
-                'core',
-                'input_params_helper',
-                'provenance_helper',
-                'report_title',
-                'patient_info',
-                'case_overview',
-                'treatment_options_merger',
-                'summary',
-                'sample',
-                'genomic_landscape',
-                'expression_helper',
-                'wgts.snv_indel',
-                'cnv',
-                'fusion',
-                'gene_information_merger',
-                'supplement.body',
-            ]
-        elif assay == 'WGS':
-            component_list = [
-                'core',
-                'input_params_helper',
-                'provenance_helper',
-                'report_title',
-                'patient_info',
-                'case_overview',
-                'treatment_options_merger',
-                'summary',
-                'sample',
-                'genomic_landscape',
-                'wgts.snv_indel',
-                'cnv',
-                'gene_information_merger',
-                'supplement.body',
-            ]
-        elif assay == 'TAR':
-            component_list = [
-                'core',
-                'tar_input_params_helper',
-                'provenance_helper',
-                'report_title',
-                'patient_info',
-                'case_overview',
-                'treatment_options_merger',
-                'summary',
-                'tar.sample',
-                'tar.snv_indel',
-                'tar.swgs',
-                'gene_information_merger',
-                'supplement.body',
-            ]
-        elif assay == 'PWGS':
-            component_list = [
-                'core',
-                'report_title',
-                'patient_info',
-                'pwgs_provenance_helper',
-                'pwgs_cardea_helper',
-                'pwgs.case_overview',
-                'pwgs.summary',
-                'pwgs.sample',
-                'pwgs.analysis',  
-                'supplement.body'
-            ]
-        else:
-            msg = "Invalid assay name '{0}'".format(assay)
-            self.logger.error(msg)
-            raise ValueError(msg)
+    def setup(self, ini_path, compact):
+        component_list = [
+            'core',
+            'sample_helper',
+            'file_helper',
+            'pancurx.blurb',
+            'pancurx.summary',
+            'pancurx.somatic',
+            'pancurx.germline',
+            'pancurx.classification',
+            'pancurx.all_genes',
+            'pancurx.appendix',
+            'pancurx.slide'
+        ]
         generator = ini_generator(self.log_level, self.log_path)
         generator.write_config(component_list, ini_path, compact)
-        self.logger.info("Wrote config for {0} to {1}".format(assay, ini_path))
+        #self.logger.info("Wrote config for {0} to {1}".format(ini_path))
 
     def update(self, config_path, json_path, out_dir, archive, pdf, summary_only,
                write_json, force):
@@ -579,7 +523,8 @@ class arg_processor(arg_processor_base):
         return value
 
     def is_archive_enabled(self):
-        return not self._get_arg('no_archive')
+        return False
+        #return not self._get_arg('no_archive')
 
     def is_cleanup_enabled(self):
         # use to auto-populate INI in 'setup' mode

@@ -34,7 +34,8 @@
                         <td style="width:150px"><b>Normal Tissue:</b></td>
                         <td style="width:150px">${results.get(plugin.NORMAL_TISSUE)}</td>
                         <td style="width:150px"><b>Normal Coverage:</b></td>
-                        <td style="width:200px">${results.get(plugin.NORMAL_COVERAGE)}x (>30x)</td>
+                        <!-- #&#956;&#771; &#956;&#772; -->
+                        <td style="width:200px">M: ${results.get(plugin.NORMAL_COVERAGE)}x (m: ${results.get('mean_coverage_normal')}x)</td>
                   </tr>
             </table>
 
@@ -46,7 +47,8 @@
                         <td style="width:150px"><b>Tumour Tissue:</b></td>
                         <td style="width:150px">${results.get(plugin.TUMOUR_TISSUE)}</td>
                         <td style="width:150px"><b>Tumour Coverage:</b></td>
-                        <td style="width:200px">${results.get(plugin.TUMOUR_COVERAGE)}x (>30x)</td>
+                        <td style="width:200px">M: ${results.get(plugin.TUMOUR_COVERAGE)}x (m: ${results.get('mean_coverage_tumour')}x)</td>
+
                   </tr>
                   <tr>
                         <td style="width:200px"><b>Tumour Sample Type:</b></td>

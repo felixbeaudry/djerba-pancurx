@@ -14,6 +14,7 @@ from djerba.core.base import base as core_base
 from djerba.util.logger import logger
 import djerba.core.constants as cc
 import djerba.util.ini_fields as ini
+import djerba.plugins.pancurx.constants as phe
 
 class configurable(core_base, ABC):
 
@@ -291,7 +292,7 @@ class core_configurer(configurable):
             if self.workspace.has_file(sample_info_file):
                 sample_info = self.workspace.read_json(sample_info_file)
                 report_id = "{0}-v{1}".format(
-                    sample_info[cc.TUMOUR_ID],
+                    sample_info[phe.TUMOUR_SAMPLE_ID],
                     wrapper.get_my_int(cc.REPORT_VERSION)
                 )
                 msg = "Generated report ID {0} from sample info JSON".format(report_id)
