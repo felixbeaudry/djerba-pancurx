@@ -16,8 +16,8 @@ def make_class_table_rows(multifactor_marker_results, type):
     for row in row_fields:
         cells = [
             td_class(row[phe.ABOVE_CUTOFF], type),
-            hb.td(''.join(("<strong>",row[phe.REPORTING_NAME],"<strong>"))),
-            hb.td(row[phe.VALUE]),
+             '<td {0}>{1}</td>'.format('style="width:25%"', ''.join(("<strong>",row[phe.REPORTING_NAME],"<strong>"))),
+             '<td {0}>{1}</td>'.format('style="width:20%"', row[phe.VALUE])
         ]
         cells = ''.join(cells)
         if row_count % 2 == 0:
@@ -43,9 +43,22 @@ def make_fusion_table_rows(row_fields):
         rows.append(hb.tr(cells))
     return rows
 
-def build_dbsnp_url(dbsnp):
-    url='https:/www.ncbi.nlm.nih.gov/snp/'+dbsnp
-    return '<a href="{0}">{1}</a>'.format(url, dbsnp)
+def build_dbsnp_url(dbsnp, chr, start):
+    if dbsnp == 'Novel':
+        chr = chr.split("chr")[1]
+        spdi = ''.join(( chr,':g.', start))
+        url = 'https:/www.ncbi.nlm.nih.gov/snp/?term={0}%3A{1}'.format(chr, start)
+        return_string = '<a href="{0}">{1}</a>'.format(url, spdi)
+    else:
+        url='https:/www.ncbi.nlm.nih.gov/snp/'+dbsnp
+        return_string = '<a href="{0}">{1}</a>'.format(url, dbsnp)
+    return return_string
+
+def build_cosmic_url(sbs):
+
+    url='https://cancer.sanger.ac.uk/signatures/sbs/'+sbs
+    return_string = '<a href="{0}">{1}</a>'.format(url, sbs)
+    return return_string
 
 
 def make_germline_table_rows(row_fields):
@@ -59,7 +72,7 @@ def make_germline_table_rows(row_fields):
             hb.td(mutation),
             '<td {0}>{1}</td>'.format(ab_class, ab),
             hb.td(row['clinvar'].replace("_"," ")),
-            hb.td(build_dbsnp_url(row['dbsnp']))
+            hb.td(build_dbsnp_url(row['dbsnp'], row['chr'], row['start']))
             #hb.td(additional_string)
         ]
         rows.append(hb.tr(cells))
@@ -126,18 +139,46 @@ def make_ordinal(n):
 
 def make_signatures_string(signature_dict):
     signature_strings = []
-    signature_dict = dict(sorted(signature_dict.items(), key=lambda item: item[1], reverse=True))
+    signature_dict = dict(sorted(signature_dict.items(), key=lambda item: item[1]['proportion'], reverse=True))
     for this_signature in signature_dict:
-        this_signature_value = round(signature_dict[this_signature] * 100)
+        this_signature_value = round(signature_dict[this_signature]['proportion'] * 100)
         if this_signature_value > 10 :
-            if  this_signature == 'SBS2026':
-                this_signature = 'SBS26'
-            this_signature_split = this_signature.split("SBS")
+            this_signature_split = this_signature.split(".")
             this_signature = this_signature_split[1]
             this_signature_string = '<mark class="sig{0}">{0}</mark> ({1}%)'.format(this_signature, this_signature_value)
             signature_strings.append(this_signature_string)
     return(', '.join(signature_strings))
     
+
+def make_germline_slide_rows(row_fields,  reportable_genes):
+    rows = []
+    for this_gene in reportable_genes:
+        theses_mutations = []
+        loh = ''
+        clinvar = ''
+        for row in row_fields:
+            if row['gene'] == this_gene:
+                mutation = process_gene_context_for_slide(row)
+                if mutation != "":
+                    theses_mutations.append(mutation)
+                loh = process_ab_slide(row['ab_counts'])
+        theses_mutations = list(set(theses_mutations))
+        if loh != '':
+            theses_mutations.append(loh)
+        theses_mutations = ", ".join(theses_mutations)
+
+        if row['clinvar'] in ['Uncertain significance']:
+            clinvar = 'VUS'
+        else:
+            clinvar = row['clinvar']
+        cells = [
+            hb.td(this_gene, italic=True),
+            hb.td(theses_mutations),
+            hb.td(clinvar),
+        ]
+        if theses_mutations != '':
+            rows.append(hb.tr(cells))
+    return rows
 
 def make_somatic_slide_rows(row_fields, ploidy, reportable_genes):
     rows = []
@@ -167,23 +208,56 @@ def make_somatic_slide_rows(row_fields, ploidy, reportable_genes):
             rows.append(hb.tr(cells))
     return rows
 
-def make_somatic_table_rows(row_fields, ploidy):
+def make_somatic_table_rows(row_fields, ploidy, tier_mode, all_genes=False):
     rows = []
     for row in row_fields:
+        
         mutation = process_gene_context(row)
         additional_string = process_additional(row)
         cn_class, cn = process_cn(row['copy_number'], ploidy)
         ab_class, ab = process_ab(row['ab_counts'])
+        if row['tumour_freq'] == 'NA':
+            tumour_freq = ''
+        else:
+            tumour_freq = round(float(row['tumour_freq']), 2)
+        if all_genes==False and row['tier'] == 'discovery' :
+            gene_name = ''.join((row['gene'],'*'))
+        else:
+            gene_name = row['gene']
         cells = [
-            hb.td(row['gene'], italic=True),
-            hb.td(row['gene_chr'], italic=False),
-            hb.td(mutation),
+            hb.td(gene_name, italic=True),
+            hb.td(row['gene_chr']),
             '<td {0}>{1}</td>'.format(cn_class, cn),
             '<td {0}>{1}</td>'.format(ab_class, ab),
-            hb.td(additional_string)
+            hb.td(tumour_freq),
+            hb.td(mutation),
+           
         ]
+        if all_genes:
+            cells.append( hb.td(additional_string))
+        if tier_mode == 'discovery':
+            rows.append(hb.tr(cells))
+        elif row['tier'] in ['driver', 'action']:
+            rows.append(hb.tr(cells))
+    return rows
+
+def make_signature_table_rows(row_fields):
+    rows = []
+    for row in row_fields:
+        if row_fields[row]['proportion'] > 0.3:
+            sbs_class = 'class="cn_very_gain"'
+        elif row_fields[row]['proportion'] > 0.1:
+            sbs_class = 'class="cn_gain"'
+        else:
+            sbs_class = ''
+        cells = [
+            hb.td(build_cosmic_url(row_fields[row]['sbs'])),
+            hb.td(row_fields[row]['aetiology']),
+             '<td {0}>{1}</td>'.format(sbs_class, row_fields[row]['proportion']),
+         ]
         rows.append(hb.tr(cells))
     return rows
+
 
 def process_ab(ab_full):
     ab_split = ab_full.split('|')
@@ -195,7 +269,7 @@ def process_ab(ab_full):
             ab = this_ab
             break
     a_b_list = ab.split('.')
-    ab = ".".join(a_b_list)
+    ab = "|".join(a_b_list)
     ab_class = ''
     if a_b_list[0] == "0":
         ab_class = 'class="cn_loh"'
@@ -279,19 +353,10 @@ def process_gene_context(row):
         mutation_string = ''
     else:
         mutation_string = row['mutation_type']
-        # if row['mutation_class'] in ("somatic snv", "somatic indel") and row['nuc_context'] != '':
-        
-        #     nuc_context = row['nuc_context'].split("|")
-        #     nuc_context = nuc_context[0].split(":")
-        #     mutation_string = ''.join((row['mutation_type']," (",nuc_context[1],')'))
-            
-        #     if row['aa_context'] != 'NA':
-        #         aa_context = row['aa_context'].split("|")
-        #         aa_context = aa_context[0].split(":")
-        #         mutation_string = ''.join((row['mutation_type']," (",nuc_context[1],';',aa_context[1],')'))
-        #         if len(mutation_string) > 40:
-        #             mutation_string = ''.join((row['mutation_type']," (",nuc_context[1],')'))
-
+        if 'nuc_context' not in row:
+            row['nuc_context'] = 'NA'
+        if 'aa_context' not in row:
+            row['aa_context'] = 'NA'
         if row['mutation_class'] in ( "somatic snv", "somatic indel", "germline snp", "germline indel") and row['nuc_context'] != '':
  
             nuc_context = row['nuc_context']
@@ -302,7 +367,7 @@ def process_gene_context(row):
                 aa_context = row['aa_context']
 
                 mutation_string = ' '.join((row['mutation_type'],"(",nuc_context,';',aa_context,')'))
-                if len(mutation_string) > 40:
+                if len(mutation_string) > 80:
                     mutation_string = ' '.join((row['mutation_type'],"(",nuc_context,'; large charge)'))
 
         elif row['mutation_class'] in ("somatic sv", "somatic cnv"):
@@ -317,18 +382,11 @@ def process_gene_context_for_slide(row):
         mutation_string = ''
     else:
         mutation_string = row['mutation_type']
-        # if row['mutation_class'] in ("somatic snv", "somatic indel") and row['nuc_context'] != '':
-        
-        #     if row['aa_context'] != 'NA':
-        #         aa_context = row['aa_context'].split("|")
-        #         aa_context = aa_context[0].split(":")
-        #         mutation_string = aa_context[1]
-        #         if len(mutation_string) > 40:
-        #             mutation_string = nuc_context[1]
-        #     else:
-        #         nuc_context = row['nuc_context'].split("|")
-        #         nuc_context = nuc_context[0].split(":")
-        #         mutation_string = nuc_context[1]
+        if 'nuc_context' not in row:
+            row['nuc_context'] = 'NA'
+        if 'aa_context' not in row:
+            row['aa_context'] = 'NA'
+
         if row['mutation_class'] in ("germline snp", "germline indel", "somatic snv", "somatic indel") and row['nuc_context'] != '':
             
             nuc_context = row['nuc_context']

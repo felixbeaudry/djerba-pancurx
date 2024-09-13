@@ -38,6 +38,7 @@ DEFAULT_REFERENCE_COHORT = '/.mounts/labs/PCSI/users/fbeaudry/PanCuRx_Analysis_P
 
 DEFAULT_GENE_FILE = 'genes.txt'
 DEFAULT_GERMLINE_GENE_FILE = 'germline.genes.txt'
+DEFAULT_SIGNATURES_FILE = 'signatures.txt'
 
 # report attributes
 REPORT_VERSION = "report_version"
@@ -203,22 +204,23 @@ COSMIC_MUTATION_TYPES = {
 	"T" : "translocation",
 }
 
-COSMIC_SIGNATURE_SET = {
-	"Signature.1": "SBS1",
-	"Signature.2": "SBS2",
-	"Signature.3": "SBS3",
-	"Signature.5": "SBS5",
-	"Signature.6": "SBS6",
-	"Signature.8": "SBS8",
-	"Signature.13": "SBS13",
-	"Signature.17a": "SBS17a",
-    "Signature.17b": "SBS17b",
-	"Signature.18": "SBS18",
-	"Signature.20": "SBS20",
-    "Signature.24": "SBS24",
-	"Signature.26": "SBS26",
-    "Signature.30": "SBS30"
-}
+#MOVED TO signatures.txt Aug 21st, 2024 by Fe
+# COSMIC_SIGNATURE_SET = {
+# 	"Signature.1": "SBS1",
+# 	"Signature.2": "SBS2",
+# 	"Signature.3": "SBS3",
+# 	"Signature.5": "SBS5",
+# 	"Signature.6": "SBS6",
+# 	"Signature.8": "SBS8",
+# 	"Signature.13": "SBS13",
+# 	"Signature.17a": "SBS17a",
+#     "Signature.17b": "SBS17b",
+# 	"Signature.18": "SBS18",
+# 	"Signature.20": "SBS20",
+#     "Signature.24": "SBS24",
+# 	"Signature.26": "SBS26",
+#     "Signature.30": "SBS30"
+# }
 
 DSBR_SNV_LOAD = "dsbr_snv_load"
 DSBR_CT_RATIO = "dsbr_ct_ratio"

@@ -15,7 +15,7 @@ import djerba.plugins.pancurx.tools as tools
 
 class main(plugin_base):
 
-    PRIORITY = 250
+    PRIORITY = 100
     PLUGIN_VERSION = '1.0.0'
     TEMPLATE_NAME = 'somatic_template.html'
 
@@ -27,6 +27,8 @@ class main(plugin_base):
         wrapper = tools.fill_file_if_null(self, wrapper, 'genes_of_interest_file', 'genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, 'comparison_cohort_file', 'comparison_cohort_file', core_constants.DEFAULT_SAMPLE_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'signatures_of_interest_file', 'signatures_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
 
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SAMPLE_VARIANTS_FILE, phe.SAMPLE_VARIANTS_FILE, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SUMMARY_FILE_PATH, phe.SUMMARY_FILE_PATH, core_constants.DEFAULT_PATH_INFO)
@@ -57,15 +59,19 @@ class main(plugin_base):
         data = self.get_starting_plugin_data(wrapper, self.PLUGIN_VERSION)
         
         genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('genes_of_interest_file'))
-        somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), genes_of_interest)
+        germline_genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('germline_genes_of_interest_file'))
+        all_genes_of_interest = genes_of_interest | germline_genes_of_interest
+        somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), all_genes_of_interest)
 
         mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
         mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
-
-        data[core_constants.RESULTS]['reportable_variants'] = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest, mane_transcripts)
+        
+        reportable_variants, tier_mode = tools.get_subset_of_somatic_variants(self, somatic_variants, genes_of_interest, mane_transcripts)
+        data[core_constants.RESULTS]['reportable_variants'] = reportable_variants
+        data[core_constants.RESULTS]['tier_mode'] = tier_mode
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
         data[core_constants.RESULTS]['loads'] = tools.get_loads_from_summary(summary_results)
-        data[core_constants.RESULTS]['sigs'] = tools.parse_cosmic_signatures(self, wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH))
+        data[core_constants.RESULTS]['sigs'] = tools.parse_cosmic_signatures(self, wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH), wrapper.get_my_string('signatures_of_interest_file'))
         data[core_constants.RESULTS][phe.CELLULOID_DIR] =  wrapper.get_my_string(phe.CELLULOID_DIR)
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
@@ -122,7 +128,9 @@ class main(plugin_base):
             phe.CELLULOID_DIR,
             'genes_of_interest_file',
             'template_type',
-            'comparison_cohort_file'
+            'comparison_cohort_file',
+            'signatures_of_interest_file',
+            'germline_genes_of_interest_file'
         ]
         for key in discovered:
             self.add_ini_discovered(key)

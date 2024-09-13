@@ -2,175 +2,266 @@ IDH1	action
 FGFR2	action
 BRAF	action
 ERBB2	action
-MET	driver
-MYC	driver
-MTAP	driver
-ABL1	rare
-ABL2	rare
-AKT1	rare
-ALK	rare
-ARAF	rare
-ARID1A	rare
-ASXL1	rare
-ATM	rare
-ATR	rare
-BAP1	rare
-B2M	rare
-BARD1	rare
-BCL10	rare
-BCL2	rare
-BCL6	rare
-BCOR	rare
-BIRC3	rare
-BRCA1	rare
-BRCA2	rare
-BRIP1	rare
-BTK	rare
-CALR	rare
-CARD11	rare
-CBFB	rare
-CBL	rare
-CCND1	rare
-CCND3	rare
-CCNE1	rare
-CD274	rare
-CD79B	rare
-CDK12	rare
-CDK4	rare
-CDKN2A	rare
-CEBPA	rare
-CHEK1	rare
-CHEK2	rare
-CIITA	rare
-CREBBP	rare
-CRLF2	rare
-CSF1R	rare
-CSF3R	rare
-CXCR4	rare
-DEK	rare
-DNMT3A	rare
-ECT2L	rare
-EED	rare
-EGFR	rare
-EP300	rare
-EPOR	rare
-ERCC2	rare
-ESR1	rare
-ETNK1	rare
-ETV6	rare
-EZH2	rare
-FANCA	rare
-FANCL	rare
-FBXW7	rare
-FGFR1	rare
-FGFR3	rare
-FLI1	rare
-FLT3	rare
-FOXP1	rare
-GATA1	rare
-GATA2	rare
-GATA3	rare
-HRAS	rare
-ID3	rare
-IDH2	rare
-IKZF1	rare
-IL3	rare
-IL7R	rare
-IRF4	rare
-JAK1	rare
-JAK2	rare
-JAK3	rare
-KDM6A	rare
-KIT	rare
-KLF2	rare
-KMT2A	rare
-KMT2D	rare
-KRAS	rare
-LMO2	rare
-MAF	rare
-MAFB	rare
-MALT1	rare
-MAP2K1	rare
-MAP2K2	rare
-MDM2	rare
-MEF2B	rare
-MLH1	rare
-MLLT10	rare
-MPL	rare
-MRE11	rare
-MTOR	rare
-MYD88	rare
-NBN	rare
-NF1	rare
-NOTCH1	rare
-NOTCH2	rare
-NPM1	rare
-NRAS	rare
-NRG1	rare
-NTRK1	rare
-NTRK2	rare
-NTRK3	rare
-Other Biomarkers	rare
-PALB2	rare
-PDCD1LG2	rare
-PDGFB	rare
-PDGFRA	rare
-PDGFRB	rare
-PHF6	rare
-PIK3CA	rare
-POLD1	rare
-POLE	rare
-PPM1D	rare
-PTCH1	rare
-PTEN	rare
-PTPN11	rare
-RAD51B	rare
-RAD51C	rare
-RAD51D	rare
-RAD54L	rare
-RAF1	rare
-RARA	rare
-RBM15	rare
-RELN	rare
-RET	rare
-RHOA	rare
-ROS1	rare
-RUNX1	rare
-SETBP1	rare
-SF3B1	rare
-SH2B3	rare
-SMAD4	rare
-SMARCB1	rare
-SOCS1	rare
-SRSF2	rare
-STAG2	rare
-STAT3	rare
-STAT5B	rare
-STK11	rare
-SUZ12	rare
-TAL1	rare
-TCF3	rare
-TCL1A	rare
-TCL1B	rare
-TET2	rare
-TERT	rare
-TGFBR2	rare
-TLX1	rare
-TLX3	rare
-TNFAIP3	rare
-TNFRSF14	rare
-TP53	rare
-TP63	rare
-TRA	rare
-TRB	rare
-TRD	rare
-TRG	rare
-TSC1	rare
-TSC2	rare
-TYK2	rare
-U2AF1	rare
-WT1	rare
-ZRSR2	rare
-XRCC2	rare
-XRCC3	rare
-DMC1	rare
+MET	action
+MYC	action
+MTAP	action
+ABL1	discovery
+ABL2	driver
+AKT1	driver
+AKT2	discovery	C3
+AKT3	discovery	C3
+ALK	driver
+APC	driver	C3
+AR	driver	C3
+ARAF	driver
+ARID1A	driver
+ASXL1	discovery
+ATM	driver
+ATR	driver
+AXL	driver	C3
+BAP1	driver
+B2M	driver
+BARD1	driver
+BCL10	driver
+BCL2	discovery
+BCL6	driver
+BCOR	driver
+BIRC3	driver
+BRCA1	driver
+BRCA2	driver
+BRIP1	driver
+BTK	driver
+CALR	driver
+CARD11	discovery
+CBFB	driver
+CBL	discovery
+CCND1	driver
+CCND2	driver	C3
+CCND3	driver
+CCNE1	driver
+CD274	driver
+CD79A	driver	C3
+CD79B	driver	C3
+CD79B	driver
+CDH1	discovery	C3
+CDK12	discovery
+CDK4	driver
+CDK6	discovery	minerva
+CDKN2A	driver
+CEBPA	discovery
+CHEK1	driver
+CHEK2	driver
+CIITA	discovery
+CREBBP	discovery
+CRLF2	discovery
+CSF1R	driver
+CSF3R	driver
+CTNNB1	driver	C3
+CXCR4	discovery
+DDR2	discovery	C3
+DEK	driver
+DNMT3A	driver
+ECT2L	discovery
+EED	discovery
+EGFR	driver
+EML4	discovery	C3
+EP300	discovery
+EPOR	driver
+ERBB3	driver	C3
+ERBB4	discovery	C3
+ERCC1	driver	C3
+ERCC2	driver
+ERG	driver	C3
+ESR1	driver
+ETNK1	driver
+ETS1	discovery	C3
+ETV1	discovery	C3
+ETV4	discovery	C3
+ETV5	discovery	C3
+ETV6	driver
+EWSR1	driver	C3
+EZH2	driver
+FAM175A	driver	C3
+FANCA	driver
+FANCI	discovery	C3
+FANCL	driver
+FBXW7	driver
+FGF1	driver	C3
+FGF10	driver	C3
+FGF14	driver	C3
+FGF2	driver	C3
+FGF23	discovery	C3
+FGF3	discovery	C3
+FGF4	discovery	C3
+FGF5	driver	C3
+FGF6	discovery	C3
+FGF7	driver	C3
+FGF8	driver	C3
+FGF9	driver	C3
+FGF19	discovery	C3
+FGFR1	driver
+FGFR3	driver
+FGFR4	driver	C3
+FLI1	discovery
+FLT1	driver	C3
+FLT3	driver
+FOXL1	discovery	C3
+FOXP1	discovery
+GATA1	discovery
+GATA2	driver
+GATA3	discovery
+GATA6	discovery	minerva
+GEN1	driver	C3
+GNA11	driver	C3
+GNAQ	driver	C3
+GNAS	driver	C3
+HRAS	driver
+HNF1A	driver	C3
+ID3	driver
+IDH2	driver
+IKZF1	driver
+IL3	driver
+IL7R	discovery
+INPP4B	discovery	C3
+IRF4	discovery
+JAK1	driver
+JAK2	driver
+JAK3	driver
+KDM6A	driver
+KDR	discovery	C3
+KIT	driver
+KIF5B	discovery	C3
+KLF2	discovery
+KMT2A	driver
+KMT2D	driver
+KRAS	driver
+LAMP1	driver	C3
+LMO2	driver
+MAF	discovery
+MAFB	driver
+MALT1	driver
+MAP2K1	driver
+MAP2K2	driver
+MCL1	discovery	C3
+MDM2	driver
+MDM4	discovery	C3
+MEF2B	driver
+MLH1	driver
+MLLT3	discovery	C3
+MLLT10	discovery
+MPL	driver
+MSH2	driver	C3
+MSH3	driver	C3
+MSH6	driver	C3
+MRE11	driver
+MRE11A	driver	C3
+MTOR	driver
+MUTYH	driver	C3
+MYCL1	driver	C3
+MYCN	driver	C3
+MYD88	driver
+NBN	driver
+NF1	driver
+NOTCH1	discovery
+NOTCH2	driver
+NOTCH3	driver	C3
+NPM1	driver
+NRAS	driver
+NRG1	driver
+NTRK1	driver
+NTRK2	driver
+NTRK3	driver
+PALB2	driver
+PAX3	driver	C3
+PAX7	discovery	C3
+PDCD1LG2	discovery
+PDGFB	driver
+PDGFRA	driver
+PDGFRB	driver
+PHF6	discovery
+PIK3CA	driver
+PIK3CB	discovery	C3
+PIK3CD	discovery	C3
+PIK3CG	discovery	C3
+PIK3R1	driver	C3
+PMS2	driver	C3
+PPARG	discovery	C3
+PPP2R2A	discovery	C3
+POLD1	driver
+POLE	driver
+PPM1D	driver
+PTCH1	driver
+PTEN	driver
+PTPN11	discovery
+RAD51	driver	C3
+RAD51B	driver
+RAD51C	driver
+RAD51D	driver
+RAD54L	driver
+RAF1	driver
+RARA	driver
+RB1	driver	C3
+RBM10	driver	LBR
+RBM15	driver
+RELN	discovery
+RET	driver
+RHOA	driver
+RICTOR	driver	C3
+ROS1	driver
+RPS6KB1	discovery	C3
+RUNX1	discovery
+SETBP1	discovery
+SF3B1	driver
+SH2B3	discovery
+SLX4	driver	C3
+SMAD4	driver
+SMARCB1	driver
+SMO	driver	C3
+SOCS1	driver
+SRC	driver	C3
+SRSF2	driver
+STAG2	discovery
+STAT3	discovery
+STAT5B	driver
+STK11	driver
+SUZ12	driver
+TAL1	driver
+TCF3	discovery
+TCL1A	driver
+TCL1B	driver
+TET2	driver
+TERT	driver
+TFRC	discovery	C3
+TGFBR2	driver
+TLX1	driver
+TLX3	driver
+TMPRSS2	driver	C3
+TNFAIP3	discovery
+TNFRSF14	driver
+TP53	driver
+TP63	driver
+TRA	driver
+TRB	driver
+TRD	driver
+TRG	driver
+TSC1	driver
+TSC2	driver
+TYK2	discovery
+U2AF1	driver
+VH	driver	C3
+WT1	discovery
+ZRSR2	driver
+XRCC2	driver
+XRCC3	driver
+DMC1	driver
+PBRM1	driver	LBR
+WNT2	discovery	minerva
+PIK3R2	discovery	minerva
+SMAD3	discovery	minerva
+RNF43	discovery	minerva
+ARID1B	discovery	minerva
+TGFBR1	discovery	minerva
+PAK1	discovery	minerva
+HAS2	discovery	minerva
+ROBO2	discovery	minerva
+SMARCA4	discovery	minerva

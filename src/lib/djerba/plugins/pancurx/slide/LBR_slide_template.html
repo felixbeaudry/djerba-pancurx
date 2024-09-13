@@ -2,7 +2,7 @@
 <%
 	from djerba.util.html import html_builder
 	import djerba.plugins.pancurx.constants as plugin
-	from djerba.plugins.pancurx.html import td_class, make_signatures_string, make_somatic_slide_rows
+	from djerba.plugins.pancurx.html import td_class, make_signatures_string, make_somatic_slide_rows, make_germline_slide_rows
 	loads = results.get('loads')
 	sigs = results.get('sigs')
 	reportable_variants = results.get('reportable_variants')
@@ -65,10 +65,10 @@
 
 		% if results.get(plugin.GERM_NONSIL_SUBSET_RARE_COUNT) > 0:
 			<table style="width:100%" class="sortable">
-				<tr><th align="left" style="width:22%">Gene</th><th align="left">Variant(s)</th><th style="width:10%">sCN</th></tr>
+				<tr><th align="left" style="width:22%">Gene</th><th align="left">Variant(s)</th><th style="width:10%">ClinVar</th></tr>
 
 				
-						% for row in make_somatic_slide_rows(reportable_germline_variants, ploidy, reportable_germline_genes):
+						% for row in make_germline_slide_rows(reportable_germline_variants, reportable_germline_genes):
 							${row}
 						% endfor
 

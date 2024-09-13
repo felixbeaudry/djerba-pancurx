@@ -1,0 +1,14 @@
+Signature.1	sbs1	Clock-like
+Signature.2	sbs2	APOBEC
+Signature.3	sbs3	HRd
+Signature.5	sbs5	
+Signature.6	sbs6	MMRd
+Signature.8	sbs8	
+Signature.13	sbs13	APOBEC
+Signature.17a	sbs17a	
+Signature.17b	sbs17b	
+Signature.18	sbs18	ROS
+Signature.20	sbs20	MMRd/POLD
+Signature.24	sbs24	Aflatoxin
+Signature.26	sbs26	MMRd
+Signature.30	sbs30	BERd

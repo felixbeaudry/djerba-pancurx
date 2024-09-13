@@ -16,7 +16,7 @@ import djerba.plugins.pancurx.constants as phe
 
 class main(plugin_base):
 
-    PRIORITY = 400
+    PRIORITY = 50
     PLUGIN_VERSION = '0.1'
     MAKO_TEMPLATE_NAME = 'summary_report_template.html'
     SUMMARY_TEMPLATE_FILE = 'summary_template.txt'

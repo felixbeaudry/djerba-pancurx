@@ -1,12 +1,13 @@
 <%
       import djerba.plugins.pancurx.constants as plugin
-      from djerba.plugins.pancurx.html import make_somatic_table_rows, k_comma_format
+      from djerba.plugins.pancurx.html import make_somatic_table_rows, k_comma_format, make_signature_table_rows
       from djerba.util.html import html_builder
       loads = results.get('loads')
       sigs = results.get('sigs')
       reportable_variants = results.get('reportable_variants')
       all_variants = results.get('all_variants')
       ploidy = results.get('ploidy')
+      tier_mode = results.get('tier_mode')
 
 %>
 
@@ -18,12 +19,13 @@
 <h3 class="lbr">Mutational Status of Common Biliary Driver and Targetable Genes</h3>
 
       <p class="lbr">Below are listed the mutational status of genes that are commonly altered in biliary tract cancers. 
-      Actionable alterations are listed regardless of their mutational status, while most oncogenes are only listed if mutated.</p>	
+      Actionable alterations are listed regardless of their mutational status, while most oncogenes are only listed if mutated. 
+      * donates genes of the discovery tier, which are only included when less than 7 confident hits are found.</p>	
 
       <table class="lbr sortable" style="width:100%" >
-      <tr><td>Gene</td><td>Chr.</td><td>Variant</td><td>CN</td><td>A.B</td><td>Additional Information</td></tr>
+      <tr><td style="width:8%">Gene</td><td style="width:5%">Chr.</td><td style="width:5%">CN</td><td style="width:5%">A|B</td><td style="width:5%">tVAF</td><td style="width:62%">Variant</td></tr>
 
-            % for row in make_somatic_table_rows(reportable_variants, ploidy):
+            % for row in make_somatic_table_rows(reportable_variants, ploidy, tier_mode):
                   ${row}
             % endfor
 
@@ -35,7 +37,7 @@
 <div style="padding:0px 0px 0px 50px; ">
 <h3 class="lbr">Mutational Load</h3>
 
-      <p class="lbr">In this tumour, the <b>TMB (genome-wide) is ${loads.get('TMB')} mutations / kb</b>.  <br><br>
+      <p class="lbr">In this tumour, the <b>TMB (genome-wide) is ${loads.get('TMB')} mutations / mb</b>.  <br><br>
       Tumour Mutation Burden (TMB) represents the number of non-inherited mutations per million bases (Mb) of genomic sequence in tumor tissue. 
       Essentially, it quantifies how many mutations occur in the genome of cancer cells. TMB has gained prominence due to its association with immunotherapy response.
       Below are the comparisons of this sample with the LBR cohort for each mutation type:<p>
@@ -59,7 +61,9 @@
       <h3 class="lbr">Mutational Signatures</h3>
       <p class="lbr">Mutational signatures can be used as a physiological readout of the biological history of a cancer 
             and also have potential use for discerning ongoing mutational processes from historical ones, thus possibly revealing new targets for anticancer therapies.
-          Below are listed the proportion of single base pair substitutions assigned to COSMIC (version 3) signatures and that signature's  aetiologies.</p>
+            Signatures are a decomposition of mutations by their flanking bases (ie the base on either side of the mutation) and the change itself (eg. C to A or T to G).
+            The plot on the left shows the proportion (%) of each mutation change (eg. C>A in red) and within that are further subset the flanking bases (A_C). 
+          On the right are listed the proportion of single base pair substitutions assigned to COSMIC (version 3) signatures and that signature's aetiologies.</p>
           
           
       <div style=" break-inside: avoid;display: table;"> 
@@ -70,18 +74,11 @@
 
                   <table class="lbr sortable">
                         <tr><th style="width: 100px"></th><th style="width: 150px">Proposed Aetiology</th><th style="width: 100px">Proportion</th>
-                        <tr><td bgcolor="#88CCEE" >SBS1</td><td>Clock-like</td><td> ${sigs.get('SBS1')} </td></tr>
-                        <tr><td bgcolor="#CC6677"  style="color:white">SBS2</td><td>APOBEC</td><td>${sigs.get('SBS2')}</td></tr>
-                        <tr><td bgcolor="#332288" style="color:white" >SBS3</td><td>HRD</td><td>${sigs.get('SBS3')}</td></tr>
-                        <tr><td bgcolor="#44AA99"  style="color:white">SBS5</td><td></td><td>${sigs.get('SBS5')}</td></tr>
-                        <tr><td bgcolor="#117733">SBS6</td><td>MMRD</td><td>${sigs.get('SBS6')}</td></tr>
-                        <tr><td bgcolor="#DDCC77">SBS8</td><td></td><td>${sigs.get('SBS8')}</td></tr>
-                        <tr><td bgcolor="#AA4499"  style="color:white">SBS13</td><td>APOBEC</td><td>${sigs.get('SBS13')}</td></tr>
-                        <tr><td bgcolor="#661100"  style="color:white">SBS17</td><td></td><td>${round(sigs.get('SBS17a') + sigs.get('SBS17b'), 2)}</td></tr>
-                        <tr><td bgcolor="#882255"  style="color:white">SBS18</td><td>ROS</td><td>${sigs.get('SBS18')}</td></tr>
-                        <tr><td bgcolor="#117733">SBS20 & 26</td><td>POLD, MMRD</td><td>${round(sigs.get('SBS20') + sigs.get('SBS26'), 2)}</td></tr> 
-                        <tr><td >SBS24</td><td>Aflatoxin</td><td>${sigs.get('SBS24')}</td></tr>
-                        <tr><td >SBS30</td><td>NTHL1</td><td>${sigs.get('SBS30')}</td></tr>
+                        % for row in make_signature_table_rows(sigs):
+                              ${row}
+                        % endfor
+            
+            
                   </table>
                   <br><br>
       </div>
