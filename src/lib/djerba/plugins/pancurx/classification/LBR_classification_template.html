@@ -12,7 +12,7 @@
  
 	<h3 class="lbr">Homologous Recombination (HR) Deficiency Flags</h3>
       <p class="lbr">Homologous Recombination Deficiency (HRD) is a cellular condition where key genes 
-            involved in homologous recombination, like BRCA1 and BRCA2, are mutated or deficient. 
+            involved in homologous recombination, like <em>BRCA1/2</em>, are mutated or deficient. 
             This impairs the accurate repair of DNA double-strand breaks, leading to 
             genomic instability and an increased risk of cancers, particularly breast and 
             ovarian cancers. HRD is associated with heightened sensitivity to certain 
@@ -45,7 +45,7 @@
         Mismatch Repair Deficiency (MMRd) is a cellular condition marked by impaired DNA mismatch repair mechanisms. 
         This deficiency prevents the correction of errors that occur during DNA replication, 
         leading to the accumulation of mutations and microsatellite instability. MMRd is often associated with Lynch syndrome,
-         a hereditary cancer syndrome, and is associated with microsatellite instability (MSI) or polymerase deficiencies (POLD/E). 
+         a hereditary cancer syndrome, and is associated with microsatellite instability (MSI) or polymerase deficiencies (<em>POLD/E</em>). 
          Cosmic signature 20 and 26 are also indicative of MMRD.</p>
 
       <table class="lbr" style="width:100%">
@@ -67,3 +67,29 @@
 
 </div>
 
+<div style="padding:0px 0px 0px 50px; break-inside: avoid; display: table;">
+
+      <h3 class="lbr">Tandem Duplicator Phenotype (TDP) Flags</h3>
+      <p class="lbr">
+            Some (non-BRCA1) tumours are associated with a tandem duplicator phenotypes (TDP) that may be associated with perturbations in <em>CDK12</em>, <em>FBXW7</em>, and <em>CCNE1</em> and predicts platinum and PARP inhibitor sensitivity.
+            Both flags - including a positive Menghi score from <a href='https://doi.org/10.1016/j.ccell.2018.06.008'>Menghi et al. 2018</a> - are required for a positive TDP call.
+      </p>
+
+      <table class="lbr" style="width:100%">
+            <tr>
+            % for row in make_hallmark_tally_table(results.get('tdp_tally'), 2, '#FFB14E'):
+                  ${row}
+            % endfor
+            </tr>
+      </table>
+      <br>
+
+      <table class="lbr" width="100%">
+            <tbody>
+            % for row in make_class_table_rows(results.get(plugin.TDP_RESULTS), plugin.TDP_RESULTS):
+                  ${row}
+            % endfor
+            </tbody>
+      </table>
+
+</div>

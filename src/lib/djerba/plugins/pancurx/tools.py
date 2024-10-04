@@ -9,8 +9,11 @@ import requests
 import json
 from djerba.util.image_to_base64 import converter
 import djerba.plugins.pancurx.constants as phe
+from djerba.util.environment import directory_finder
+from djerba.util.subprocess_runner import subprocess_runner
 import shutil
 from scipy import stats
+import collections
 
 def add_underscore_to_donor(donor):
     if "EPPIC" in donor:
@@ -18,6 +21,43 @@ def add_underscore_to_donor(donor):
     else:
         donor = re.sub(r'^([A-Z0-9]+)(....)', r'\1_\2', donor)
     return(donor)
+
+def calculate_TDP_status(sdf):
+    ###CONDITIONS(As discussed with Faiyaz at DART in May 2024)
+    # Menghi Score > 0 and duplication ratio > 0.205
+
+    tdp_tally = 0
+    tdp_score = round(float(sdf["tdp_score"]), 2)
+
+    if tdp_score > 0:
+        tdp_score_call = True
+        tdp_tally = tdp_tally + 1
+    else:
+        tdp_score_call = False
+    tdp_score_dict = {
+        "reporting_name": "TDP score > 0 :", 
+        "value": tdp_score, 
+        "above_cutoff": tdp_score_call
+    }
+    
+    dup_count = sdf["sv_dup_count"]
+    sv_count = sdf["sv_count"]
+    dup_ratio = round(int(dup_count)/int(sv_count), 3)
+    
+    if dup_ratio > 0.205:
+        dup_ratio_call = True
+        tdp_tally = tdp_tally + 1
+    else:
+        dup_ratio_call = False
+
+    dup_ratio_dict = {
+        "reporting_name": "Dup. ratio > 0.205 :", 
+        "value": dup_ratio, 
+        "above_cutoff": dup_ratio_call
+    }
+    
+    tdp_results = [tdp_score_dict, dup_ratio_dict]
+    return(tdp_results, tdp_tally)
 
 def check_path_exists(self, path):
     if not os.path.exists(path):
@@ -120,22 +160,45 @@ def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_coho
     expression_dict = {}
     input_tpm_path = check_path_exists(self, input_tpm_path)
     comparison_cohort_path = check_path_exists(self, comparison_cohort_path)
+
+    finder = directory_finder(self.log_level, self.log_path)
+    work_dir = self.workspace.get_work_dir()
+
+    if self.workspace.has_file(os.path.join(work_dir, 'tpm.txt')):
+        msg = "TPM file found"
+        self.logger.info(msg)
+    else:
+
+        r_script = os.path.join(finder.get_base_dir(), "plugins/pancurx/fusions/get_tpm.R")
+
+        cmd = [
+            'Rscript', r_script ,
+            '--cohort', comparison_cohort_path,
+            '--input', input_tpm_path,
+            '--output', os.path.join(work_dir, 'tpm.txt'),
+        ]
+
+        runner = subprocess_runner()
+        runner.run(cmd, "tpm R script")
+
+    input_tpm_path = os.path.join(work_dir, 'tpm.txt')
     with open(input_tpm_path, 'r') as input_tpm_file:
-        for row in csv.DictReader(input_tpm_file, delimiter="\t"):
-            if row['Gene Name'] in genes_of_interest:
+        for row in csv.DictReader(input_tpm_file, delimiter="\t", fieldnames=['gene','TPM','percentile'] ):
+            if row['gene'] in genes_of_interest:
                 data = {
-                    'gene' : row['Gene Name'],
-                    'input_tpm': row['TPM']
+                    'gene' : row['gene'],
+                    'input_tpm': row['TPM'],
+                    'percentile': row['percentile'],
                 }
-                expression_dict[row['Gene Name']] = data
+                expression_dict[row['gene']] = data
     with open(comparison_cohort_path, 'r') as comparison_cohort_file:
         for row in csv.DictReader(comparison_cohort_file, delimiter="\t"):
-            if row['gene_name'] in expression_dict:
+            if row['gene_list'] in expression_dict:
                 dict_items = list(row.values())
                 cohort_expression_list = dict_items[1:]
-                this_tpm = expression_dict[row['gene_name']]['input_tpm']
-                this_percentile = round(stats.percentileofscore(cohort_expression_list, this_tpm ,  'rank'), 2)
-                expression_dict[row['gene_name']]['cohort_perc'] = this_percentile
+                this_tpm = expression_dict[row['gene_list']]['input_tpm']
+                #this_percentile = round(stats.percentileofscore(cohort_expression_list, this_tpm ,  'rank'), 2)
+                expression_dict[row['gene_list']]['cohort_perc'] = round(float(expression_dict[row['gene_list']]['percentile'] ) * 100, 1)
     return(expression_dict)
 
 def get_germline_variant_counts( summary_results):
@@ -191,6 +254,32 @@ def get_load_quantified(sample_value, quantification_dictionary):
     return(quantification_string)
 
 
+def get_percentile(self, sample_variant_count, cohort_path, variant_column_name):
+    these_counts = []
+    cohort_path = check_path_exists(self, cohort_path)
+    with open(cohort_path, 'r') as cohort_file:
+        for row in csv.DictReader(cohort_file, delimiter=","):
+            these_counts.append(int(row[variant_column_name]))
+    cohort_count = {}
+    for this_count in these_counts:
+        if this_count in cohort_count.keys():
+            cohort_count[this_count] = cohort_count[this_count] + 1
+        else:
+            cohort_count[this_count] = 1
+    sorted_cohort_count = collections.OrderedDict(sorted(cohort_count.items()))
+    
+    lowerCount = 0
+    equalCount = 0
+    for this_count in sorted_cohort_count.keys():
+        if int(sample_variant_count) > this_count:
+            lowerCount = lowerCount + sorted_cohort_count[this_count]
+        elif int(sample_variant_count) == this_count:
+            equalCount = equalCount + sorted_cohort_count[this_count]
+    rank = round(((lowerCount + (0.5 * equalCount)) / (len(these_counts) + 1)*100))
+    return(rank )
+
+
+
 def get_subset_of_germline_variants(sample_variants, gene_order, chosen_transcripts, cnvs_and_abs):
     germline_nonsilent_gene_count = 0
     germ_nonsil_genes_rare = 0
@@ -201,7 +290,7 @@ def get_subset_of_germline_variants(sample_variants, gene_order, chosen_transcri
             for variant in sample_variants[gene]:
                 germline_nonsilent_gene_count = germline_nonsilent_gene_count + 1
                 if sample_variants[gene][variant]['rarity'] != "common" and \
-                    (sample_variants[gene][variant]['clinvar'] not in [ "Benign", "Benign/Likely benign", "Likely benign" ] or gene == 'DPYD'):
+                    (sample_variants[gene][variant]['clinvar'] not in [ "Benign", "Benign/Likely_benign", "Likely_benign" ] or gene == 'DPYD'):
                     this_chosen_transcript = chosen_transcripts[gene]
                     if this_chosen_transcript in sample_variants[gene][variant]['aa_change']:
                         chosen_frame = sample_variants[gene][variant]['aa_change'][this_chosen_transcript]
@@ -438,19 +527,65 @@ def parse_coverage(self, coverage_file_path):
                 mean_coverage = round(float(mean_coverage), 1)
     return(median_coverage, mean_coverage)
 
-def parse_fusions(self, fusions_file_path, min_split_reads = 7):
+def parse_star_qc(self, star_qc_file_path):
+    qc_metrics = {}
+    total_unmapped = 0
+    fieldnames = ['metric', 'value']
+    star_qc_file_path = check_path_exists(self, star_qc_file_path)
+    with open(star_qc_file_path, 'r') as star_qc_file:
+        for row in csv.DictReader(star_qc_file, delimiter="|", fieldnames=fieldnames):
+            if row['value'] != None:
+                qc_metrics[row['metric'].strip()] = row['value'].strip()
+            if row['metric'].strip() in ['Number of reads unmapped: too many mismatches', 'Number of reads unmapped: too short', 'Number of reads unmapped: other']:
+                total_unmapped = total_unmapped + int(row['value'])
+    qc_metrics['% of reads unmapped'] = round(( total_unmapped / int(qc_metrics['Number of input reads']) ) * 100, 1)
+    if qc_metrics['% of reads unmapped'] <= 50 and int(qc_metrics['Uniquely mapped reads number']) >= 3000000:
+        qc_metrics['qc_final'] = 'good'
+    else:
+        qc_metrics['qc_final'] = 'poor'
+    return(qc_metrics)
+
+def filter_fusions(self, all_fusions, subset_order, cnvs_and_abs, gene_expression, min_split_reads = 7):
+    reportable_variants = []
     fusion_count = 0
+
+    for this_gene in subset_order.keys():
+        fusion_not_found = True
+        if this_gene in gene_expression and this_gene in cnvs_and_abs:
+            this_variant = {
+                'gene' : this_gene,
+                'gene_chr' : cnvs_and_abs[this_gene]['gene_chr'],
+                'input_tpm' : round(float(gene_expression[this_gene]['input_tpm']), 1),
+                'cohort_perc': gene_expression[this_gene]['cohort_perc'], 
+                'copy_number' : cnvs_and_abs[this_gene]['copy_number'],
+            }
+            for this_fusion in all_fusions:
+                if this_gene == this_fusion['gene1_aliases'] or this_gene == this_fusion['gene2_aliases']:
+                    if int(this_fusion['break1_split_reads']) >= min_split_reads and int(this_fusion['break2_split_reads']) >= min_split_reads:
+                        fusion_count = fusion_count + 1
+                        this_variant['variant'] =  ''.join((this_fusion['fusion_product'], ' (', this_fusion['gene_product_type'],' ',this_fusion['event_type'],  ')'))
+                        reportable_variants.append(this_variant)
+                        fusion_not_found = False
+            if fusion_not_found and subset_order[this_gene] in ['action','driver']:
+                if float(gene_expression[this_gene]['cohort_perc']) < 5:
+                    this_variant['variant'] =  'downregulated'
+                    reportable_variants.append(this_variant)
+                elif float(gene_expression[this_gene]['cohort_perc']) > 95:
+                    this_variant['variant'] =  'upregulated'
+                    reportable_variants.append(this_variant)
+    return(reportable_variants, fusion_count)
+
+
+def parse_fusions(self, fusions_file_path):
     sample_fusions = []
     fusions_file_path = check_path_exists(self, fusions_file_path)
     with open(fusions_file_path, 'r') as fusions_file:
         for row in csv.DictReader(fusions_file, delimiter="\t"):
 
-            if row['break1_homologous_seq'] != 'None'  and \
-            row['transcript1'] != 'None'  and \
-                int(row['break1_split_reads']) >= min_split_reads and \
-                int(row['break2_split_reads']) >= min_split_reads and \
+            if row['break1_homologous_seq'] != 'None' and \
+                row['transcript1'] != 'None'  and \
                 row['gene1_aliases'] != 'None' and \
-                row['gene2_aliases'] != 'None' :  
+                row['gene2_aliases'] != 'None' :
                 fusion_characteristics = {
                     'gene1_aliases': row['gene1_aliases'],
                     'break1_chromosome': row['break1_chromosome'],
@@ -464,9 +599,9 @@ def parse_fusions(self, fusions_file_path, min_split_reads = 7):
                     'break2_split_reads': row['break2_split_reads'],
                     'linking_split_reads': row['linking_split_reads'],                    
                 }
-                fusion_count = fusion_count + 1
+                #fusion_count = fusion_count + 1
                 sample_fusions.append(fusion_characteristics)
-    return(sample_fusions, fusion_count)
+    return(sample_fusions)
 
 
 def parse_germline_variants(self, sample_variants_file_path):
@@ -696,6 +831,7 @@ def subset_and_deduplicate(data ):
                 subset_data[this_gene] = {
                     'copy_number' : data[this_gene][this_variant]['copy_number'],
                     'ab_counts' : data[this_gene][this_variant]['ab_counts'],
+                    'gene_chr' : data[this_gene][this_variant]['gene_chr'],
                 }
     return(subset_data)
 

@@ -44,6 +44,7 @@ class main(plugin_base):
         wrapper = tools.try_two_null_files(self, wrapper, 'genes_of_interest_file', 'genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO, phe.DEFAULT_GENE_FILE)
         wrapper = tools.try_two_null_files(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO , phe.DEFAULT_GERMLINE_GENE_FILE)
         wrapper = tools.fill_file_if_null(self, wrapper, 'signatures_of_interest_file', 'signatures_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'comparison_cohort_file', 'comparison_cohort_file', core_constants.DEFAULT_SAMPLE_INFO)
 
         if wrapper.my_param_is_null(phe.SLIDE_DATE):
             wrapper.set_my_param(phe.SLIDE_DATE, phe.NONE_SPECIFIED)
@@ -91,6 +92,9 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.TMB_STACK_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.TMB_STACK_PLOT), phe.TMB_STACK_PLOT)
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
         data[core_constants.RESULTS]['loads'] = tools.get_loads_from_summary(summary_results)
+        data[core_constants.RESULTS]['loads']['snv_percentile'] = tools.get_percentile(self, data[core_constants.RESULTS]['loads']['snv_count'],  wrapper.get_my_string('comparison_cohort_file'), 'snv_count')
+        data[core_constants.RESULTS]['loads']['sv_percentile'] = tools.get_percentile(self, data[core_constants.RESULTS]['loads']['sv_count'],  wrapper.get_my_string('comparison_cohort_file'), 'sv_count')
+        data[core_constants.RESULTS]['loads']['indel_percentile'] = tools.get_percentile(self, data[core_constants.RESULTS]['loads']['indel_count'], wrapper.get_my_string('comparison_cohort_file'), 'indel_count')
 
 
         data[core_constants.RESULTS]['sigs'] = tools.parse_cosmic_signatures(self, wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH), wrapper.get_my_string('signatures_of_interest_file'))
@@ -106,7 +110,12 @@ class main(plugin_base):
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
         data[core_constants.RESULTS]['ploidy_numeric'] = ploidy
 
-        data[core_constants.RESULTS]['tandem_duplicator_phenotype_score'] = tools.parse_TDP(self, wrapper.get_my_string(phe.TDP_PATH))
+        #data[core_constants.RESULTS]['tandem_duplicator_phenotype_score'] = tools.parse_TDP(self, wrapper.get_my_string(phe.TDP_PATH))
+
+        tdp_results, tdp_tally = tools.calculate_TDP_status(summary_results)
+        data[core_constants.RESULTS][phe.TDP_RESULTS] = tdp_results
+        data[core_constants.RESULTS]['tdp_tally'] = tdp_tally
+
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
         dsbr_results, dsbr_tally = tools.parse_multifactor_marker(self, summary_results, phe.DSBR_HTML_HEADERS, phe.DSBR_DEFAULT_HALLMARK_CUTOFFS)
         data[core_constants.RESULTS][phe.DSBR_RESULTS] = dsbr_results
@@ -174,7 +183,8 @@ class main(plugin_base):
             'genes_of_interest_file',
             'germline_genes_of_interest_file',
             'template_type',
-            'signatures_of_interest_file'
+            'signatures_of_interest_file',
+            'comparison_cohort_file'
 
         ]
         for key in discovered:

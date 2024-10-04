@@ -36,12 +36,12 @@ class TestSampleInfo(PluginTester):
         params = {
             self.INI: os.path.join(input_dir, self.INI_NAME),
             self.JSON: 'somatic.json',
-            self.MD5: '080bfc9fe47ba842edbe9d92fd7055c9'
+            self.MD5: '265107a5c86fd60254e8b459c863df6d'
         }
         self.run_basic_test(test_source_dir, params)
     def redact_json_data(self, data):
         """replaces empty method from testing.tools"""
-        for key in ['whole_genome_plot_path','histbox_indel','histbox_sv','histbox_snv','indel_vaf_plot','snv_vaf_plot','sv_bin_plot','indel_bin_plot','snv_context_plot','celluloid_plot']:
+        for key in ['whole_genome_plot_path','histbox_indel','histbox_sv','histbox_snv','indel_vaf_plot','snv_vaf_plot','sv_bin_plot','indel_bin_plot','snv_context_plot','celluloid_plot','oncoslide_cnv_plot']:
             del data['results'][key]
         return data        
 

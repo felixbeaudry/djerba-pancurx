@@ -36,7 +36,7 @@ class TestSampleInfo(PluginTester):
         params = {
             self.INI: os.path.join(input_dir, self.INI_NAME),
             self.JSON: 'germline.json',
-            self.MD5: 'ca3e875bce46b40ec5d3d888c893822b'
+            self.MD5: 'c63ff4b80f7fbb57065a4fc771b37357'
         }
         self.run_basic_test(test_source_dir, params)
 

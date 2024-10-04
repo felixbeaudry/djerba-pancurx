@@ -37,7 +37,7 @@ class TestclassificationInfo(PluginTester):
         params = {
             self.INI: os.path.join(input_dir, self.INI_NAME),
             self.JSON: 'classification.json',
-            self.MD5: '30f89c8e28f97035510b536cea98d89c'
+            self.MD5: '31dab65c911ec944bf7582a20c214cb5'
         }
         self.run_basic_test(test_source_dir, params)
 

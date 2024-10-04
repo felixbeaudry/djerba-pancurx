@@ -19,7 +19,7 @@ class TestProvenance(TestBase):
     HELPER_NAME = 'sample_helper'
     CORE = 'core'
 
-    PATH_INFO_MD5 = 'b975845036294eb340e2157429857012'
+    PATH_INFO_MD5 = 'd5e9a8a619ef906d9d153af2558317ab'
 
     def testGetProvenance(self):
         ws = workspace(self.tmp_dir)

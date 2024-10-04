@@ -88,7 +88,7 @@ class main(plugin_base):
                 '--loadings', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_LOADINGS_PATH),
                 '--genes', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_GENES_PATH),
                 '--comparison', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_COMPARISON_PATH),
-                '--input', input_tpm,
+                '--input', os.path.join(work_dir, 'tpm.txt'),
                 '--output', os.path.join(work_dir, 'immunedeconv.txt'),
             ]
 

@@ -13,7 +13,11 @@
              "normal_tissue": "Lymphocyte",
              "template_type": "PCX_summary_template.html",
              "normal_coverage": 42.0,
-             "tumour_coverage": 77.0
+             "tumour_coverage": 77.0,
+             "sample_type": "NONE_SPECIFIED",
+              "location_subtype": "NONE_SPECIFIED",
+              "mean_coverage_normal": 41.2,
+              "mean_coverage_tumour": 79.0
             },
  "version": "1.0.0"}
 

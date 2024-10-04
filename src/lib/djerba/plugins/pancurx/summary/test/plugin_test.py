@@ -36,7 +36,7 @@ class TestSummary(PluginTester):
         params = {
             self.INI: os.path.join(input_dir, self.INI_NAME),
             self.JSON: 'summary.json',
-            self.MD5: '115f2c184a1543f7c5cb755d4be6cf9d'
+            self.MD5: '88d6c779a180fdc04c73fe1d3a4b5f1e'
         }
         self.run_basic_test(test_source_dir, params)
 

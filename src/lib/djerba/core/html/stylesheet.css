@@ -178,3 +178,9 @@ table.sortable thead {
 
 .MMR_results-True {border:2px solid #107733;  background-color: #107733; color: white;}
 .MMR_results-False {border:2px solid #107733; background-color: white; color: black;}
+
+.TDP_results-True {border:2px solid #FFB14E;  background-color: #FFB14E; color: white;}
+.TDP_results-False {border:2px solid #FFB14E; background-color: white; color: black;}
+
+
+

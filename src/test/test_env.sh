@@ -1,6 +1,7 @@
 #! /usr/bin/env bash
 
 # 'source' this file to run tests
+export DJERBA_PRIVATE_DIR=/.mounts/labs/PCSI/users/
 
 # if DJERBA_SOURCE_DIR not set
 if [ -z "${DJERBA_SOURCE_DIR}" ]; then
@@ -25,3 +26,9 @@ else
     export DJERBA_TEST_DATA=$DJERBA_TEST_DIR # deprecated, but still used in some tests
     # DJERBA_PRIVATE_DIR is set by the environment module
 fi
+
+export DJERBA_RUN_DIR=${DJERBA_SOURCE_DIR}/src/lib/djerba/data
+export DJERBA_TEST_DIR=/.mounts/labs/PCSI/users/fbeaudry/reports/djerba_test_data
+export INTEGRATION_TEST_DIR=/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-test
+export TEMP_REPORT_TEST_DIR=/.mounts/labs/PCSI/users/fbeaudry/reports
+
