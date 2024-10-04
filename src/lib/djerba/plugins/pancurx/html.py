@@ -5,6 +5,7 @@ import djerba.plugins.pancurx.constants as phe
 from djerba.util.html import html_builder as hb
 
 def k_comma_format(value):
+    value = int(value)
     value_formatted = f'{value:,}'
     return(value_formatted)
 
@@ -29,18 +30,24 @@ def make_class_table_rows(multifactor_marker_results, type):
     return rows
 
 
-def make_fusion_table_rows(row_fields):
+def make_fusion_table_rows(row_fields, ploidy):
     rows = []
+    already_printerd = []
     for row in row_fields:
-
+        cn_class, cn = process_cn(row['copy_number'], ploidy)
         cells = [
-            hb.td(row['fusion_product'], italic=True),
-            hb.td("Recommend Manual Review"),
-            hb.td(row['event_type']),
-            hb.td(row['gene_product_type']),
-            hb.td(row['fusion_splicing_pattern']),
+            hb.td(row['gene'], italic=True),
+            hb.td(row['gene_chr']),
+            '<td {0}>{1}</td>'.format(cn_class, cn),
+            hb.td(row['input_tpm']),
+            hb.td(row['cohort_perc']),
+            hb.td(row['variant'])
+
         ]
-        rows.append(hb.tr(cells))
+        
+        if ' '.join((row['gene'], row['variant'])) not in already_printerd:
+            rows.append(hb.tr(cells))
+            already_printerd.append(' '.join((row['gene'], row['variant'])))
     return rows
 
 def build_dbsnp_url(dbsnp, chr, start):
@@ -158,19 +165,27 @@ def make_germline_slide_rows(row_fields,  reportable_genes):
         clinvar = ''
         for row in row_fields:
             if row['gene'] == this_gene:
-                mutation = process_gene_context_for_slide(row)
-                if mutation != "":
-                    theses_mutations.append(mutation)
+                if row['mutation_type'] == 'splice':
+                    theses_mutations = ['splice']
+                else:
+                    mutation = process_gene_context_for_slide(row)
+                    if mutation != "":
+                        theses_mutations.append(mutation)
+                if row['clinvar'] in ['Uncertain_significance', 'Conflicting_interpretations_of_pathogenicity']:
+                    clinvar = 'VUS'
+                elif row['clinvar'] == 'NA' or row['clinvar'] == 'Benign':
+                    clinvar = row['dbsnp']
+                else:
+                    clinvar = row['clinvar'].replace("_"," ")
                 loh = process_ab_slide(row['ab_counts'])
         theses_mutations = list(set(theses_mutations))
-        if loh != '':
+        if loh != '' :
+            loh = ''.join(('s',loh))
             theses_mutations.append(loh)
+            
         theses_mutations = ", ".join(theses_mutations)
 
-        if row['clinvar'] in ['Uncertain significance']:
-            clinvar = 'VUS'
-        else:
-            clinvar = row['clinvar']
+
         cells = [
             hb.td(this_gene, italic=True),
             hb.td(theses_mutations),
@@ -195,7 +210,7 @@ def make_somatic_slide_rows(row_fields, ploidy, reportable_genes):
                 loh = process_ab_slide(row['ab_counts'])
                 cn_class, cn = process_cn(row['copy_number'], ploidy)
         theses_mutations = list(set(theses_mutations))
-        if loh != '':
+        if loh != '' and "".join(theses_mutations) != 'homozygous deletion':
             theses_mutations.append(loh)
         theses_mutations = ", ".join(theses_mutations)
 
@@ -288,7 +303,7 @@ def process_ab_slide(ab_full):
             ab = this_ab
             break
     a_b_list = ab.split('.')
-    if a_b_list[0] == "0":
+    if a_b_list[0] == "0" :
         loh = 'LOH'
     if len(ab_split) > 1 and loh == 'LOH':
         loh = "".join((loh,'*'))
@@ -304,7 +319,7 @@ def process_additional(row):
         additional_string.append("COSMIC census hit") 
     return('; '.join(additional_string))
 
-def process_cn(cn_full, ploidy):
+def process_cn(cn_full, ploidy=None):
     cn_split = cn_full.split('|')
     cn = 'NA'
     for this_cn in cn_split:
@@ -315,7 +330,10 @@ def process_cn(cn_full, ploidy):
             break
     try:
         cn = round(float(cn), 1)
-        cn_class = get_cn_cell_class(cn, ploidy)
+        if ploidy != None:
+            cn_class = get_cn_cell_class(cn, ploidy)
+        else:
+            cn_class = ''
     except ValueError:
         cn_class = ''
     if len(cn_split) > 1:

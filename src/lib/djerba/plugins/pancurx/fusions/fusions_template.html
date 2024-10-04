@@ -1,29 +1,38 @@
 <%
       import djerba.plugins.pancurx.constants as plugin
-      from djerba.plugins.pancurx.html import make_fusion_table_rows
+      from djerba.plugins.pancurx.html import make_fusion_table_rows, k_comma_format
       from djerba.util.html import html_builder
-
+      star_qc = results.get('star_qc')
+      ploidy = results.get('ploidy')
 %>
 
 
 
-<h2 class="lbr">Fusions (WTS)</h2>
-<div style="padding:0px 0px 0px 50px; break-inside: avoid; display: table;">
-      <p>Gene fusions, critical in carcinogenesis, often entail oncogenes resulting from chromosomal rearrangements. 
-            Their detection relies on RNA analysis rather than whole-genome sequencing (WGS), as active expression correlates with pathogenesis.
-      Confidence is based on the number of RNA reads spanning the fusion breakpoint and manual review is often recommended.  </p>
+<h2 class="lbr">Gene Expression (WTS)</h2>
 
-      % if results.get('fusion_count') > 0:
-            <table style="width:100%" class="sortable">
-                  <tr><td>Fusion</td><td>Confidence</td><td>Event Type</td><td>Reading Frame</td><td>Splicing</td></tr>
-                  % for variant_row in make_fusion_table_rows(results.get('fusions')):
-                        ${variant_row}
-                  % endfor
+<div style="padding:0px 0px 0px 50px; ">
+<h3 class="lbr">Transcriptome Quality Control</h3>
+<p>The RNA from this sample is of <strong>${star_qc.get('qc_final')}</strong> quality. We observe: 
+  <ul>
+    <li><strong>${k_comma_format(star_qc.get('Uniquely mapped reads number'))}</strong> uniquely mapping reads (>3,000,000)</li>
+    <li><strong>${star_qc.get('% of reads unmapped')} %</strong> unmapped reads (<50%) </li>
 
-            </table>
-      % else:
-            <p>No interesting fusions to report.</p>
-      % endif
+  </ul>
+ 
+</p>
+
+
+<h3 class="lbr">Expression Status of Common Biliary Driver and Targetable Genes</h3>
+
+
+      <table class="lbr sortable" style="width:100%" >
+      <tr><td style="width:8%">Gene</td><td style="width:5%">Chr.</td><td style="width:5%">CN</td><td style="width:5%">TPM</td><td style="width:10%">Exp. %ile</td><td style="width:52%">Variant</td></tr>
+      % for variant_row in make_fusion_table_rows(results.get('fusions'), ploidy):
+            ${variant_row}
+      % endfor
+
+      </table>
+
 
 
 </div>

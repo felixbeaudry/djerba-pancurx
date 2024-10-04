@@ -55,17 +55,26 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.INFERRED_SEX] = tools.parse_sex(self, wrapper.get_my_string(phe.SEX_PATH), wrapper.get_my_string('template_type'))
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), phe.PLOIDY)
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
-        data[core_constants.RESULTS]['tandem_duplicator_phenotype_score'] = tools.parse_TDP(self, wrapper.get_my_string(phe.TDP_PATH))
+        
         summary_results = tools.parse_summary_file(self, wrapper.get_my_string(phe.SUMMARY_FILE_PATH))
+
         dsbr_results, dsbr_tally = tools.parse_multifactor_marker(self, summary_results, phe.DSBR_HTML_HEADERS, phe.DSBR_DEFAULT_HALLMARK_CUTOFFS)
         data[core_constants.RESULTS][phe.DSBR_RESULTS] = dsbr_results
         data[core_constants.RESULTS]['dsbr_tally'] = dsbr_tally
+
         mmr_results, mmr_tally = tools.parse_multifactor_marker(self, summary_results, phe.MMR_HTML_HEADERS, phe.MMR_DEFAULT_HALLMARK_CUTOFFS)
         data[core_constants.RESULTS][phe.MMR_RESULTS] = mmr_results
         data[core_constants.RESULTS]['mmr_tally'] = mmr_tally
-        data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
+        
+        tdp_results, tdp_tally = tools.calculate_TDP_status(summary_results)
+        data[core_constants.RESULTS][phe.TDP_RESULTS] = tdp_results
+        data[core_constants.RESULTS]['tdp_tally'] = tdp_tally
+
+        #data[core_constants.RESULTS]['tandem_duplicator_phenotype_score'] = tools.parse_TDP(self, wrapper.get_my_string(phe.TDP_PATH))
+        
         #TODO: replace waddell pull by calculation from SV counts
         data[core_constants.RESULTS][phe.WADDELL_CLASS] = summary_results['waddell']
+        data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
         return data
 
     def render(self, data):
@@ -92,4 +101,5 @@ class main(plugin_base):
         self.set_priority_defaults(self.PRIORITY)
 
             
-	
+        
+

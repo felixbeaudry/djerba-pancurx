@@ -10,7 +10,8 @@ dist
 .project
 .pydevproject
 djerba.log
-*.DS_Store
+.DS_Store
+*/.DS_Store
 *.Rhistory
 *.RData
 *.vscode

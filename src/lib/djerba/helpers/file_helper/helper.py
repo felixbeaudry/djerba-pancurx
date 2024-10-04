@@ -67,6 +67,7 @@ class main(helper_base):
             phe.TDP_PATH : path_finder.make_tdp_path(),
             "snv_annovar": path_finder.make_snv_annovar(),
             "indel_annovar": path_finder.make_indel_annovar(),
+            phe.STAR_QC_PATH: path_finder.make_star_qc(),
             
             phe.MAVIS_FUSIONS_PATH: path_finder.make_mavis_fusion(),
             phe.TPM_PATH: path_finder.make_stringtie(),
@@ -141,6 +142,11 @@ class assemble_file_paths(logger):
         file_path = os.path.join(self.rna_root_extended, "starfusion/1.9.0/mavis/summary", file_name)
         return(file_path)
 
+    def make_star_qc(self):
+        file_name = "".join(("Log.final.out"))
+        file_path = os.path.join(self.rna_root_extended, "collapsed", file_name)
+        return(file_path)
+       
     def make_bam_paths(self):
         file_name = "".join((self.sample, '.bam'))
         normal_file_name = "".join((self.normal_sample, '.bam'))

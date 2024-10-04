@@ -5,7 +5,6 @@ from time import strptime
 import csv
 import os
 import re
-import collections
 import djerba.core.constants as core_constants
 from djerba.plugins.base import plugin_base
 from djerba.util.render_mako import mako_renderer
@@ -91,9 +90,9 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.INDEL_BIN_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.INDEL_BIN_PLOT), phe.INDEL_BIN_PLOT)
         data[core_constants.RESULTS][phe.SV_BIN_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.SV_BIN_PLOT), phe.SV_BIN_PLOT)
 
-        data[core_constants.RESULTS]['loads']['snv_percentile'] = self.get_percentile(data[core_constants.RESULTS]['loads']['snv_count'],  wrapper.get_my_string('comparison_cohort_file'), 'snv_count')
-        data[core_constants.RESULTS]['loads']['sv_percentile'] = self.get_percentile(data[core_constants.RESULTS]['loads']['sv_count'],  wrapper.get_my_string('comparison_cohort_file'), 'sv_count')
-        data[core_constants.RESULTS]['loads']['indel_percentile'] = self.get_percentile(data[core_constants.RESULTS]['loads']['indel_count'], wrapper.get_my_string('comparison_cohort_file'), 'indel_count')
+        data[core_constants.RESULTS]['loads']['snv_percentile'] = tools.get_percentile(self, data[core_constants.RESULTS]['loads']['snv_count'],  wrapper.get_my_string('comparison_cohort_file'), 'snv_count')
+        data[core_constants.RESULTS]['loads']['sv_percentile'] = tools.get_percentile(self, data[core_constants.RESULTS]['loads']['sv_count'],  wrapper.get_my_string('comparison_cohort_file'), 'sv_count')
+        data[core_constants.RESULTS]['loads']['indel_percentile'] = tools.get_percentile(self, data[core_constants.RESULTS]['loads']['indel_count'], wrapper.get_my_string('comparison_cohort_file'), 'indel_count')
         data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
         data[core_constants.RESULTS][phe.ONCOSLIDE_CNV_PLOT] = tools.convert_svg_plot(self, wrapper.get_my_string(phe.ONCOSLIDE_CNV_PLOT),   phe.ONCOSLIDE_CNV_PLOT)
 
@@ -137,29 +136,4 @@ class main(plugin_base):
         self.set_ini_default(core_constants.ATTRIBUTES, 'research')
         self.set_priority_defaults(self.PRIORITY)
 
-
-
-    def get_percentile(self, sample_variant_count, cohort_path, variant_column_name):
-        these_counts = []
-        cohort_path = tools.check_path_exists(self, cohort_path)
-        with open(cohort_path, 'r') as cohort_file:
-            for row in csv.DictReader(cohort_file, delimiter=","):
-                these_counts.append(int(row[variant_column_name]))
-        cohort_count = {}
-        for this_count in these_counts:
-            if this_count in cohort_count.keys():
-                cohort_count[this_count] = cohort_count[this_count] + 1
-            else:
-                cohort_count[this_count] = 1
-        sorted_cohort_count = collections.OrderedDict(sorted(cohort_count.items()))
-        
-        lowerCount = 0
-        equalCount = 0
-        for this_count in sorted_cohort_count.keys():
-            if int(sample_variant_count) > this_count:
-                lowerCount = lowerCount + sorted_cohort_count[this_count]
-            elif int(sample_variant_count) == this_count:
-                equalCount = equalCount + sorted_cohort_count[this_count]
-        rank = round(((lowerCount + (0.5 * equalCount)) / (len(these_counts) + 1)*100))
-        return(rank )
 

@@ -23,7 +23,7 @@ DEFAULT_MANE_FILE = 'MANE.GRCh38.v1.3.summary.txt'
 #DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
 DEFAULT_CIBERSORT_LOADINGS_PATH='pancurx/LM22.txt'
 DEFAULT_CIBERSORT_GENES_PATH='pancurx/hgnc_complete_set.txt'
-DEFAULT_CIBERSORT_COMPARISON_PATH='pancurx/LBR.all_rna.txt'
+DEFAULT_CIBERSORT_COMPARISON_PATH='pancurx/LBR.immune_rna.txt'
 
 
 DEFAULT_RNA_SEQTYPE = 'rna'
@@ -131,9 +131,11 @@ HISTBOX_SNV = "histbox_snv"
 WHOLE_CHROMOSOME_PLOTS = "whole_chromosome_plots"
 DSBR_RESULTS = "DSBR_results"
 MMR_RESULTS = "MMR_results"
+TDP_RESULTS = "TDP_results"
 REPORTING_NAME = "reporting_name"
 MAVIS_FUSIONS_PATH = "mavis_fusions"
 TPM_PATH = "tpm_path"
+STAR_QC_PATH = "star_qc"
 
 CHROMOSOME_1_PLOT = 'chromosome_1_plot'
 CHROMOSOME_2_PLOT = 'chromosome_2_plot' 

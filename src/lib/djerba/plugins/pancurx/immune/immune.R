@@ -35,25 +35,26 @@ library(ggplot2)
   names(comparison_matrix)[1] <- c('HGNC')
   
   #gene_set should be 'hgnc_complete_set.txt' from https://www.genenames.org/download/archive/
-  gene_set_data <-  read.csv(opt$genes, sep="\t", header=TRUE, check.names=FALSE)[]
+  #gene_set_data <-  read.csv(opt$genes, sep="\t", header=TRUE, check.names=FALSE)[]
   
 #### PROCESS AND CLEAN DATA ####
   
   if(file.exists(sample_tpm_file_path)){
+    tpm_file <- fread(sample_tpm_file_path)
   
-    gene_list <- gene_set_data[gene_set_data$locus_group == "protein-coding gene",c("symbol","ensembl_gene_id" )]
+  #  gene_list <- gene_set_data[gene_set_data$locus_group == "protein-coding gene",c("symbol","ensembl_gene_id" )]
     
-    #input_data <- read.csv(opt$input, sep="\t", header=TRUE, check.names=FALSE)
-    tpm_file <- fread(sample_tpm_file_path)[,c("Gene Name", "Coverage")]
+  #  input_data <- read.csv(opt$input, sep="\t", header=TRUE, check.names=FALSE)
+    
   
-    tpm_file <- left_join(gene_list, tpm_file, by=c("symbol" = "Gene Name"), multiple = "all")
+  #  tpm_file <- left_join(gene_list, tpm_file, by=c("symbol" = "Gene Name"), multiple = "all")
     names(tpm_file)[1] <- c('HGNC')
     
-    TPMs <- tpm_file %>%
-      group_by(HGNC) %>%
-      summarise(this_sample = round(mean(Coverage), 2))
+     TPMs <- tpm_file #%>%
+  #    group_by(HGNC) %>%
+  #    summarise(this_sample = round(mean(Coverage), 2))
     
-    TPMs$this_sample[is.na(TPMs$this_sample)] <- 0
+  #  TPMs$this_sample[is.na(TPMs$this_sample)] <- 0
     
   } else {
     cat("rna not found \n")
@@ -61,11 +62,14 @@ library(ggplot2)
   }
   
   #load the sample to be processed and join with the control matrix
-  TPMs_full =  as.data.frame(inner_join(TPMs, comparison_matrix))
+  TPMs_full =  as.data.frame(inner_join(TPMs[,-3], comparison_matrix))
   
   rownames(TPMs_full) <- TPMs_full$HGNC
   TPMs_full <- TPMs_full[,-1] #remove "HGNC" column
 
+  #some genes missing from analysis, may impact results
+  TPMs_full <- TPMs_full[!is.na(TPMs_full$this_sample),]
+  
 #### RUN ANALYSIS IF POSSIBLE ####
   
   if (nrow(TPMs_full[ TPMs_full$this_sample > 0,]) == 0) {

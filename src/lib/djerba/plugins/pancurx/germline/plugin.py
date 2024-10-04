@@ -11,6 +11,7 @@ from djerba.util.render_mako import mako_renderer
 from djerba.util.image_to_base64 import converter
 import djerba.plugins.pancurx.constants as phe
 import djerba.plugins.pancurx.tools as tools
+import shutil
 
 class main(plugin_base):
 
@@ -26,6 +27,9 @@ class main(plugin_base):
         wrapper = tools.fill_file_if_null(self, wrapper, phe.GERMLINE_ANNOVAR_PATH, phe.GERMLINE_ANNOVAR_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
+
+        if wrapper.my_param_is_null('cnvs_and_abs'):
+            wrapper.set_my_param('cnvs_and_abs', os.path.join(self.workspace.print_location(), 'cnvs_and_abs.json'))
         return wrapper.get_config()
 
     def extract(self, config):
@@ -45,6 +49,12 @@ class main(plugin_base):
         
         mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
         mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
+
+        if self.workspace.has_file('cnvs_and_abs.json'):
+            msg = "using workspace CNV and ABs"
+            self.logger.info(msg)
+        else:
+            shutil.copyfile(wrapper.get_my_string('cnvs_and_abs'), os.path.join(self.workspace.print_location(), 'cnvs_and_abs.json'))
 
         cnvs_and_abs = self.workspace.read_json('cnvs_and_abs.json')
         germ_nonsil_genes, germ_nonsil_genes_rare, germ_pathogenic, reportable_germline_variants = tools.get_subset_of_germline_variants(germline_variants, genes_of_interest, mane_transcripts, cnvs_and_abs)
@@ -72,7 +82,8 @@ class main(plugin_base):
             phe.GERMLINE_ANNOVAR_PATH,
             phe.SUMMARY_FILE_PATH,
             'template_type',
-            'germline_genes_of_interest_file'
+            'germline_genes_of_interest_file',
+            'cnvs_and_abs'
         ]
         for key in discovered:
             self.add_ini_discovered(key)
