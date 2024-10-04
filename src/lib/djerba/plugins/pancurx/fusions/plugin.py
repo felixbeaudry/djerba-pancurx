@@ -40,7 +40,7 @@ class main(plugin_base):
         finder = directory_finder(self.log_level, self.log_path)
         data_dir = finder.get_data_dir()
         cnvs_and_abs = self.workspace.read_json('cnvs_and_abs.json')
-        data[core_constants.RESULTS]['gene_expression'] = tools.get_gene_expression(self, genes_of_interest, wrapper.get_my_string(phe.TPM_PATH), os.path.join(data_dir, phe.DEFAULT_CIBERSORT_COMPARISON_PATH))
+        data[core_constants.RESULTS]['gene_expression'] = tools.get_gene_expression(self, genes_of_interest, wrapper.get_my_string(phe.TPM_PATH),  phe.DEFAULT_CIBERSORT_COMPARISON_PATH)
 
         fusions, fusion_count = tools.filter_fusions(self, all_fusions, genes_of_interest, cnvs_and_abs, data[core_constants.RESULTS]['gene_expression'])
         data[core_constants.RESULTS]['fusions'] = fusions

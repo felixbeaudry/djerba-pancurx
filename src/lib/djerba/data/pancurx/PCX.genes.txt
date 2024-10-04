@@ -1,9 +1,0 @@
-KRAS	action
-TP53	action
-CDKN2A	action
-SMAD4	action
-MAP2K4	action
-ARID1A	action
-RNF43	action
-TGFBR2	action
-KDM6A	action

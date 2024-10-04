@@ -11,7 +11,7 @@ DEFAULT_CORE_LIMS_URL = "http://pinery.gsi.oicr.on.ca/samples?type=Identity"
 DEFAULT_ROOTPATH = '/.mounts/labs/PCSI/pipeline/hg38'
 #TEMP: plot path is different
 DEFAULT_PLOTPATH = '/.mounts/labs/PCSI/users/fbeaudry/reports/btc_plots'
-DEFAULT_DATA_LOCATION = '/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-pancurx/src/lib/djerba/data/pancurx/'
+DEFAULT_DATA_LOCATION = '/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/'
 DEFAULT_ARCHIVEPATH = 'https://www.hpc.oicr.on.ca/archive/projects/PCSI/pipeline/hg38'
 DEFAULT_SEQTYPE = 'wgs'
 DEFAULT_ALIGNER = 'bwa'
@@ -23,7 +23,7 @@ DEFAULT_MANE_FILE = 'MANE.GRCh38.v1.3.summary.txt'
 #DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
 DEFAULT_CIBERSORT_LOADINGS_PATH='pancurx/LM22.txt'
 DEFAULT_CIBERSORT_GENES_PATH='pancurx/hgnc_complete_set.txt'
-DEFAULT_CIBERSORT_COMPARISON_PATH='pancurx/LBR.immune_rna.txt'
+DEFAULT_CIBERSORT_COMPARISON_PATH='/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/LBR.immune_rna.txt'
 
 
 DEFAULT_RNA_SEQTYPE = 'rna'
