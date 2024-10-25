@@ -59,7 +59,7 @@ class main(helper_base):
             "bam_paths": path_finder.make_bam_paths(),
             "indelPath" : path_finder.make_indel_path(),
             phe.CELLULOID_PARAM_PATH : path_finder.make_celluloid_param_path(),
-            "snvPath" : path_finder.make_snv_path(),
+            phe.SNV_PATH : path_finder.make_snv_path(),
             phe.GERMLINE_PATH : path_finder.make_germline_path(),
             "svPath" : path_finder.make_structural_path(),
             "segPath" : path_finder.make_celluloid_seg_path(),

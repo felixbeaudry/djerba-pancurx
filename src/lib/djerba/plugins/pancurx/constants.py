@@ -21,7 +21,7 @@ DEFAULT_BLURB_FILE = 'blurb_template.txt'
 DEFAULT_MANE_FILE = 'MANE.GRCh38.v1.3.summary.txt'
 
 #DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
-DEFAULT_CIBERSORT_LOADINGS_PATH='pancurx/LM22.txt'
+DEFAULT_CIBERSORT_LOADINGS_PATH='/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/LM22.txt'
 DEFAULT_CIBERSORT_GENES_PATH='pancurx/hgnc_complete_set.txt'
 DEFAULT_CIBERSORT_COMPARISON_PATH='/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/LBR.immune_rna.txt'
 
@@ -39,6 +39,7 @@ DEFAULT_REFERENCE_COHORT = '/.mounts/labs/PCSI/users/fbeaudry/PanCuRx_Analysis_P
 DEFAULT_GENE_FILE = 'genes.txt'
 DEFAULT_GERMLINE_GENE_FILE = 'germline.genes.txt'
 DEFAULT_SIGNATURES_FILE = 'signatures.txt'
+DEFAULT_SITES_FILE = 'sites.txt'
 
 # report attributes
 REPORT_VERSION = "report_version"
@@ -136,6 +137,7 @@ REPORTING_NAME = "reporting_name"
 MAVIS_FUSIONS_PATH = "mavis_fusions"
 TPM_PATH = "tpm_path"
 STAR_QC_PATH = "star_qc"
+SNV_PATH = "snvpath"
 
 CHROMOSOME_1_PLOT = 'chromosome_1_plot'
 CHROMOSOME_2_PLOT = 'chromosome_2_plot' 

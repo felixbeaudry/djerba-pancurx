@@ -45,6 +45,11 @@ class main(helper_base):
             file_path = os.path.join(DATA_LOCATION, file_name)
             wrapper.set_my_param('signatures_of_interest_file', file_path)
 
+        if wrapper.my_param_is_null('sites_of_interest_file'):
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), phe.DEFAULT_SITES_FILE))
+            file_path = os.path.join(DATA_LOCATION, file_name)
+            wrapper.set_my_param('sites_of_interest_file', file_path)
+
         if wrapper.my_param_is_null('germline_genes_of_interest_file'):
             file_name = '.'.join( (wrapper.get_my_string('template_type'), phe.DEFAULT_GERMLINE_GENE_FILE))
             file_path = os.path.join(DATA_LOCATION, file_name)
@@ -75,6 +80,7 @@ class main(helper_base):
                 'germline_genes_of_interest_file': wrapper.get_my_string('germline_genes_of_interest_file'),
                 'immune_genes_of_interest_file': wrapper.get_my_string('immune_genes_of_interest_file'),
                 'signatures_of_interest_file': wrapper.get_my_string('signatures_of_interest_file'),
+                'sites_of_interest_file': wrapper.get_my_string('sites_of_interest_file'),
                 'template_type': wrapper.get_my_string('template_type'),
                 phe.SUMMARY_FILE: wrapper.get_my_string(phe.SUMMARY_FILE),
             }
@@ -99,6 +105,7 @@ class main(helper_base):
             'genes_of_interest_file',
             'signatures_of_interest_file',
             phe.EXTERNAL_IDS,
+            'sites_of_interest_file',
         ]
         for key in discovered:
             self.add_ini_discovered(key)

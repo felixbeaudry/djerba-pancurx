@@ -1,7 +1,0 @@
-In this sample, we find  
-  
-- 
- 
-Mutational loads are . COSMIC3 SBS context analysis finds signatures .
- 
-Tumour has an estimated ploidy of . QC is , with a cellularity of %.

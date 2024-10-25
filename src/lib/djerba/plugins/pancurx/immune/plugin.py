@@ -85,7 +85,7 @@ class main(plugin_base):
             cmd = [
                 'Rscript', r_script_dir + "/immune.R",
                 '--cibersort', r_script_dir,
-                '--loadings', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_LOADINGS_PATH),
+                '--loadings',  phe.DEFAULT_CIBERSORT_LOADINGS_PATH,
                 '--genes', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_GENES_PATH),
                 '--comparison', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_COMPARISON_PATH),
                 '--input', os.path.join(work_dir, 'tpm.txt'),

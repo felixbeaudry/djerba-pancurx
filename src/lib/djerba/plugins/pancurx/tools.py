@@ -27,7 +27,10 @@ def calculate_TDP_status(sdf):
     # Menghi Score > 0 and duplication ratio > 0.205
 
     tdp_tally = 0
-    tdp_score = round(float(sdf["tdp_score"]), 2)
+    if sdf["tdp_score"] != 'NA':
+        tdp_score = round(float(sdf["tdp_score"]), 2)
+    else: 
+        tdp_score= 0
 
     if tdp_score > 0:
         tdp_score_call = True
@@ -123,7 +126,6 @@ def find_external_id_in_json_dict(lims_dict, this_donor):
             for attribute in range(len(lims_dict[donor]['attributes'])):
                 if lims_dict[donor]['attributes'][attribute]['name'] == "External Name":
                     external_id = lims_dict[donor]['attributes'][attribute]['value']
-                    # external_id = external_id.replace(',', ' ')
     return(external_id)
 
 def get_all_somatic_variants(self, sample_variants, inferred_sex):
@@ -197,7 +199,6 @@ def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_coho
                 dict_items = list(row.values())
                 cohort_expression_list = dict_items[1:]
                 this_tpm = expression_dict[row['gene_list']]['input_tpm']
-                #this_percentile = round(stats.percentileofscore(cohort_expression_list, this_tpm ,  'rank'), 2)
                 expression_dict[row['gene_list']]['cohort_perc'] = round(float(expression_dict[row['gene_list']]['percentile'] ) * 100, 1)
     return(expression_dict)
 
@@ -328,8 +329,9 @@ def get_subset_of_somatic_variants(self, sample_variants, subset_order, mane_tra
                 else:
                     if variant != "No Variant" and subset_order[gene] in ['driver','action']:
                         core_variant_count += 1
-                    sample_variants = get_mane_context(sample_variants, gene, variant, mane_transcripts, 'nuc_context')
-                    sample_variants = get_mane_context(sample_variants, gene, variant, mane_transcripts, 'aa_context')
+                    if sample_variants[gene][variant]['mutation_class'] != 'EXTRASITE':
+                        sample_variants = get_mane_context(sample_variants, gene, variant, mane_transcripts, 'nuc_context')
+                        sample_variants = get_mane_context(sample_variants, gene, variant, mane_transcripts, 'aa_context')
                     sample_variants[gene][variant]['tier'] = subset_order[gene]
                     reportable_variants.append(sample_variants[gene][variant])
     if core_variant_count > 6:
@@ -494,7 +496,7 @@ def get_signatures_of_interest(self, cosmic_signature_set_path):
     return(signatures_of_interest)
 
 def parse_cosmic_signatures(self, cosmic_signatures_file_path, cosmic_signature_set_path):
-    #signature_results = {}
+
     row = {}
     cosmic_signatures_file_path = check_path_exists(self, cosmic_signatures_file_path)
     with open(cosmic_signatures_file_path, 'r') as cosmic_signatures_file:
@@ -510,9 +512,36 @@ def parse_cosmic_signatures(self, cosmic_signatures_file_path, cosmic_signature_
         if signature_name in row:
             signatures_of_interest[signature_name]['count'] = row[signature_name]
             signatures_of_interest[signature_name]['proportion'] = round( row[signature_name] / sigs_total , 2)
-    
-
     return(signatures_of_interest)
+
+def parse_extra_sites(self, snv_file_path, site_set_path):
+    extra_sites_set = []
+    with open(site_set_path, 'r') as site_set:
+        for row in csv.DictReader(site_set, delimiter="\t"):
+            this_site = {
+                'chrom'	: row['chrom'],
+                'pos'	:row['pos'],
+                'type'	:row['type'],
+                'variant':row['variant'],
+                'element': row['element'],
+            }
+            extra_sites_set.append(this_site)
+
+
+    snv_file_path = check_path_exists(self, snv_file_path)
+    extra_sites_call = []
+    with gzip.open(snv_file_path, 'rt') as snv_file:
+        for line in snv_file:
+            if not line.startswith('#'):
+                columns = line.strip().split('\t')
+                for this_site in extra_sites_set:
+                    if columns[0] == this_site['chrom'] and columns[1] == this_site['pos']:
+                        #take max AF as more likely from tumour
+                        first_genotype = float(columns[10].split(':')[2])
+                        second_genotype = float(columns[10].split(':')[2])
+                        this_site['vaf'] = max((first_genotype, second_genotype))
+                        extra_sites_call.append(this_site)
+    return(extra_sites_call)
 
 def parse_coverage(self, coverage_file_path):
     coverage_file_path = check_path_exists(self, coverage_file_path)
@@ -599,7 +628,6 @@ def parse_fusions(self, fusions_file_path):
                     'break2_split_reads': row['break2_split_reads'],
                     'linking_split_reads': row['linking_split_reads'],                    
                 }
-                #fusion_count = fusion_count + 1
                 sample_fusions.append(fusion_characteristics)
     return(sample_fusions)
 
@@ -727,7 +755,7 @@ def parse_sex(self, sex_file_path, template="PCX"):
 
 
 
-def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}):
+def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}, extra_sites = []):
     sample_variants = {}
     sample_variants_file_path = check_path_exists(self, sample_variants_file_path)
     with open(sample_variants_file_path, 'r') as sample_variants_file:
@@ -759,6 +787,37 @@ def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}):
                 else:
                     sample_variants[gene] = {}
                     sample_variants[gene][variant_key] = variant_characteristics
+            for this_site in extra_sites:
+                if row['gene'] == this_site['element']:
+
+                    variant_key = f"{this_site['chrom']},{this_site['pos']}"
+                    
+                    variant_characteristics = {
+                        'gene': this_site['element'],
+                        'gene_chr': row['gene_chr'],
+                        'position': this_site['pos'],
+                        'nuc_context': this_site['variant'],
+                        'mutation_type': this_site['type'],
+                        'mutation_class': 'EXTRASITE',
+                        'rarity': 'NA',
+                        'clinvar': 'NA',
+                        'dbsnp': 'NA',
+                        'copy_number': row['copy_number'],
+                        'ab_counts': row['ab_counts'],
+                        'cosmic_census_flag': 'NA',
+                        'aa_context': 'NA',
+                        'tumour_freq': this_site['vaf']
+                    }
+
+                    # add variant to gene or create gene
+                    if gene in sample_variants:
+                        sample_variants[gene][variant_key] = variant_characteristics
+                    else:
+                        sample_variants[gene] = {}
+                        sample_variants[gene][variant_key] = variant_characteristics
+
+
+    #run through again to get CNs for genes without variants
     with open(sample_variants_file_path, 'r') as sample_variants_file:
         for row in csv.DictReader(sample_variants_file, delimiter=","):
             gene = row['gene']
