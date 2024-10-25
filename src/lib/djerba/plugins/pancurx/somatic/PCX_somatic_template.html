@@ -7,6 +7,7 @@
       reportable_variants = results.get('reportable_variants')
       all_variants = results.get('all_variants')
       ploidy = results.get('ploidy')
+      tier_mode = results.get('tier_mode')
 
 %>
 
@@ -85,9 +86,9 @@
       <h3 class="pcx">Driver Gene Status</h3>
 	
       <table class="pcx"  style="width:100%" class="sortable">
-      <tr><td>Gene</td><td>Chr.</td><td>Variant</td><td>Copy Number</td><td>A.B Count</td><td>Additional Information</td></tr>
+		<tr><td><b>Gene</b></td><td><b>Chr.</b></td><td><b>Copy Number</b></td><td><b>A|B Count</b></td><td><b>tVAF</b></td><td><b>Variant</b></td></tr>
 
-            % for row in make_somatic_table_rows(reportable_variants, ploidy):
+            % for row in make_somatic_table_rows(reportable_variants, ploidy, tier_mode):
                   ${row}
             % endfor
 

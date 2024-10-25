@@ -145,14 +145,14 @@
 					Proficient
 				%endif				
 				(MMRD-HS: ${results.get('mmr_tally')})</td></tr>
-			<tr><td><b>TDP Score:</b> 
-				% if results.get('tandem_duplicator_phenotype_score') > 0 :
-					Positive
-				%else:
-					Negative
-				%endif		
-				 (Menghi score: ${results.get('tandem_duplicator_phenotype_score')})</td></tr>
-			<tr><td><b>COSMIC SBS:</b> 
+				<tr><td><b>TDP Status:</b> 
+					% if results.get('tdp_tally') > 1 :
+						Deficient
+					%else:
+						Proficient
+					%endif				
+					(TDP-HS: ${results.get('tdp_tally')})</td></tr>
+				<tr><td><b>COSMIC SBS:</b> 
 				${make_signatures_string(sigs)}
 
 

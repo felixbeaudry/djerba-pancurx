@@ -12,18 +12,18 @@
 
       <table class="pcx" style="width:100%" >
 
-            <tr><td><b>Germline Non-silent Variants:</b></td><td>${results.get(plugin.GERM_NONSILENT_COUNT)}</td>
-                <td><b>Germline Non-silent Variants in common Pancreatic Cancer Genes:</b></td><td>${results.get(plugin.GERM_NONSIL_SUBSET_COUNT)}</td></tr>
-            <tr> <td><b>Germline Pathogenic Variants:</b></td><td>${results.get(plugin.GERM_PATHOGENIC_COUNT)}</td>
-                 <td><b>Germline Rare Non-silent Variants in common Pancreatic Cancer Genes:</b></td><td>${results.get(plugin.GERM_NONSIL_SUBSET_RARE_COUNT)}</td> </tr>
+            <tr><td><b>Germline Non-silent Variants:</b> ${results.get(plugin.GERM_NONSILENT_COUNT)}</td></tr>
+                  <tr>    <td><b>Germline Non-silent Variants in common Pancreatic Cancer Genes:</b> ${results.get(plugin.GERM_NONSIL_SUBSET_COUNT)}</td></tr>
+            <tr> <td><b>Germline Pathogenic Variants:</b> ${results.get(plugin.GERM_PATHOGENIC_COUNT)}</td></tr>
+                  <tr>    <td><b>Germline Rare Non-silent Variants in common Pancreatic Cancer Genes:</b> ${results.get(plugin.GERM_NONSIL_SUBSET_RARE_COUNT)}</td> </tr>
       </table>
 	<br>
       <table class="pcx" style="width:100%" class="sortable">
-            <tr><td>Gene</td><td>Variant</td><td>Somatic Copy Number</td><td>Somatic A.B Count</td><td>Additional Information</td></tr>
+            <tr><td><b>Gene</b></td><td><b>Variant</b></td><td><b>Somatic A|B Count</b></td><td><b>Additional Information</b></td><td></td></tr>
 
 
 
-                  % for row in make_germline_table_rows(reportable_germline_variants, ploidy):
+                  % for row in make_germline_table_rows(reportable_germline_variants):
                         ${row}
                   % endfor
 
