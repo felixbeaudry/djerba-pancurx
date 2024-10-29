@@ -19,6 +19,8 @@ DEFAULT_ALIGNER_VERSION = '0.7.17'
 DEFAULT_CELLULOID_VERSION = "v0.11.7"
 DEFAULT_BLURB_FILE = 'blurb_template.txt'
 DEFAULT_MANE_FILE = 'MANE.GRCh38.v1.3.summary.txt'
+DEFAULT_ENV_PATH = '/.mounts/labs/PCSI/tools/djerba/djerba_env/'
+
 
 #DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
 DEFAULT_CIBERSORT_LOADINGS_PATH='/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/LM22.txt'

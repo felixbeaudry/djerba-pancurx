@@ -170,11 +170,11 @@ def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_coho
         msg = "TPM file found"
         self.logger.info(msg)
     else:
-
+        r_command = os.path.join(phe.DEFAULT_ENV_PATH, "lib/R/bin/Rscript")
         r_script = os.path.join(finder.get_base_dir(), "plugins/pancurx/fusions/get_tpm.R")
 
         cmd = [
-            'Rscript', r_script ,
+            r_command, r_script ,
             '--cohort', comparison_cohort_path,
             '--input', input_tpm_path,
             '--output', os.path.join(work_dir, 'tpm.txt'),

@@ -82,8 +82,9 @@ class main(plugin_base):
             msg = "CIBERSORT file found"
             self.logger.info(msg)
         else:
+            r_command = os.path.join(phe.DEFAULT_ENV_PATH, "lib/R/bin/Rscript")
             cmd = [
-                'Rscript', r_script_dir + "/immune.R",
+                r_command, r_script_dir + "/immune.R",
                 '--cibersort', r_script_dir,
                 '--loadings',  phe.DEFAULT_CIBERSORT_LOADINGS_PATH,
                 '--genes', os.path.join(data_dir, phe.DEFAULT_CIBERSORT_GENES_PATH),
