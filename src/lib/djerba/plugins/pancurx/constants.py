@@ -1,17 +1,14 @@
 #defaults
 CURRENT_REPORT_VERSION = '1.0'
-DIPLOID_CUTOFF = 2.3
-DEFAULT_DELETION_CUTOFF = 0.5
-DEFAULT_AMP_MULTIPLIER_CUTOFF = 4
-DEFAULT_DEL_LOH_CUTOFF = 1.5
-DEFAULT_GAIN_ADDEND_CUTOFF = 1
 
 # FILE PATH DEFAULTS
-DEFAULT_CORE_LIMS_URL = "http://pinery.gsi.oicr.on.ca/samples?type=Identity"
-DEFAULT_ROOTPATH = '/.mounts/labs/PCSI/pipeline/hg38'
+DEFAULT_ENV_PATH = '/.mounts/labs/PCSI/tools/djerba/djerba_env/'
+DEFAULT_DATA_LOCATION = '/.mounts/labs/PCSI/references/cohort_lists/'
 #TEMP: plot path is different
 DEFAULT_PLOTPATH = '/.mounts/labs/PCSI/users/fbeaudry/reports/btc_plots'
-DEFAULT_DATA_LOCATION = '/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/'
+
+DEFAULT_CORE_LIMS_URL = "http://pinery.gsi.oicr.on.ca/samples?type=Identity"
+DEFAULT_ROOTPATH = '/.mounts/labs/PCSI/pipeline/hg38'
 DEFAULT_ARCHIVEPATH = 'https://www.hpc.oicr.on.ca/archive/projects/PCSI/pipeline/hg38'
 DEFAULT_SEQTYPE = 'wgs'
 DEFAULT_ALIGNER = 'bwa'
@@ -19,14 +16,11 @@ DEFAULT_ALIGNER_VERSION = '0.7.17'
 DEFAULT_CELLULOID_VERSION = "v0.11.7"
 DEFAULT_BLURB_FILE = 'blurb_template.txt'
 DEFAULT_MANE_FILE = 'MANE.GRCh38.v1.3.summary.txt'
-DEFAULT_ENV_PATH = '/.mounts/labs/PCSI/tools/djerba/djerba_env/'
-
 
 #DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
 DEFAULT_CIBERSORT_LOADINGS_PATH='/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/LM22.txt'
 DEFAULT_CIBERSORT_GENES_PATH='pancurx/hgnc_complete_set.txt'
 DEFAULT_CIBERSORT_COMPARISON_PATH='/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/LBR.immune_rna.txt'
-
 
 DEFAULT_RNA_SEQTYPE = 'rna'
 DEFAULT_RNA_ALIGNER = 'star'
@@ -34,9 +28,7 @@ DEFAULT_RNA_ALIGNER_VERSION = '2.7.4a'
 
 # DATA FILES
 DEFAULT_HUGO_SYN_FILE_PATH = "/.mounts/labs/PCSI/raw_data/hugo/HUGO_synonyms_171213.txt"
-DEFAULT_COSMIC_CENSUS_FILE_PATH = "/.mounts/labs/PCSI/users/rdenroche/phoenix/phoenixParser/cosmic_census_20161115.tsv" #TODO: check use?
 DEFAULT_REFSEQ_FILE_PATH = "/.mounts/labs/PCSI/references/GRCh38/rna/refSeq/hg38_refSeq_genes.txt"
-DEFAULT_REFERENCE_COHORT = '/.mounts/labs/PCSI/users/fbeaudry/PanCuRx_Analysis_Pipeline/scripts/plot/data/pdac_20170926_matrix.csv'
 
 DEFAULT_GENE_FILE = 'genes.txt'
 DEFAULT_GERMLINE_GENE_FILE = 'germline.genes.txt'
@@ -169,6 +161,14 @@ CHROMOSOME_PLOTS = {"chr1" : CHROMOSOME_1_PLOT,
                     "chr18-22" : CHROMOSOME_18_22_PLOT, 
                     "chrX-Y" : CHROMOSOME_X_Y_PLOT}
 
+## COPY NUMBER CUTOFFS
+DIPLOID_CUTOFF = 2.3
+DEFAULT_DELETION_CUTOFF = 0.5
+DEFAULT_AMP_MULTIPLIER_CUTOFF = 4
+DEFAULT_DEL_LOH_CUTOFF = 1.5
+DEFAULT_GAIN_ADDEND_CUTOFF = 1
+
+
 EXCLUDED_GERMLINE_PATHOGENIC_VARIANTS = ['rs11571833']
 
 DSBR_GENES = ["BRCA1", "BRCA2", "PALB2", "RAD51", "RAD51B", "RAD51C", "RAD51D", "XRCC2", "XRCC3", "DMC1", "BRIP1"]
@@ -209,24 +209,6 @@ COSMIC_MUTATION_TYPES = {
 	"S" : "splicing",
 	"T" : "translocation",
 }
-
-#MOVED TO signatures.txt Aug 21st, 2024 by Fe
-# COSMIC_SIGNATURE_SET = {
-# 	"Signature.1": "SBS1",
-# 	"Signature.2": "SBS2",
-# 	"Signature.3": "SBS3",
-# 	"Signature.5": "SBS5",
-# 	"Signature.6": "SBS6",
-# 	"Signature.8": "SBS8",
-# 	"Signature.13": "SBS13",
-# 	"Signature.17a": "SBS17a",
-#     "Signature.17b": "SBS17b",
-# 	"Signature.18": "SBS18",
-# 	"Signature.20": "SBS20",
-#     "Signature.24": "SBS24",
-# 	"Signature.26": "SBS26",
-#     "Signature.30": "SBS30"
-# }
 
 DSBR_SNV_LOAD = "dsbr_snv_load"
 DSBR_CT_RATIO = "dsbr_ct_ratio"
