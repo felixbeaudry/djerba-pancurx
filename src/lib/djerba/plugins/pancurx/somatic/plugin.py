@@ -23,12 +23,13 @@ class main(plugin_base):
         config = self.apply_defaults(config)
         wrapper = self.get_config_wrapper(config)
 
-        wrapper = tools.fill_file_if_null(self, wrapper, 'genes_of_interest_file', 'genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, 'comparison_cohort_file', 'comparison_cohort_file', core_constants.DEFAULT_SAMPLE_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, 'signatures_of_interest_file', 'signatures_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, 'sites_of_interest_file', 'sites_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
+
+        wrapper = tools.fill_file_if_null(self, wrapper, 'genes_of_interest_file', 'genes_of_interest_file', core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'comparison_cohort_file', 'comparison_cohort_file', core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'signatures_of_interest_file', 'signatures_of_interest_file', core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'sites_of_interest_file', 'sites_of_interest_file', core_constants.DEFAULT_PATH_INFO)
 
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SAMPLE_VARIANTS_FILE, phe.SAMPLE_VARIANTS_FILE, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SUMMARY_FILE_PATH, phe.SUMMARY_FILE_PATH, core_constants.DEFAULT_PATH_INFO)

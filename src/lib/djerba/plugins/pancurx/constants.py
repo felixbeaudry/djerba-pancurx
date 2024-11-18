@@ -4,8 +4,9 @@ CURRENT_REPORT_VERSION = '1.0'
 # FILE PATH DEFAULTS
 DEFAULT_ENV_PATH = '/.mounts/labs/PCSI/tools/djerba/djerba_env/'
 DEFAULT_DATA_LOCATION = '/.mounts/labs/PCSI/references/cohort_lists/'
-#TEMP: plot path is different
-DEFAULT_PLOTPATH = '/.mounts/labs/PCSI/users/fbeaudry/reports/btc_plots'
+#TEMP: plot path is different - can be deleted after Dec 1st, 2024 (FB)
+#DEFAULT_PLOTPATH = '/.mounts/labs/PCSI/users/fbeaudry/reports/btc_plots'
+DEFAULT_DJERBA_BIN_PATH='/.mounts/labs/PCSI/tools/djerba/djerba_env/lib/python3.10/site-packages/djerba/plugins/'
 
 DEFAULT_CORE_LIMS_URL = "http://pinery.gsi.oicr.on.ca/samples?type=Identity"
 DEFAULT_ROOTPATH = '/.mounts/labs/PCSI/pipeline/hg38'
@@ -18,9 +19,9 @@ DEFAULT_BLURB_FILE = 'blurb_template.txt'
 DEFAULT_MANE_FILE = 'MANE.GRCh38.v1.3.summary.txt'
 
 #DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
-DEFAULT_CIBERSORT_LOADINGS_PATH='/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/LM22.txt'
+DEFAULT_CIBERSORT_LOADINGS_PATH='/.mounts/labs/PCSI/references/cohort_lists/LM22.txt'
 DEFAULT_CIBERSORT_GENES_PATH='pancurx/hgnc_complete_set.txt'
-DEFAULT_CIBERSORT_COMPARISON_PATH='/.mounts/labs/PCSI/users/fbeaudry/reports/djerba-run-data/LBR.immune_rna.txt'
+DEFAULT_CIBERSORT_COMPARISON_PATH='/.mounts/labs/PCSI/references/cohort_lists/LBR.immune_rna.txt'
 
 DEFAULT_RNA_SEQTYPE = 'rna'
 DEFAULT_RNA_ALIGNER = 'star'
@@ -58,6 +59,7 @@ LOCATION_SUBTYPE = 'location_subtype'
 
 # sample attributes
 SUMMARY_FILE = 'summary_file'
+BLURB_FILE = 'blurb_file'
 CELLULARITY = "cellularity"
 TUMOUR_COVERAGE = "tumour_coverage"
 NORMAL_COVERAGE = "normal_coverage"
@@ -81,6 +83,7 @@ WADDELL_CLASS = "waddell_class"
 MOFFITT_CLASS = "moffitt_class"
 INFERRED_SEX = "inferred_sex"
 HLA_TYPES = "hla_types"
+SV_FILE = "svpath"
 
 # strings
 NONE_SPECIFIED = "NONE_SPECIFIED"

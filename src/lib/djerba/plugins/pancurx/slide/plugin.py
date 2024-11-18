@@ -33,6 +33,7 @@ class main(plugin_base):
         wrapper = tools.fill_file_if_null(self, wrapper, phe.COSMIC_SIGNNLS_PATH, phe.COSMIC_SIGNNLS_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SUMMARY_FILE_PATH, phe.SUMMARY_FILE_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.CELLULOID_PLOT, phe.CELLULOID_PLOT, core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.SNV_PATH, phe.SNV_PATH, core_constants.DEFAULT_PATH_INFO)
 
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'indel.stack_count', phe.INDEL_BIN_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'sv.bins', phe.SV_BIN_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
@@ -41,10 +42,11 @@ class main(plugin_base):
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'sv.stack_count', phe.SV_STACK_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'stack-tmb', phe.TMB_STACK_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
 
-        wrapper = tools.try_two_null_files(self, wrapper, 'genes_of_interest_file', 'genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO, phe.DEFAULT_GENE_FILE)
-        wrapper = tools.try_two_null_files(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO , phe.DEFAULT_GERMLINE_GENE_FILE)
-        wrapper = tools.fill_file_if_null(self, wrapper, 'signatures_of_interest_file', 'signatures_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, 'comparison_cohort_file', 'comparison_cohort_file', core_constants.DEFAULT_SAMPLE_INFO)
+        wrapper = tools.try_two_null_files(self, wrapper, 'genes_of_interest_file', 'genes_of_interest_file', core_constants.DEFAULT_PATH_INFO, phe.DEFAULT_GENE_FILE)
+        wrapper = tools.try_two_null_files(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_PATH_INFO , phe.DEFAULT_GERMLINE_GENE_FILE)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'signatures_of_interest_file', 'signatures_of_interest_file', core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'comparison_cohort_file', 'comparison_cohort_file', core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'sites_of_interest_file', 'sites_of_interest_file', core_constants.DEFAULT_PATH_INFO)
 
         if wrapper.my_param_is_null(phe.SLIDE_DATE):
             wrapper.set_my_param(phe.SLIDE_DATE, phe.NONE_SPECIFIED)
@@ -97,6 +99,7 @@ class main(plugin_base):
         data[core_constants.RESULTS]['loads']['indel_percentile'] = tools.get_percentile(self, data[core_constants.RESULTS]['loads']['indel_count'], wrapper.get_my_string('comparison_cohort_file'), 'indel_count')
 
 
+
         data[core_constants.RESULTS]['sigs'] = tools.parse_cosmic_signatures(self, wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH), wrapper.get_my_string('signatures_of_interest_file'))
 
         if wrapper.get_my_string(phe.SLIDE_DATE) == phe.NONE_SPECIFIED:
@@ -126,7 +129,10 @@ class main(plugin_base):
 
         genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('genes_of_interest_file'))
         tools.copy_if_not_exists(wrapper.get_my_string('genes_of_interest_file'), os.path.join(self.workspace.print_location(), phe.DEFAULT_GENE_FILE))
-        somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), genes_of_interest)
+        
+        extra_sites_call = tools.parse_extra_sites(self, wrapper.get_my_string(phe.SNV_PATH), wrapper.get_my_string('sites_of_interest_file'))
+
+        somatic_variants = tools.parse_somatic_variants(self, wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE), genes_of_interest, extra_sites_call)
 
         mane_transcript_path = os.path.join(phe.DEFAULT_DATA_LOCATION, phe.DEFAULT_MANE_FILE)
         mane_transcripts = tools.parse_mane_transcript(self, mane_transcript_path)
@@ -184,7 +190,9 @@ class main(plugin_base):
             'germline_genes_of_interest_file',
             'template_type',
             'signatures_of_interest_file',
-            'comparison_cohort_file'
+            'comparison_cohort_file',
+            'sites_of_interest_file',
+            phe.SNV_PATH
 
         ]
         for key in discovered:

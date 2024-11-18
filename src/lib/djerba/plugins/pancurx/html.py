@@ -171,7 +171,7 @@ def make_germline_slide_rows(row_fields,  reportable_genes):
                     mutation = process_gene_context_for_slide(row)
                     if mutation != "":
                         theses_mutations.append(mutation)
-                if row['clinvar'] in ['Uncertain_significance', 'Conflicting_interpretations_of_pathogenicity']:
+                if row['clinvar'] in ['Uncertain_significance', 'Conflicting_interpretations_of_pathogenicity', 'Conflicting_interpretations_of_pathogenicity,_risk_factor']:
                     clinvar = 'VUS'
                 elif row['clinvar'] == 'NA' or row['clinvar'] == 'Benign':
                     clinvar = row['dbsnp']

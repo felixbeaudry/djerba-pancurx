@@ -26,7 +26,7 @@ class main(plugin_base):
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SUMMARY_FILE_PATH, phe.SUMMARY_FILE_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.GERMLINE_ANNOVAR_PATH, phe.GERMLINE_ANNOVAR_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
-        wrapper = tools.fill_file_if_null(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_SAMPLE_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'germline_genes_of_interest_file', 'germline_genes_of_interest_file', core_constants.DEFAULT_PATH_INFO)
 
         if wrapper.my_param_is_null('cnvs_and_abs'):
             wrapper.set_my_param('cnvs_and_abs', os.path.join(self.workspace.print_location(), 'cnvs_and_abs.json'))

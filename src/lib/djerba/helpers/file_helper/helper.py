@@ -49,37 +49,96 @@ class main(helper_base):
         if wrapper.my_param_is_null(phe.GERMLINE_ANNOVAR_PATH):
             wrapper.set_my_param(phe.GERMLINE_ANNOVAR_PATH, path_finder.make_germline_annovar())
 
+        if wrapper.my_param_is_null(phe.SUMMARY_FILE_PATH):
+            wrapper.set_my_param(phe.SUMMARY_FILE_PATH, path_finder.make_sample_summary_path())
+
+        if wrapper.my_param_is_null(phe.SAMPLE_VARIANTS_FILE):
+            wrapper.set_my_param(phe.SAMPLE_VARIANTS_FILE, path_finder.make_sample_variants_path())
+
+        if wrapper.my_param_is_null(phe.CELLULOID_PLOT):
+            wrapper.set_my_param(phe.CELLULOID_PLOT, path_finder.make_celluloid_plot_path())
+
+        if wrapper.my_param_is_null(phe.TDP_PATH):
+            wrapper.set_my_param(phe.TDP_PATH, path_finder.make_tdp_path())
+
+        if wrapper.my_param_is_null(phe.SV_FILE):
+            wrapper.set_my_param(phe.SV_FILE, path_finder.make_structural_path())
+
+        DATA_LOCATION = phe.DEFAULT_DATA_LOCATION
+        wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
+
+        if wrapper.my_param_is_null('comparison_cohort_file'):
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), 'summary.csv'))
+            file_path = os.path.join(DATA_LOCATION, file_name)
+            wrapper.set_my_param('comparison_cohort_file', file_path)
+
+        if wrapper.my_param_is_null(phe.BLURB_FILE):
+            file_path = os.path.join(DATA_LOCATION, phe.DEFAULT_BLURB_FILE)
+            wrapper.set_my_param(phe.BLURB_FILE, file_path)
+
+        if wrapper.my_param_is_null('genes_of_interest_file'):
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), phe.DEFAULT_GENE_FILE))
+            file_path = os.path.join(DATA_LOCATION, file_name)
+            wrapper.set_my_param('genes_of_interest_file', file_path)
+
+        if wrapper.my_param_is_null('signatures_of_interest_file'):
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), phe.DEFAULT_SIGNATURES_FILE))
+            file_path = os.path.join(DATA_LOCATION, file_name)
+            wrapper.set_my_param('signatures_of_interest_file', file_path)
+
+        if wrapper.my_param_is_null('sites_of_interest_file'):
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), phe.DEFAULT_SITES_FILE))
+            file_path = os.path.join(DATA_LOCATION, file_name)
+            wrapper.set_my_param('sites_of_interest_file', file_path)
+
+        if wrapper.my_param_is_null('germline_genes_of_interest_file'):
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), phe.DEFAULT_GERMLINE_GENE_FILE))
+            file_path = os.path.join(DATA_LOCATION, file_name)
+            wrapper.set_my_param('germline_genes_of_interest_file', file_path)
+
+        if wrapper.my_param_is_null('immune_genes_of_interest_file'):
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), 'immune.genes.txt'))
+            file_path = os.path.join(DATA_LOCATION, file_name)
+            wrapper.set_my_param('immune_genes_of_interest_file', file_path)
+
         all_paths = {
 
             phe.COSMIC_SIGNNLS_PATH : wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH),
             phe.SEX_PATH: wrapper.get_my_string(phe.SEX_PATH),
             phe.GERMLINE_ANNOVAR_PATH: wrapper.get_my_string(phe.GERMLINE_ANNOVAR_PATH),
+            phe.SUMMARY_FILE_PATH: wrapper.get_my_string(phe.SUMMARY_FILE_PATH),
+            phe.SAMPLE_VARIANTS_FILE: wrapper.get_my_string(phe.SAMPLE_VARIANTS_FILE),
+
+            phe.CELLULOID_PLOT: wrapper.get_my_string(phe.CELLULOID_PLOT),
+            phe.TDP_PATH : wrapper.get_my_string(phe.TDP_PATH),
+            phe.SV_FILE : wrapper.get_my_string(phe.SV_FILE),
+
+            'comparison_cohort_file': wrapper.get_my_string('comparison_cohort_file'),
+            'genes_of_interest_file': wrapper.get_my_string('genes_of_interest_file'),
+            'germline_genes_of_interest_file': wrapper.get_my_string('germline_genes_of_interest_file'),
+            'immune_genes_of_interest_file': wrapper.get_my_string('immune_genes_of_interest_file'),
+            'signatures_of_interest_file': wrapper.get_my_string('signatures_of_interest_file'),
+            'sites_of_interest_file': wrapper.get_my_string('sites_of_interest_file'),
+            phe.BLURB_FILE: wrapper.get_my_string(phe.BLURB_FILE),
 
             "coveragePaths": path_finder.make_coverage_paths(),
             "bam_paths": path_finder.make_bam_paths(),
-            "indelPath" : path_finder.make_indel_path(),
+            
             phe.CELLULOID_PARAM_PATH : path_finder.make_celluloid_param_path(),
-            phe.SNV_PATH : path_finder.make_snv_path(),
-            phe.GERMLINE_PATH : path_finder.make_germline_path(),
-            "svPath" : path_finder.make_structural_path(),
             "segPath" : path_finder.make_celluloid_seg_path(),
             phe.CELLULOID_DIR: path_finder.make_celluloid_dir_path(),
-            phe.TDP_PATH : path_finder.make_tdp_path(),
+
+            phe.GERMLINE_PATH : path_finder.make_germline_path(),
+            phe.SNV_PATH : path_finder.make_snv_path(),
+            "indelPath" : path_finder.make_indel_path(),
             "snv_annovar": path_finder.make_snv_annovar(),
             "indel_annovar": path_finder.make_indel_annovar(),
+
             phe.STAR_QC_PATH: path_finder.make_star_qc(),
-            
             phe.MAVIS_FUSIONS_PATH: path_finder.make_mavis_fusion(),
             phe.TPM_PATH: path_finder.make_stringtie(),
 
-            # eventually the summary and figure scripts will be ported into djerba
-            # and djerba won't need to look for these files
-
-            phe.SUMMARY_FILE_PATH: path_finder.make_sample_summary_path(),
-            phe.SAMPLE_VARIANTS_FILE: path_finder.make_sample_variants_path(),
-
             # plots
-            phe.CELLULOID_PLOT: path_finder.make_celluloid_plot_path(),
             phe.WHOLE_GENOME_PLOT: path_finder.make_whole_genome_plot_path(),
             phe.WHOLE_CHROMOSOME_PLOTS: path_finder.make_whole_chromosome_plots_path(),
 
@@ -101,7 +160,20 @@ class main(helper_base):
             phe.NORMAL_ID,
             phe.COSMIC_SIGNNLS_PATH,
             phe.SEX_PATH  ,
-            phe.GERMLINE_ANNOVAR_PATH
+            phe.GERMLINE_ANNOVAR_PATH,
+            phe.SUMMARY_FILE_PATH,
+            phe.SAMPLE_VARIANTS_FILE,
+            phe.BLURB_FILE,
+            'comparison_cohort_file',
+            'immune_genes_of_interest_file',
+            'germline_genes_of_interest_file',
+            'genes_of_interest_file',
+            'signatures_of_interest_file',
+            'sites_of_interest_file',
+            'template_type',
+            phe.CELLULOID_PLOT,
+            phe.TDP_PATH,
+            phe.SV_FILE,
         ]
         for key in discovered:
             self.add_ini_discovered(key)
@@ -130,7 +202,7 @@ class assemble_file_paths(logger):
         self.normal_archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, normal_sample, seq_path)
 
         #TEMP: plot path is different
-        self.plot_path = os.path.join(phe.DEFAULT_PLOTPATH, sample)
+        #self.plot_path = os.path.join(phe.DEFAULT_PLOTPATH, sample)
 
     def make_stringtie(self):
         file_name = "".join((self.sample,"_stringtie_abundance.txt"))
@@ -307,24 +379,28 @@ class assemble_file_paths(logger):
                       'oncoplot.SVs',
                       ]
        
+        core_file_path = os.path.join(self.root_extended, "results/djerba_plots")
+
         for this_plot_name in plot_names:
 
             file_name = ".".join((self.sample,this_plot_name,"svg"))
-            file_path = os.path.join(self.plot_path, file_name)
+            file_path = os.path.join(core_file_path, file_name)
             plot_dict[this_plot_name] = file_path
 
         return(plot_dict)
 
     def make_whole_genome_plot_path(self):
         file_name = "".join((self.sample,".whole_genome.png"))
-        file_path = os.path.join(self.plot_path, file_name)
+        file_path = os.path.join(self.root_extended, "results/djerba_plots")
+        file_path = os.path.join(file_path, file_name)
         return(file_path)
 
     def make_whole_chromosome_plots_path(self):
         whole_chromosome_plots_paths = {}
+        core_file_path = os.path.join(self.root_extended, "results/djerba_plots")
         for this_chromosome in phe.CHROMOSOME_PLOTS.keys():
             file_name = "".join((self.sample,".whole_",this_chromosome,".png"))
-            file_path = os.path.join(self.plot_path, file_name)
+            file_path = os.path.join(core_file_path, file_name)
             whole_chromosome_plots_paths[phe.CHROMOSOME_PLOTS[this_chromosome]] = file_path
         return(whole_chromosome_plots_paths)
 

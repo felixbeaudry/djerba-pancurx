@@ -14,6 +14,7 @@ from djerba.util.subprocess_runner import subprocess_runner
 import shutil
 from scipy import stats
 import collections
+import time
 
 def add_underscore_to_donor(donor):
     if "EPPIC" in donor:
@@ -163,15 +164,14 @@ def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_coho
     input_tpm_path = check_path_exists(self, input_tpm_path)
     comparison_cohort_path = check_path_exists(self, comparison_cohort_path)
 
-    finder = directory_finder(self.log_level, self.log_path)
     work_dir = self.workspace.get_work_dir()
 
-    if self.workspace.has_file(os.path.join(work_dir, 'tpm.txt')):
+    if self.workspace.has_file('tpm.txt'):
         msg = "TPM file found"
         self.logger.info(msg)
     else:
         r_command = os.path.join(phe.DEFAULT_ENV_PATH, "lib/R/bin/Rscript")
-        r_script = os.path.join(finder.get_base_dir(), "plugins/pancurx/fusions/get_tpm.R")
+        r_script = os.path.join(phe.DEFAULT_DJERBA_BIN_PATH, "pancurx/fusions/get_tpm.R")
 
         cmd = [
             r_command, r_script ,
@@ -670,7 +670,13 @@ def parse_lims(self, donor):
         msg = "Trouble pulling LIMS"
         raise MissingLIMSError(msg)
     else:
-        lims_json_dict = json.loads(r.text)
+        try:
+            lims_json_dict = json.loads(r.text)
+        except json.decoder.JSONDecodeError:
+            msg = 'LIMS file is currently writing, waiting for 45 seconds'
+            self.logger.info(msg)
+            time.sleep(45)
+
         external_ids = find_external_id_in_json_dict(lims_json_dict , donor)
     return(external_ids)
 
@@ -896,10 +902,17 @@ def subset_and_deduplicate(data ):
 
 def try_two_null_files(self, wrapper, workflow_name, ini_param, path_info, first_file):
     if wrapper.my_param_is_null(ini_param):
-        this_file = os.path.join(self.workspace.print_location(), first_file )
-        if self.workspace.has_file(this_file):
+        
+        if self.workspace.has_file(first_file):
+            msg = '{0} found in workspace {1} '.format(first_file, self.workspace.print_location() )
+            self.logger.info(msg)
+            this_file = os.path.join(self.workspace.print_location(), first_file )
             wrapper.set_my_param(ini_param, this_file)
         elif self.workspace.has_file(path_info):
+            msg = '{0} not found in workspace {1}, checking {2} '.format(first_file, self.workspace.print_location(), path_info )
+            self.logger.info(msg)
+
+
             path_info = self.workspace.read_json(path_info)
             workflow_path = path_info.get(workflow_name)
             if workflow_path == None:
