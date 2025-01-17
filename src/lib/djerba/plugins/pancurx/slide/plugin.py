@@ -34,6 +34,12 @@ class main(plugin_base):
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SUMMARY_FILE_PATH, phe.SUMMARY_FILE_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.CELLULOID_PLOT, phe.CELLULOID_PLOT, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.SNV_PATH, phe.SNV_PATH, core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.MAVIS_FUSIONS_PATH, phe.MAVIS_FUSIONS_PATH, core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, phe.TPM_PATH, phe.TPM_PATH, core_constants.DEFAULT_PATH_INFO)
+
+        wrapper = tools.fill_file_if_null(self, wrapper, 'envpath', 'envpath', core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'binpath', 'binpath', core_constants.DEFAULT_PATH_INFO)
+
 
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'indel.stack_count', phe.INDEL_BIN_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'sv.bins', phe.SV_BIN_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
@@ -62,8 +68,8 @@ class main(plugin_base):
             tissue = tools.get_tissue_from_sample_id(wrapper.get_my_string(phe.NORMAL_ID))
             wrapper.set_my_param(phe.NORMAL_TISSUE, tissue)
 
-        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'tumour', phe.TUMOUR_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
-        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'normal', phe.NORMAL_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'tumour', phe.TUMOUR_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, phe.COVERAGE_PATHS)
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'normal', phe.NORMAL_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, phe.COVERAGE_PATHS)
         return wrapper.get_config()
 
     def extract(self, config):
@@ -153,6 +159,22 @@ class main(plugin_base):
         data[core_constants.RESULTS][phe.GERM_NONSIL_SUBSET_RARE_COUNT] = germ_nonsil_genes_rare
         data[core_constants.RESULTS]['reportable_germline_genes'] = germline_genes_of_interest
 
+        envpath = wrapper.get_my_string('envpath')
+        binpath = wrapper.get_my_string('binpath')
+
+        if os.path.exists( wrapper.get_my_string(phe.MAVIS_FUSIONS_PATH)) is True:
+            data[core_constants.RESULTS]['assay'] = 'WGTS'
+            all_fusions = tools.parse_fusions(self, wrapper.get_my_string(phe.MAVIS_FUSIONS_PATH))
+
+            data[core_constants.RESULTS]['gene_expression'] = tools.get_gene_expression(self, genes_of_interest, wrapper.get_my_string(phe.TPM_PATH),  phe.DEFAULT_CIBERSORT_COMPARISON_PATH, envpath, binpath)
+
+            fusions, fusion_count = tools.filter_fusions(self, all_fusions, genes_of_interest, cnvs_and_abs, data[core_constants.RESULTS]['gene_expression'])
+            data[core_constants.RESULTS]['fusions'] = fusions
+        else:
+            data[core_constants.RESULTS]['assay'] = 'WGS'
+
+
+
         data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
 
         return(data)
@@ -192,8 +214,11 @@ class main(plugin_base):
             'signatures_of_interest_file',
             'comparison_cohort_file',
             'sites_of_interest_file',
-            phe.SNV_PATH
-
+            phe.SNV_PATH,
+            phe.MAVIS_FUSIONS_PATH,
+            phe.TPM_PATH,
+            'binpath',
+            'envpath'
         ]
         for key in discovered:
             self.add_ini_discovered(key)

@@ -22,8 +22,8 @@ class main(plugin_base):
         for this_chromosome_plot in phe.CHROMOSOME_PLOTS.values():
             wrapper = tools.fill_categorized_file_if_null(self, wrapper, this_chromosome_plot, this_chromosome_plot, core_constants.DEFAULT_PATH_INFO, 'whole_chromosome_plots')
 
-        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'tumour', phe.TUMOUR_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
-        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'normal', phe.NORMAL_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'tumour', phe.TUMOUR_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, phe.COVERAGE_PATHS)
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'normal', phe.NORMAL_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, phe.COVERAGE_PATHS)
         wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
 
 

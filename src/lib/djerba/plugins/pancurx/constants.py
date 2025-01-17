@@ -1,12 +1,14 @@
 #defaults
 CURRENT_REPORT_VERSION = '1.0'
+DEFAULT_ENV_PATH = '/.mounts/labs/PCSI/tools/djerba/djerba_env/'
+#DEFAULT_ENV_PATH = '/.mounts/labs/PCSI/users/fbeaudry/reports/djerba_dev/'
+
+DEFAULT_DJERBA_BIN_PATH='/.mounts/labs/PCSI/tools/djerba/djerba_env/lib/python3.10/site-packages/djerba/plugins/'
+#DEFAULT_DJERBA_BIN_PATH='/.mounts/labs/PCSI/users/fbeaudry/reports/djerba_dev/lib/python3.10/site-packages/djerba/plugins/'
+
 
 # FILE PATH DEFAULTS
-DEFAULT_ENV_PATH = '/.mounts/labs/PCSI/tools/djerba/djerba_env/'
 DEFAULT_DATA_LOCATION = '/.mounts/labs/PCSI/references/cohort_lists/'
-#TEMP: plot path is different - can be deleted after Dec 1st, 2024 (FB)
-#DEFAULT_PLOTPATH = '/.mounts/labs/PCSI/users/fbeaudry/reports/btc_plots'
-DEFAULT_DJERBA_BIN_PATH='/.mounts/labs/PCSI/tools/djerba/djerba_env/lib/python3.10/site-packages/djerba/plugins/'
 
 DEFAULT_CORE_LIMS_URL = "http://pinery.gsi.oicr.on.ca/samples?type=Identity"
 DEFAULT_ROOTPATH = '/.mounts/labs/PCSI/pipeline/hg38'
@@ -20,7 +22,7 @@ DEFAULT_MANE_FILE = 'MANE.GRCh38.v1.3.summary.txt'
 
 #DEFAULT_CIBERSORT_PATH='CIBERSORT.R'
 DEFAULT_CIBERSORT_LOADINGS_PATH='/.mounts/labs/PCSI/references/cohort_lists/LM22.txt'
-DEFAULT_CIBERSORT_GENES_PATH='pancurx/hgnc_complete_set.txt'
+DEFAULT_CIBERSORT_GENES_PATH='/.mounts/labs/PCSI/references/cohort_lists/pancurx/hgnc_complete_set.txt'
 DEFAULT_CIBERSORT_COMPARISON_PATH='/.mounts/labs/PCSI/references/cohort_lists/LBR.immune_rna.txt'
 
 DEFAULT_RNA_SEQTYPE = 'rna'
@@ -135,6 +137,7 @@ MAVIS_FUSIONS_PATH = "mavis_fusions"
 TPM_PATH = "tpm_path"
 STAR_QC_PATH = "star_qc"
 SNV_PATH = "snvpath"
+COVERAGE_PATHS = "coverage_paths"
 
 CHROMOSOME_1_PLOT = 'chromosome_1_plot'
 CHROMOSOME_2_PLOT = 'chromosome_2_plot' 

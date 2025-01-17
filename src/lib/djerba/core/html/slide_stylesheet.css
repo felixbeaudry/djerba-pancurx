@@ -59,7 +59,7 @@ h2 {
 
 h3 {
 	color: #FFFFFF;
-	background-color: #0d6f3a;
+	
 	font-family: Arial, sans-serif;
 	text-align: left;
 	border-radius: 0px;
@@ -67,6 +67,14 @@ h3 {
 	padding-left: 25px;
 	page-break-after: avoid;
 	margin-bottom: 10px;
+}
+
+.lbr_slide {
+  background-color: #0d6f3a;
+}
+
+.pcx_slide {
+  background-color: #65bc45;
 }
 
 .full_gene_header {

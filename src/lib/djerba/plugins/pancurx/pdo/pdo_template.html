@@ -1,0 +1,176 @@
+<%
+      import djerba.plugins.pancurx.pdo.pdo_constants as plugin
+      from djerba.plugins.pancurx.html import td_class, make_sensitivity_rows, add_curve_plots
+      from djerba.util.html import html_builder
+      sensitivities = results.get('sensitivities_table')
+      curve_plots = results.get('drug_curve_plots')
+%>
+<div id="header">
+	<table class="lbr" border="0" style="width:100%">
+		  <tr style="vertical-align:top;">
+				<td style="width:33.33%"><h4>PDO Summary</h4></td>
+				<td style="width:33.33%"><h4 style="text-align:center;">${results.get(plugin.PDO_ID)}</h4></td>
+				<td style="width:33.33%"><h4 style="text-align:right;">${results.get(plugin.REPORT_DATE)}</h4></td>
+		  </tr>
+	</table>
+</div>
+	
+<div id="main"  >
+		<h1 class="lbr">Organoid Drug Response Report</h1>
+
+		  <h2 class="pdo" style="margin:0px 0px 10px 0px"> Sample Metadata</h2>
+
+		  <div style="padding:0px 0px 0px 50px">
+	
+		  <table class="lbr" style="width:100%; font-size: 15px;">
+				<tr>
+					  <td><b>PSP ID:</b> ${results.get(plugin.PSP_ID)}</td>
+					  <td><b>PDO ID:</b> ${results.get(plugin.PDO_ID)}</td>
+					  <td><b>Type:</b> ${results.get(plugin.PDO_TYPE)}</td>
+				</tr>
+				<tr>
+					  <td><b>PANX ID:</b> ${results.get(plugin.PANX_ID)}</td>
+					  <td><b>Trial:</b> ADOPT</td>
+					  <td><b>ADOPT ID:</b> ${results.get(plugin.ADOPT_ID)}</td>
+				</tr>
+				
+		  </table>
+		  </div>
+		  
+		</br> <p>  </p>
+
+		<h2 class="pdo" style="margin:0px 0px 10px 0px">Sensitivity to Drugs of Interest</h2>
+		<div style="padding:0px 100px 0px 50px">
+			<p class="lbr">A drug screen using patient-derived organoids (PDO) involves growing miniaturized versions of a patient's tumor in the lab. 
+				These organoids mimic the patient's unique biological environment, allowing tests of various drugs directly on the PDO to potentially be informative of drug efficacy in the patient. 
+				<br>&ensp;&ensp;&ensp;&ensp; Below, each table highlights (1) the mechanism by which the drug is expected to work, 
+				(2) the percentile of the Area Under the dose-response Curve (AUC) compared to a standard cohort, and
+				(3) whether IC50 (half-maximal inhibitory concentration) is less than Cmax (maximum concentration of the drug in the bloodstream).
+				Organoids where IC50 &lt; Cmax and AUC &lt; 30th percentile of cohort are defined as sensitive to the PDO matched drug; cells in orange pass these thresholds. 
+				Complete dose response curves are shown in the supplementary materials of this report. 
+				</p>
+	
+
+		<h3 class="pdo">ADOPT Drugs</h3>
+		<table class="lbr sortable table-striped">
+			<thead >
+            <th style="width: 120px">Drug</th><th style="width: 400px">Mechanism of action</th><th style="width: 120px; text-align:center">AUC Percentile</th><th style="width: 100px; text-align:center">IC<sub>50</sub> (C<sub>max</sub>)</th><th style="width: 100px; text-align:center">Sensitivity</th></tr>
+			</thead>
+			<tbody>
+            % for row in make_sensitivity_rows(sensitivities, this_class='adopt'):
+                  ${row}
+            % endfor
+		</tbody>
+      	</table>
+
+
+		<h3 class="pdo">Standard of Care Drugs</h3>
+		<table class="lbr sortable table-striped">
+			<thead>
+            <tr><th style="width: 120px">Drug</th><th style="width: 500px">Mechanism of action</th><th style="width: 120px; text-align:center">AUC Percentile</th><th style="width: 100px; text-align:center">IC<sub>50</sub> </th></tr>
+			</thead>
+			<tbody>
+            % for row in make_sensitivity_rows(sensitivities, this_class='soc'):
+                  ${row}
+            % endfor
+		</tbody>
+      	</table>
+
+
+		<h3 class="pdo">Other Drugs</h3>
+		<table class="lbr sortable table-striped">
+			<thead>
+            <tr><th style="width: 120px">Drug</th><th style="width: 500px">Mechanism of action</th><th style="width: 120px; text-align:center">AUC Percentile</th><th style="width: 100px; text-align:center">IC<sub>50</sub> </th></tr>
+		</thead>
+		<tbody>
+			% for row in make_sensitivity_rows(sensitivities, this_class='kras'):
+                  ${row}
+            % endfor
+		</tbody>
+      	</table>
+
+	</br> <p>  </p>
+
+		</div>
+
+
+		<div style="page-break-before: always;"></div>
+
+		<h2 class="pdo" style="margin:0px 0px 10px 0px"> Quality Control</h2>
+		<div style="padding:0px 100px 0px 50px">
+		  <p class="lbr">Quality control is  performed by comparing the viability of a negative and positive control set. 
+			  Passing quality requires clear differentiation between positive and negative controls in the plot below. 
+			  The differentiation is summarized in the Z' factor, which should be above 0.3 and a factor above 0.5 is preferred.
+		  </p>
+
+
+	  <table style="text-align:center; width:100%">
+		  <tr>
+			  <td ><img style="width:500px;"  src="${results.get(plugin.VIABILITY_SCORE_PLOT)}"/ ></td> 
+			  </tr>
+	  </table>
+
+	  <table class="regular" style=" width:100%">
+		<tr>
+			<td><b>Viability Z'-factor (>0.3):</b></td>
+			<td> ${results.get(plugin.VIABILITY_SCORE)} </td>
+			
+			% if results.get(plugin.VIABILITY_SCORE) > 0.3 :
+			<td>${td_class(True, 'QC')}</td>
+			% else:
+			<td>${td_class(False, 'QC')}</td>
+			% endif
+				
+
+	  </tr>
+
+		<tr>
+
+	  <td><b>Individual assay fulfils quality control metrics:</b> </td>
+
+	  % if results.get(plugin.VIABILITY_SCORE) > 0.3 :
+		<td>PASS </td>
+		<td>${td_class(True, 'QC')}</td>
+		% else:
+		<td>FAIL </td>
+		<td>${td_class(False, 'QC')}</td>
+		% endif
+			</tr>
+		</table>
+
+	</br> <p>  </p>
+
+	  </div>
+		<h2 class="pdo" style="margin:0px 0px 10px 0px">Dose Response Curves (DRC)</h2>
+		<div style="padding:0px 100px 0px 50px">
+
+			<p class="lbr">The plots shown here are compared against a cohort of 42 PDOs, of which 4 are from resected samples and 38 are from advanced PDAC samples. 
+				 See end of document for definitions of abbreviations.</p>
+
+			<table style="text-align:center; width:100%">
+			% for row in add_curve_plots(curve_plots):
+				${row}
+			% endfor
+			</table>
+
+			<h3 class="pdo">Definitions</h3>
+		<p class="lbr">A dose-response curve illustrates the relationship between the dose of a drug and its effect on the pdo. 
+			The x-axis represents the drug dose, while the y-axis shows the response, as a percentage of maximum viability. <br>
+			<ul class="lbr">
+				<li>The <strong>Area Under the Curve (AUC)</strong> quantifies the overall drug effect across all doses. 
+			A higher AUC indicates greater efficacy, reflecting the drug's potency and effectiveness over the tested range.</li>
+			<li>The <strong>Drug Sensitivity Score (DSS)</strong> measures a drug's effectiveness by integrating potency and efficacy. 
+			It considers the dose-response relationship, including the slope and maximum response, 
+			providing a comprehensive metric to compare drug performance and identify the most effective treatments.</li>
+			<li>The <strong>Emax</strong> represents the maximum effect a drug can achieve, regardless of dose. 
+			Emax helps compare the effectiveness of different drugs at their peak performance.</li>
+			<li>The <strong>Cmax</strong> represents the maximum concentration of a drug in the bloodstream after administration . 
+			It indicates the peak level achieved, reflecting the drug's absorption rate and bioavailability - the values here are based on the literature. 
+			Cmax is crucial for understanding the drug's pharmacokinetics and optimizing dosing regimens.</li>
+		</ul>
+		</p>
+		</div>
+		<hr>
+</div>
+
+

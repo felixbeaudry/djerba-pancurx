@@ -22,11 +22,16 @@ class main(plugin_base):
     def configure(self, config):
         config = self.apply_defaults(config)
         wrapper = self.get_config_wrapper(config)
+
+        wrapper = tools.fill_file_if_null(self, wrapper, 'template_type', 'template_type', core_constants.DEFAULT_SAMPLE_INFO)
+
         wrapper = tools.fill_file_if_null(self, wrapper, 'genes_of_interest_file', 'genes_of_interest_file', core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.MAVIS_FUSIONS_PATH, phe.MAVIS_FUSIONS_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.STAR_QC_PATH, phe.STAR_QC_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.TPM_PATH, phe.TPM_PATH, core_constants.DEFAULT_PATH_INFO)
         wrapper = tools.fill_file_if_null(self, wrapper, phe.PARAM_PATH, phe.PARAM_PATH, core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'envpath', 'envpath', core_constants.DEFAULT_PATH_INFO)
+        wrapper = tools.fill_file_if_null(self, wrapper, 'binpath', 'binpath', core_constants.DEFAULT_PATH_INFO)
 
         return wrapper.get_config()
 
@@ -38,9 +43,11 @@ class main(plugin_base):
         all_fusions = tools.parse_fusions(self, wrapper.get_my_string(phe.MAVIS_FUSIONS_PATH))
         genes_of_interest = tools.get_genes_of_interest(self, wrapper.get_my_string('genes_of_interest_file'))
 
+        envpath = wrapper.get_my_string('envpath')
+        binpath = wrapper.get_my_string('binpath')
 
         cnvs_and_abs = self.workspace.read_json('cnvs_and_abs.json')
-        data[core_constants.RESULTS]['gene_expression'] = tools.get_gene_expression(self, genes_of_interest, wrapper.get_my_string(phe.TPM_PATH),  phe.DEFAULT_CIBERSORT_COMPARISON_PATH)
+        data[core_constants.RESULTS]['gene_expression'] = tools.get_gene_expression(self, genes_of_interest, wrapper.get_my_string(phe.TPM_PATH),  phe.DEFAULT_CIBERSORT_COMPARISON_PATH, envpath, binpath)
 
         fusions, fusion_count = tools.filter_fusions(self, all_fusions, genes_of_interest, cnvs_and_abs, data[core_constants.RESULTS]['gene_expression'])
         data[core_constants.RESULTS]['fusions'] = fusions
@@ -49,11 +56,15 @@ class main(plugin_base):
 
         ploidy = tools.parse_celluloid_params(self, wrapper.get_my_string(phe.PARAM_PATH), "ploidy_numeric")
         data[core_constants.RESULTS][phe.PLOIDY] = ploidy
+
+        data[core_constants.RESULTS]['template_type'] = '_'.join((wrapper.get_my_string('template_type'), self.TEMPLATE_NAME))
+
         return data
 
     def render(self, data):
         renderer = mako_renderer(self.get_module_dir())
-        return renderer.render_name(self.TEMPLATE_NAME, data)
+        template_name = data[core_constants.RESULTS]['template_type'] 
+        return renderer.render_name(template_name, data)
 
     def specify_params(self):
         discovered = [
@@ -62,6 +73,9 @@ class main(plugin_base):
             phe.TPM_PATH,
             phe.PARAM_PATH,
             'genes_of_interest_file',
+            'envpath',
+            'binpath',
+            'template_type',
         ]
         for key in discovered:
             self.add_ini_discovered(key)

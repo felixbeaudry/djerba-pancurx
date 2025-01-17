@@ -14,11 +14,12 @@ def make_class_table_rows(multifactor_marker_results, type):
     rows = []
     row_count = 1
     row_hold = ""
+    
     for row in row_fields:
         cells = [
             td_class(row[phe.ABOVE_CUTOFF], type),
              '<td {0}>{1}</td>'.format('style="width:25%"', ''.join(("<strong>",row[phe.REPORTING_NAME],"<strong>"))),
-             '<td {0}>{1}</td>'.format('style="width:20%"', row[phe.VALUE])
+             '<td {0}>{1}</td>'.format('style="width:20%"', str(row[phe.VALUE]).rstrip(".0"))
         ]
         cells = ''.join(cells)
         if row_count % 2 == 0:
@@ -48,6 +49,25 @@ def make_fusion_table_rows(row_fields, ploidy):
         if ' '.join((row['gene'], row['variant'])) not in already_printerd:
             rows.append(hb.tr(cells))
             already_printerd.append(' '.join((row['gene'], row['variant'])))
+    return rows
+
+
+def make_fusion_slide_rows(row_fields, ploidy):
+    rows = []
+    already_printed = []
+    for row in row_fields:
+        cn_class, cn = process_cn(row['copy_number'], ploidy)
+        cells = [
+            hb.td(row['gene'], italic=True),
+            '<td {0}>{1}</td>'.format(cn_class, cn),
+            hb.td(row['cohort_perc']),
+            hb.td(row['variant'])
+
+        ]
+        if ' '.join((row['gene'], row['variant'])) not in already_printed and \
+            (cn_class != '' or row['variant'] not in ['downregulated', 'upregulated']):
+            rows.append(hb.tr(cells))
+            already_printed.append(' '.join((row['gene'], row['variant'])))
     return rows
 
 def build_dbsnp_url(dbsnp, chr, start):
@@ -98,6 +118,58 @@ def make_hallmark_tally_table(hallmark_tally, hallmark_length, color):
         hallmark_index = hallmark_index + 1
     return(rows)
 
+def make_sensitivity_rows(row_fields, this_class):
+    rows = []
+    for row in row_fields:
+        hit_class = ''
+        if row['drug_class'] == this_class:
+
+
+            ic50_cmax = None
+            ic50_is_smaller = None
+            if row['ic50'] != 'NA' and row['cmax'] != 'NA':
+                if float(row['ic50']) < float(row['cmax']):
+                    ic50_cmax = ''.join((str(round(float(row['ic50']), 2)), ' (< ', str(round(float(row['cmax']), 2)),')'))
+                    ic50_is_smaller = True
+                    ic50_class='class="cn_gain"'
+                else:
+                    ic50_cmax = ''.join((str(round(float(row['ic50']), 2)), ' (> ', str(round(float(row['cmax']), 2)),')'))
+                    ic50_is_smaller = False
+                    ic50_class=''
+            else:
+                ic50_class=''
+            if float(row['auc_ptile']) < 30:
+                auc_percentile_is_below = True
+                auc_class= 'class="cn_gain"'
+            else:
+                auc_percentile_is_below = False
+                auc_class=''
+            if auc_percentile_is_below and ic50_is_smaller:
+                sensitivity_class = 'class="cn_gain"'
+                pdo_is_sensitive = 'True'
+            else:
+                sensitivity_class = ''
+                pdo_is_sensitive = 'False'
+            if row['ic50'] != 'NA':
+                ic50 = round(float(row['ic50']), 2)
+            else:
+                ic50 = 'None'
+            cells = [
+                hb.td(row['drug']),
+                hb.td(row['mechanism']),
+                '<td {0} style="text-align:center">{1}</td>'.format(auc_class, row['auc_ptile']),
+                '<td  style="text-align:center">{0}</td>'.format(ic50 ),            
+                ]
+            if this_class == 'adopt':
+              cells = [
+                hb.td(row['drug']),
+                hb.td(row['mechanism']),
+                '<td {0} style="text-align:center">{1}</td>'.format(auc_class, row['auc_ptile']),
+                '<td {0} style="text-align:center">{1}</td>'.format(ic50_class, ic50_cmax),
+                '<td {0} style="text-align:center">{1}</td>'.format(sensitivity_class, pdo_is_sensitive)
+            ]       
+            rows.append(hb.tr(cells))
+    return rows
 
 def make_immune_table_rows(row_fields, ploidy, expression):
     rows = []
@@ -152,7 +224,9 @@ def make_signatures_string(signature_dict):
         if this_signature_value > 10 :
             this_signature_split = this_signature.split(".")
             this_signature = this_signature_split[1]
-            this_signature_string = '<mark class="sig{0}">{0}</mark> ({1}%)'.format(this_signature, this_signature_value)
+            this_signature_string = '{0} ({1}%)'.format(this_signature, this_signature_value)
+            ## uncomment below to highlight signatures in same color as sigs plot
+            #this_signature_string = '<mark class="sig{0}">{0}</mark> ({1}%)'.format(this_signature, this_signature_value)
             signature_strings.append(this_signature_string)
     return(', '.join(signature_strings))
     
@@ -236,7 +310,7 @@ def make_somatic_table_rows(row_fields, ploidy, tier_mode, all_genes=False):
         else:
             tumour_freq = round(float(row['tumour_freq']), 2)
         if all_genes==False and row['tier'] == 'discovery' :
-            gene_name = ''.join((row['gene'],'*'))
+            gene_name = ''.join((row['gene'],'<sup>&#9872;</sup>'))
         else:
             gene_name = row['gene']
         cells = [
@@ -273,6 +347,26 @@ def make_signature_table_rows(row_fields):
         rows.append(hb.tr(cells))
     return rows
 
+def make_immune_cell_rows(row_fields):
+    rows = []
+
+    for row in row_fields:
+        sbs_class = ''
+        ab_class = ''
+        if row['percentile'] > 95:
+            sbs_class = 'class="cn_gain"' 
+        if row['cibersort'] == 0:
+              ab_class = 'class="cn_loh"'
+        cells = [
+            hb.td(row['cell_type']),
+
+             '<td {0}>{1}</td>'.format(ab_class, row['cibersort']),
+             '<td {0}>{1}</td>'.format(sbs_class, row['percentile']),
+
+            hb.td(row['description']),
+         ]
+        rows.append(hb.tr(cells))
+    return rows
 
 def process_ab(ab_full):
     ab_split = ab_full.split('|')
@@ -329,7 +423,7 @@ def process_cn(cn_full, ploidy=None):
             cn = this_cn
             break
     try:
-        cn = round(float(cn), 1)
+        cn = round(float(cn), 2)
         if ploidy != None:
             cn_class = get_cn_cell_class(cn, ploidy)
         else:
@@ -433,4 +527,13 @@ def td_class(level, type):
         shape = '&#x2715;'
     div = '<div class="circle {0}-{1}">{2}</div>'.format(type, level, shape)
     return hb.td(div)
+
+
+def add_curve_plots(row_fields):
+    plots = []
+    for row in row_fields:
+        plot = '<tr><td ><img style="width: 80%; object-fit: contain" src="{0}"/></td></tr>'.format(row)
+        plots.append(plot)
+    return plots
+
 

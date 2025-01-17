@@ -5,13 +5,13 @@ sample_tpm_file_path = '/Volumes/pcsi/users/fbeaudry/reports/BTC0053/tpm.txt'
 #genes_path = '/Volumes/pcsi/users/fbeaudry/djerba-pancurx/src/lib/djerba/data/pancurx/hgnc_complete_set.txt'
 #gene_set_data <-  read.csv(genes_path, sep="\t", header=TRUE, check.names=FALSE) 
 
-MATRIX_file = '/Volumes/pcsi/users/fbeaudry/reports/djerba-pancurx/src/lib/djerba/data/pancurx/LBR.immune_rna.txt'
+MATRIX_file = '/Volumes/pcsi/references/cohort_lists/LBR.immune_rna.txt'
 
 comparison_matrix = read.csv(MATRIX_file, sep="\t", header=TRUE)
 
 
-CIBERSORT_PATH = '/Volumes/PCSI/users/fbeaudry/reports/djerba-pancurx/src/lib/djerba/plugins/pancurx/immune/CIBERSORT.R'
-CIBERSORT_MAT_PATH = '/Volumes/pcsi/users/fbeaudry/reports/djerba-pancurx/src/lib/djerba/data/pancurx/LM22.txt'
+CIBERSORT_PATH = '/Volumes/PCSI/users/fbeaudry/reports/djerba_dev/lib/python3.10/site-packages/djerba/plugins/pancurx/immune/CIBERSORT.R'
+CIBERSORT_MAT_PATH = '/Volumes/pcsi/references/cohort_lists/LM22.txt'
 
 # CIBERSORT.R file path
 set_cibersort_binary(CIBERSORT_PATH) 

@@ -48,8 +48,9 @@ class main(plugin_base):
 
         wrapper = tools.fill_file_if_null(self, wrapper, phe.PARAM_PATH, phe.PARAM_PATH, core_constants.DEFAULT_PATH_INFO)
         
-        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'tumour', phe.TUMOUR_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
-        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'normal', phe.NORMAL_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, 'coveragePaths')
+        #file_type_name, ini_param, path_info, category
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'tumour', phe.TUMOUR_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, phe.COVERAGE_PATHS)
+        wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'normal', phe.NORMAL_COVERAGE_PATH, core_constants.DEFAULT_PATH_INFO, phe.COVERAGE_PATHS)
 
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'drivers', phe.ONCOSLIDE_DRIVER_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')
         wrapper = tools.fill_categorized_file_if_null(self, wrapper, 'snv.bar_count', phe.ONCOSLIDE_SNV_PLOT, core_constants.DEFAULT_PATH_INFO, 'svg_plots')

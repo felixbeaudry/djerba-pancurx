@@ -1,0 +1,11 @@
+PDO_ID = 'pdo_id'
+REPORT_DATE = 'report_date'
+PSP_ID = 'psp_id'
+PDO_TYPE = 'pdo_type'
+PANX_ID = 'panx_id'
+ADOPT_ID = 'adopt_id'
+VIABILITY_SCORE = 'viability_score'
+VIABILITY_SCORE_PLOT = 'viability_score_plot'
+SENSITIVITIES_TABLE = 'sensitivities_table'
+CURVE_DIR = 'curve_dir'
+NONE_SPECIFIED = "NONE_SPECIFIED"

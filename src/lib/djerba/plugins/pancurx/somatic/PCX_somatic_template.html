@@ -1,6 +1,6 @@
 <%
       import djerba.plugins.pancurx.constants as plugin
-      from djerba.plugins.pancurx.html import make_somatic_table_rows
+      from djerba.plugins.pancurx.html import make_somatic_table_rows, make_signature_table_rows
       from djerba.util.html import html_builder
       loads = results.get('loads')
       sigs = results.get('sigs')
@@ -8,7 +8,7 @@
       all_variants = results.get('all_variants')
       ploidy = results.get('ploidy')
       tier_mode = results.get('tier_mode')
-
+      sigs = results.get('sigs')
 %>
 
 <div id="main">
@@ -72,9 +72,8 @@
 
 	<table style="width:100%"><tr>
 
-		<td style="text-align:center"><img id='SNV_CONTEXT_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SNV_CONTEXT_PLOT)}"/></td>
-            <td style="text-align:center"><img id='INDEL_BIN_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.INDEL_BIN_PLOT)}"/></td>
-		<td style="text-align:center"><img id='SV_BIN_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SV_BIN_PLOT)}"/></td>
+            <td style="text-align:center"><img id='INDEL_BIN_PLOT' style='width: 40%; object-fit: contain' src="${results.get(plugin.INDEL_BIN_PLOT)}"/></td>
+		<td style="text-align:center"><img id='SV_BIN_PLOT' style='width: 40%; object-fit: contain' src="${results.get(plugin.SV_BIN_PLOT)}"/></td>
   
 	</tr></table>
 
@@ -83,9 +82,30 @@
       <img id='SNV_VAF_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.SNV_VAF_PLOT)}"/>
       <img id='INDEL_VAF_PLOT' style='width: 100%; object-fit: contain' src="${results.get(plugin.INDEL_VAF_PLOT)}"/>
 
+	  <h3 class="pcx">Mutational Signatures</h3>
+          
+		<img id='SNV_CONTEXT_PLOT' style='height: 300px; position: relative; float:left; margin-left: 50px; margin-right: 50px; ' src="${results.get(plugin.SNV_CONTEXT_PLOT)}"/>
+
+
+		<table class="lbr sortable">
+			<tr><th style="width: 100px"></th><th style="width: 150px">Proposed Aetiology</th><th style="width: 100px">Proportion</th>
+			% for row in make_signature_table_rows(sigs):
+					${row}
+			% endfor
+
+
+		</table>
+		<br>
+		<br>
+
+
+
+
+
+
       <h3 class="pcx">Driver Gene Status</h3>
 	
-      <table class="pcx"  style="width:100%" class="sortable">
+      <table class="pcx sortable"  style="width:100%" >
 		<tr><td><b>Gene</b></td><td><b>Chr.</b></td><td><b>Copy Number</b></td><td><b>A|B Count</b></td><td><b>tVAF</b></td><td><b>Variant</b></td></tr>
 
             % for row in make_somatic_table_rows(reportable_variants, ploidy, tier_mode):
@@ -93,6 +113,7 @@
             % endfor
 
       </table>
+      <p>CN values in orange show copy gains defined as ploidy + 1, in red amplifications as ploidy x 4, in light blue CN-LOH as CN less than 1.5, and in dark blue homozygous deletions as CN less than 0.5. Copy Numbers and A.B ratios annotated with a * represent instances where we estimate more than one copy state within the gene.</p>
 
 
       

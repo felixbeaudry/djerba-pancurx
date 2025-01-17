@@ -1,10 +1,11 @@
 <%
       import djerba.plugins.pancurx.constants as plugin
-      from djerba.plugins.pancurx.html import make_immune_table_rows, make_hla_table_rows
+      from djerba.plugins.pancurx.html import make_fusion_table_rows, make_immune_cell_rows
       from djerba.util.html import html_builder
       reportable_variants = results.get('reportable_variants')
       ploidy = results.get('ploidy')
       expression = results.get('gene_expression')
+      immune_cells = results.get('immune_cells')
 %>
 
 
@@ -12,19 +13,32 @@
 <h2 class="lbr">Immune Inference</h2>
 <div style="padding:0px 0px 0px 50px">
 
-
-
-
-      <h3 class="lbr">Immune Cell Deconvolution</h3>
-
       <p class="lbr">
             Immunotherapy leverages the body's immune system to recognize and eliminate cancer cells and 
             its success hinges on deciphering the tumor microenvironment.
             The problem is tumors can evade immune surveillance through various mechanisms. 
-            Immune cell deconvolution for this sample (shown as <b>X</b>) based on RNAseq 
-            for four cell types (CD8+ T-cells, CD4+ T-cells, Natural Killer [NK] T-cells, M1 Macrophages) 
-            and compare these results to the LBR cohort (N=57) shown as boxplots.</p>
-      <img style='height: 300px;  margin-left: 50px; margin-right: 50px; ' src="${results.get('immune_fig')}"/>
+      </p>
+
+      <h3 class="lbr">Immune Checkpoint Markers</h3>
+
+            <table class="lbr sortable" style="width:100%" >
+                  <tr><td style="width: 75px">Gene</td><td style="width: 75px">Chr.</td><td style="width: 50px">CN</td><td style="width: 60px">TPM</td><td style="width: 60px">Exp. %ile</td></tr>
+                  % for variant_row in make_fusion_table_rows(results.get('immune_markers'), ploidy):
+                        ${variant_row}
+                  % endfor
+            
+            </table>
+            
+      <h3 class="lbr">Immune Cell Deconvolution</h3>
+
+      <table class="lbr sortable">
+            <tr><th style="width: 150px">Cell Type</th><th style="width: 50px">Value</th><th style="width: 60px">Percentile</th><th style="width: 600px">Description</th>
+            % for row in make_immune_cell_rows(immune_cells):
+                  ${row}
+            % endfor
+
+
+      </table>
 
 </div>
 

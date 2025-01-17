@@ -99,8 +99,12 @@ def fill_categorized_file_if_null(self, wrapper, file_type_name, ini_param, path
     if wrapper.my_param_is_null(ini_param):
         if self.workspace.has_file(path_info):
             path_info = self.workspace.read_json(path_info)
-            workflow_paths = path_info.get(category)
-            workflow_path = workflow_paths[file_type_name]
+            #print(path_info)
+            path_infos = path_info.get(category)
+            #print(path_infos)
+            workflow_paths = json.loads(path_infos.replace("\'","\""))
+            #print(workflow_paths)
+            workflow_path = workflow_paths.get(file_type_name)
             if workflow_path == None:
                 msg = 'Cannot find {0}'.format(ini_param)
                 self.logger.error(msg)
@@ -159,7 +163,7 @@ def get_genes_of_interest(self, genes_of_interest_file_path):
             genes_of_interest[row[0]] = row[1]
     return(genes_of_interest)
 
-def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_cohort_path):
+def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_cohort_path, envpath, binpath):
     expression_dict = {}
     input_tpm_path = check_path_exists(self, input_tpm_path)
     comparison_cohort_path = check_path_exists(self, comparison_cohort_path)
@@ -170,8 +174,8 @@ def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_coho
         msg = "TPM file found"
         self.logger.info(msg)
     else:
-        r_command = os.path.join(phe.DEFAULT_ENV_PATH, "lib/R/bin/Rscript")
-        r_script = os.path.join(phe.DEFAULT_DJERBA_BIN_PATH, "pancurx/fusions/get_tpm.R")
+        r_command = os.path.join(envpath, "lib/R/bin/Rscript")
+        r_script = os.path.join(binpath, "pancurx/fusions/get_tpm.R")
 
         cmd = [
             r_command, r_script ,
@@ -190,16 +194,13 @@ def get_gene_expression(self, genes_of_interest, input_tpm_path, comparison_coho
                 data = {
                     'gene' : row['gene'],
                     'input_tpm': row['TPM'],
-                    'percentile': row['percentile'],
+                    'percentile': round(float(row['percentile']) * 100, 1),
                 }
                 expression_dict[row['gene']] = data
-    with open(comparison_cohort_path, 'r') as comparison_cohort_file:
-        for row in csv.DictReader(comparison_cohort_file, delimiter="\t"):
-            if row['gene_list'] in expression_dict:
-                dict_items = list(row.values())
-                cohort_expression_list = dict_items[1:]
-                this_tpm = expression_dict[row['gene_list']]['input_tpm']
-                expression_dict[row['gene_list']]['cohort_perc'] = round(float(expression_dict[row['gene_list']]['percentile'] ) * 100, 1)
+    #with open(comparison_cohort_path, 'r') as comparison_cohort_file:
+    #    for row in csv.DictReader(comparison_cohort_file, delimiter="\t"):
+    #        if row['gene_list'] in expression_dict:
+    #            expression_dict[row['gene_list']]['cohort_perc'] = round(float(expression_dict[row['gene_list']]['percentile'] ) * 100, 1)
     return(expression_dict)
 
 def get_germline_variant_counts( summary_results):
@@ -514,6 +515,58 @@ def parse_cosmic_signatures(self, cosmic_signatures_file_path, cosmic_signature_
             signatures_of_interest[signature_name]['proportion'] = round( row[signature_name] / sigs_total , 2)
     return(signatures_of_interest)
 
+def get_immune_cells_of_interest(self, immune_cells_of_interest_file_path):
+    immune_cells_of_interest = {}
+    immune_cells_of_interest_file_path = check_path_exists(self, immune_cells_of_interest_file_path)
+    with open(immune_cells_of_interest_file_path, 'r') as immune_cells_of_interest_file:
+        for row in csv.reader(immune_cells_of_interest_file, delimiter="\t"):
+            immune_cells_of_interest[row[0]] = { 'description' : row[1] }
+    return(immune_cells_of_interest)
+
+
+def parse_sensitivities(self, sensitivities_path):
+    sensitivities = []
+    sensitivities_path = check_path_exists(self, sensitivities_path)
+
+    with open(sensitivities_path, 'r') as sensitivities_file:
+        for row in csv.DictReader(sensitivities_file, delimiter="\t"):
+            
+            this_drug = {
+                'drug'	: row['Drug'],
+                'mechanism'	: row['Mechanism of action'],
+                'status' : row['status'],
+                'drug_class' : row['drug_class'],
+                'ic50' : row['ic50'],
+                'auc_ptile': round(float(row['auc.sum.percentile']), 2),
+                'cmax': row['C_max..micromolar.'],
+                #'ic50_cmax': ic50_cmax,
+                #'pdo_is_sensitive': pdo_is_sensitive
+
+            }
+            sensitivities.append(this_drug)
+
+    return(sensitivities)
+
+def parse_immune_cells(self, immune_cells_of_interest_file):
+    immune_cells_of_interest = []
+    immune_cells_info = get_immune_cells_of_interest(self, immune_cells_of_interest_file)
+
+    immunedeconv_path = os.path.join(self.workspace.print_location(), 'immunedeconv.txt' )
+    immunedeconv_path = check_path_exists(self, immunedeconv_path)
+
+    with open(immunedeconv_path, 'r') as immunedeconv_file:
+        for row in csv.DictReader(immunedeconv_file, delimiter="\t"):
+            if row['cell_type'] in immune_cells_info:
+                this_cell = {
+                    'cell_type'	: row['cell_type'],
+                    'cibersort'	: round(float(row['this_sample']), 4),
+                    'percentile' : round(float(row['this_percentile']) * 100, 0),
+                    'description' : immune_cells_info[row['cell_type']]['description'],
+                }
+                immune_cells_of_interest.append(this_cell)
+
+    return(immune_cells_of_interest)
+
 def parse_extra_sites(self, snv_file_path, site_set_path):
     extra_sites_set = []
     with open(site_set_path, 'r') as site_set:
@@ -585,7 +638,7 @@ def filter_fusions(self, all_fusions, subset_order, cnvs_and_abs, gene_expressio
                 'gene' : this_gene,
                 'gene_chr' : cnvs_and_abs[this_gene]['gene_chr'],
                 'input_tpm' : round(float(gene_expression[this_gene]['input_tpm']), 1),
-                'cohort_perc': gene_expression[this_gene]['cohort_perc'], 
+                'cohort_perc': gene_expression[this_gene]['percentile'], 
                 'copy_number' : cnvs_and_abs[this_gene]['copy_number'],
             }
             for this_fusion in all_fusions:
@@ -596,13 +649,33 @@ def filter_fusions(self, all_fusions, subset_order, cnvs_and_abs, gene_expressio
                         reportable_variants.append(this_variant)
                         fusion_not_found = False
             if fusion_not_found and subset_order[this_gene] in ['action','driver']:
-                if float(gene_expression[this_gene]['cohort_perc']) < 5:
+                if float(gene_expression[this_gene]['percentile']) < 5:
                     this_variant['variant'] =  'downregulated'
                     reportable_variants.append(this_variant)
-                elif float(gene_expression[this_gene]['cohort_perc']) > 95:
+                elif float(gene_expression[this_gene]['percentile']) > 95:
                     this_variant['variant'] =  'upregulated'
                     reportable_variants.append(this_variant)
     return(reportable_variants, fusion_count)
+
+def filter_immune(self,  subset_order, cnvs_and_abs, gene_expression):
+    reportable_variants = []
+
+    for this_gene in subset_order.keys():
+        if this_gene in gene_expression and this_gene in cnvs_and_abs:
+            this_variant = {
+                'gene' : this_gene,
+                'gene_chr' : cnvs_and_abs[this_gene]['gene_chr'],
+                'input_tpm' : round(float(gene_expression[this_gene]['input_tpm']), 1),
+                'cohort_perc': gene_expression[this_gene]['percentile'], 
+                'copy_number' : cnvs_and_abs[this_gene]['copy_number'],
+                'variant' : ''
+            }
+            if float(gene_expression[this_gene]['percentile']) < 5:
+                this_variant['variant'] =  'downregulated'
+            elif float(gene_expression[this_gene]['percentile']) > 95:
+                this_variant['variant'] =  'upregulated'
+            reportable_variants.append(this_variant)
+    return(reportable_variants)
 
 
 def parse_fusions(self, fusions_file_path):
@@ -665,19 +738,23 @@ def parse_germline_variants(self, sample_variants_file_path):
 
 def parse_lims(self, donor):
     donor = add_underscore_to_donor(donor)
-    r = requests.get(phe.DEFAULT_CORE_LIMS_URL, allow_redirects=True)
-    if r.status_code == 404:
-        msg = "Trouble pulling LIMS"
-        raise MissingLIMSError(msg)
-    else:
-        try:
-            lims_json_dict = json.loads(r.text)
-        except json.decoder.JSONDecodeError:
-            msg = 'LIMS file is currently writing, waiting for 45 seconds'
-            self.logger.info(msg)
-            time.sleep(45)
+    json_loaded = 0
+    while json_loaded < 6:
+        r = requests.get(phe.DEFAULT_CORE_LIMS_URL, allow_redirects=True)
+        if r.status_code == 404:
+            msg = "Trouble pulling LIMS"
+            raise MissingLIMSError(msg)
+        else:
+            try:
+                lims_json_dict = json.loads(r.text)
+                json_loaded = 6
+            except json.decoder.JSONDecodeError:
+                msg = 'LIMS file is currently writing, waiting for 30 seconds'
+                self.logger.info(msg)
+                time.sleep(30)
+                json_loaded = json_loaded + 1
 
-        external_ids = find_external_id_in_json_dict(lims_json_dict , donor)
+    external_ids = find_external_id_in_json_dict(lims_json_dict , donor)
     return(external_ids)
 
 def parse_mane_transcript(self, mane_transcript_path):
@@ -743,6 +820,8 @@ def parse_sex(self, sex_file_path, template="PCX"):
                     inferredSex = "Male"
                 elif short_sex == 'F':
                     inferredSex = "Female"
+                elif short_sex == 'U':
+                    inferredSex = "Undetermined"
                 else:
                     msg = "Cannot infer sex {0} from file: {1}".format(short_sex, sex_file_path)
                     self.logger.error(msg)
@@ -752,6 +831,8 @@ def parse_sex(self, sex_file_path, template="PCX"):
                     inferredSex = "XY"
                 elif short_sex == 'F':
                     inferredSex = "XX"
+                elif short_sex == 'U':
+                    inferredSex = "Undetermined"
                 else:
                     msg = "Cannot infer sex {0} from file: {1}".format(short_sex, sex_file_path)
                     self.logger.error(msg)
@@ -759,6 +840,13 @@ def parse_sex(self, sex_file_path, template="PCX"):
 
     return(inferredSex)
 
+
+def parse_zprime(self, zprime_file_path):
+    zprime_file_path = check_path_exists(self, zprime_file_path)
+    with open(zprime_file_path) as zprime_file:
+        for row in zprime_file:
+            zprime = row.strip()
+    return(float(zprime))
 
 
 def parse_somatic_variants(self, sample_variants_file_path, gene_list = {}, extra_sites = []):

@@ -38,7 +38,16 @@ class main(helper_base):
         sample = wrapper.get_my_string(phe.TUMOUR_SAMPLE_ID)
         normal = wrapper.get_my_string(phe.NORMAL_SAMPLE_ID)
         
-        path_finder = assemble_file_paths( donor, sample, normal)
+        if wrapper.my_param_is_null('rootpath'):
+            wrapper.set_my_param('rootpath', phe.DEFAULT_ROOTPATH)
+
+        if wrapper.my_param_is_null('envpath'):
+            wrapper.set_my_param('envpath', phe.DEFAULT_ENV_PATH)
+
+        if wrapper.my_param_is_null('binpath'):
+            wrapper.set_my_param('binpath', phe.DEFAULT_DJERBA_BIN_PATH)
+
+        path_finder = assemble_file_paths(wrapper.get_my_string('rootpath'), donor, sample, normal)
 
         if wrapper.my_param_is_null(phe.COSMIC_SIGNNLS_PATH):
             wrapper.set_my_param(phe.COSMIC_SIGNNLS_PATH, path_finder.make_cosmic_signals_path())
@@ -101,6 +110,59 @@ class main(helper_base):
             file_path = os.path.join(DATA_LOCATION, file_name)
             wrapper.set_my_param('immune_genes_of_interest_file', file_path)
 
+        if wrapper.my_param_is_null('immune_cells_of_interest_file'):
+            file_name = '.'.join( (wrapper.get_my_string('template_type'), 'immune.cells.txt'))
+            file_path = os.path.join(DATA_LOCATION, file_name)
+            wrapper.set_my_param('immune_cells_of_interest_file', file_path)
+
+        if wrapper.my_param_is_null(phe.COVERAGE_PATHS):
+            wrapper.set_my_param(phe.COVERAGE_PATHS, path_finder.make_coverage_paths())
+
+        if wrapper.my_param_is_null("bam_paths"):
+            wrapper.set_my_param("bam_paths", path_finder.make_bam_paths())
+
+        if wrapper.my_param_is_null(phe.CELLULOID_PARAM_PATH):
+            wrapper.set_my_param(phe.CELLULOID_PARAM_PATH, path_finder.make_celluloid_param_path())
+
+        if wrapper.my_param_is_null("seg_path"):
+            wrapper.set_my_param("seg_path", path_finder.make_celluloid_seg_path())
+
+        if wrapper.my_param_is_null(phe.CELLULOID_DIR):
+            wrapper.set_my_param(phe.CELLULOID_DIR, path_finder.make_celluloid_dir_path())
+
+        if wrapper.my_param_is_null(phe.GERMLINE_PATH):
+            wrapper.set_my_param(phe.GERMLINE_PATH, path_finder.make_germline_path())
+
+        if wrapper.my_param_is_null(phe.SNV_PATH):
+            wrapper.set_my_param(phe.SNV_PATH, path_finder.make_snv_path())
+
+        if wrapper.my_param_is_null("indel_path"):
+            wrapper.set_my_param("indel_path", path_finder.make_indel_path())
+
+        if wrapper.my_param_is_null("snv_annovar"):
+            wrapper.set_my_param("snv_annovar", path_finder.make_snv_annovar())
+
+        if wrapper.my_param_is_null("indel_annovar"):
+            wrapper.set_my_param("indel_annovar", path_finder.make_indel_annovar())
+
+        if wrapper.my_param_is_null(phe.STAR_QC_PATH):
+            wrapper.set_my_param(phe.STAR_QC_PATH, path_finder.make_star_qc())
+
+        if wrapper.my_param_is_null(phe.MAVIS_FUSIONS_PATH):
+            wrapper.set_my_param(phe.MAVIS_FUSIONS_PATH, path_finder.make_mavis_fusion())
+
+        if wrapper.my_param_is_null(phe.TPM_PATH):
+            wrapper.set_my_param(phe.TPM_PATH, path_finder.make_stringtie())
+
+        if wrapper.my_param_is_null(phe.WHOLE_GENOME_PLOT):
+            wrapper.set_my_param(phe.WHOLE_GENOME_PLOT, path_finder.make_whole_genome_plot_path())
+
+        if wrapper.my_param_is_null(phe.WHOLE_CHROMOSOME_PLOTS):
+            wrapper.set_my_param(phe.WHOLE_CHROMOSOME_PLOTS, path_finder.make_whole_chromosome_plots_path())
+
+        if wrapper.my_param_is_null('svg_plots'):
+            wrapper.set_my_param('svg_plots', path_finder.make_svg_plots())
+
         all_paths = {
 
             phe.COSMIC_SIGNNLS_PATH : wrapper.get_my_string(phe.COSMIC_SIGNNLS_PATH),
@@ -119,30 +181,33 @@ class main(helper_base):
             'immune_genes_of_interest_file': wrapper.get_my_string('immune_genes_of_interest_file'),
             'signatures_of_interest_file': wrapper.get_my_string('signatures_of_interest_file'),
             'sites_of_interest_file': wrapper.get_my_string('sites_of_interest_file'),
+            'immune_cells_of_interest_file': wrapper.get_my_string('immune_cells_of_interest_file'),
             phe.BLURB_FILE: wrapper.get_my_string(phe.BLURB_FILE),
 
-            "coveragePaths": path_finder.make_coverage_paths(),
-            "bam_paths": path_finder.make_bam_paths(),
+            phe.COVERAGE_PATHS: wrapper.get_my_string(phe.COVERAGE_PATHS) ,
+            "bam_paths": wrapper.get_my_string("bam_paths")  ,
             
-            phe.CELLULOID_PARAM_PATH : path_finder.make_celluloid_param_path(),
-            "segPath" : path_finder.make_celluloid_seg_path(),
-            phe.CELLULOID_DIR: path_finder.make_celluloid_dir_path(),
+            phe.CELLULOID_PARAM_PATH : wrapper.get_my_string(phe.CELLULOID_PARAM_PATH) ,
+            "seg_path" : wrapper.get_my_string("seg_path") ,
+            phe.CELLULOID_DIR: wrapper.get_my_string(phe.CELLULOID_DIR) ,
 
-            phe.GERMLINE_PATH : path_finder.make_germline_path(),
-            phe.SNV_PATH : path_finder.make_snv_path(),
-            "indelPath" : path_finder.make_indel_path(),
-            "snv_annovar": path_finder.make_snv_annovar(),
-            "indel_annovar": path_finder.make_indel_annovar(),
+            phe.GERMLINE_PATH : wrapper.get_my_string(phe.GERMLINE_PATH) ,
+            phe.SNV_PATH : wrapper.get_my_string(phe.SNV_PATH) ,
+            "indel_path" : wrapper.get_my_string("indel_path") ,
+            "snv_annovar": wrapper.get_my_string("snv_annovar") ,
+            "indel_annovar": wrapper.get_my_string("indel_annovar") ,
 
-            phe.STAR_QC_PATH: path_finder.make_star_qc(),
-            phe.MAVIS_FUSIONS_PATH: path_finder.make_mavis_fusion(),
-            phe.TPM_PATH: path_finder.make_stringtie(),
+            phe.STAR_QC_PATH: wrapper.get_my_string(phe.STAR_QC_PATH),
+            phe.MAVIS_FUSIONS_PATH: wrapper.get_my_string(phe.MAVIS_FUSIONS_PATH) ,
+            phe.TPM_PATH: wrapper.get_my_string(phe.TPM_PATH) ,
 
             # plots
-            phe.WHOLE_GENOME_PLOT: path_finder.make_whole_genome_plot_path(),
-            phe.WHOLE_CHROMOSOME_PLOTS: path_finder.make_whole_chromosome_plots_path(),
+            phe.WHOLE_GENOME_PLOT: wrapper.get_my_string(phe.WHOLE_GENOME_PLOT) ,
+            phe.WHOLE_CHROMOSOME_PLOTS: wrapper.get_my_string(phe.WHOLE_CHROMOSOME_PLOTS) ,
 
-            'svg_plots': path_finder.make_svg_plots(),
+            'svg_plots': wrapper.get_my_string('svg_plots') ,
+            'envpath': wrapper.get_my_string('envpath') ,
+            'binpath': wrapper.get_my_string('binpath') ,
 
         }
         self.write_path_info(all_paths)
@@ -174,6 +239,26 @@ class main(helper_base):
             phe.CELLULOID_PLOT,
             phe.TDP_PATH,
             phe.SV_FILE,
+            phe.COVERAGE_PATHS,
+            "bam_paths",
+            phe.CELLULOID_PARAM_PATH,
+            "seg_path",
+            phe.CELLULOID_DIR,
+            phe.GERMLINE_PATH,
+            phe.SNV_PATH,
+            "indel_path" ,
+            "snv_annovar",
+            "indel_annovar",
+            phe.STAR_QC_PATH,
+            phe.MAVIS_FUSIONS_PATH,
+            phe.TPM_PATH,
+            phe.WHOLE_GENOME_PLOT,
+            phe.WHOLE_CHROMOSOME_PLOTS,
+            'svg_plots',
+            'rootpath',
+            'binpath',
+            'envpath',
+            'immune_cells_of_interest_file'
         ]
         for key in discovered:
             self.add_ini_discovered(key)
@@ -184,9 +269,8 @@ class main(helper_base):
 
 class assemble_file_paths(logger):
     
-    PLOT_DIRECTORY = "results/plots"
     
-    def __init__(self, donor, sample, normal_sample, log_level=logging.WARNING, log_path=None):
+    def __init__(self, rootpath, donor, sample, normal_sample, log_level=logging.WARNING, log_path=None):
         self.log_level = log_level
         self.log_path = log_path
         self.logger = self.get_logger(log_level, __name__, log_path)
@@ -195,14 +279,13 @@ class assemble_file_paths(logger):
         self.normal_sample = normal_sample
         seq_path = os.path.join(phe.DEFAULT_SEQTYPE, phe.DEFAULT_ALIGNER, phe.DEFAULT_ALIGNER_VERSION)
         rna_seq_path = os.path.join(phe.DEFAULT_RNA_SEQTYPE, phe.DEFAULT_RNA_ALIGNER, phe.DEFAULT_RNA_ALIGNER_VERSION)
-        self.root_extended = os.path.join(phe.DEFAULT_ROOTPATH, donor, sample, seq_path)
-        self.rna_root_extended = os.path.join(phe.DEFAULT_ROOTPATH, donor, sample, rna_seq_path)
-        self.archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, sample, seq_path)
-        self.normal_root_extended = os.path.join(phe.DEFAULT_ROOTPATH, donor, normal_sample, seq_path)
-        self.normal_archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, normal_sample, seq_path)
 
-        #TEMP: plot path is different
-        #self.plot_path = os.path.join(phe.DEFAULT_PLOTPATH, sample)
+        self.root_extended = os.path.join(rootpath, donor, sample, seq_path) 
+        self.rna_root_extended = os.path.join(rootpath, donor, sample, rna_seq_path)
+        self.normal_root_extended = os.path.join(rootpath, donor, normal_sample, seq_path)
+
+        self.archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, sample, seq_path)
+        self.normal_archive_extended = os.path.join(phe.DEFAULT_ARCHIVEPATH, donor, normal_sample, seq_path)
 
     def make_stringtie(self):
         file_name = "".join((self.sample,"_stringtie_abundance.txt"))
@@ -354,7 +437,7 @@ class assemble_file_paths(logger):
 
     def make_celluloid_plot_path(self):
         file_name = "".join((self.sample,"-celluloid_contour.png"))
-        file_path = os.path.join(self.root_extended, self.PLOT_DIRECTORY, file_name)
+        file_path = os.path.join(self.root_extended, "results/plots", file_name)
         return(file_path)
 
     ## PLOTTING PATHS

@@ -10,11 +10,11 @@
 %>
 
 
-
+<h1 class="pcx">Appendix</h1>
 
       <h3 class="pcx">Full Deleterious Somatic Variant List</h2>
 
-      <table class="pcx" style="width:100%" class="sortable">
+      <table class="pcx sortable" style="width:100%" >
 		<tr><td><b>Gene</b></td><td><b>Chr.</b></td><td><b>Copy Number</b></td><td><b>A|B Count</b></td><td><b>tVAF</b></td><td><b>Variant</b></td><td><b></b></td></tr>
                   % for variant_row in make_somatic_table_rows(all_variants, ploidy, 'discovery', all_genes=True):
                         ${variant_row}
